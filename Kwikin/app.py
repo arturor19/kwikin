@@ -77,10 +77,29 @@ def dashboard():
     picture = dict(session)['profile']['picture']
     return render_template('dashboard.html', name=name, picture=picture)
 
+@app.route('/logout')
+def logout():
+    for key in list(session.keys()):
+        session.pop(key)
+        flash('You are now logged out', 'success')
+    return render_template('login.html')
+
+@app.route('/crearqr')
+@is_logged_in
+def peticionqr():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    return render_template('crearpeticionqr.html',  name=name, picture=picture)
 
 
+@app.route("/qrcode", methods=["GET"])
+def get_qrcode():
+    qr = qrcode("quedsfsiii", mode="raw", start_date="20/02/2020 12:00", end_date="20/02/2054 12:00")
+    print(qr)
+    return send_file(qr, mimetype="image/png")
 
-# Articles
+
+# De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
 def articles():
     # Create cursor
@@ -118,7 +137,7 @@ def article(id):
 
 
 
-# Check if user logged in
+
 
 #unique
 
@@ -132,12 +151,7 @@ def unique():
 
 
 
-@app.route('/logout')
-def logout():
-    for key in list(session.keys()):
-        session.pop(key)
-        flash('You are now logged out', 'success')
-    return render_template('login.html')
+
 
 
 # Dashboard
@@ -180,11 +194,7 @@ def dashboardpaboorar():
     cur.close()
 
 
-@app.route("/qrcode", methods=["GET"])
-def get_qrcode():
-    qr = qrcode("quedsfsiii", mode="raw", start_date="20/02/2020 12:00", end_date="20/02/2054 12:00")
-    print(qr)
-    return send_file(qr, mimetype="image/png")
+
 
 
 

@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Crear QR</title>
+{% endblock %}
+{%block body %}
+    <form action="" method="post">
+        <label for="name">Nombre: </label>
+        <input type="text" id="name" name="name" /><br>
+        <label for="dir">Direccion que visita: </label>
+        <input type="text" id="dir" name="dir" /><br>
+        <label for="dateE">Dia entrada: </label>
+        <input type="date" id="dateE" name="date" /><br>
+        <label for="timeE">hora entrada: </label>
+        <input type="time" id="timeE" name="timeE" /><br>
+        <label for="dateS">Dia salida: </label>
+        <input type="date" id="dateS" name="date" /><br>
+        <label for="timeS">hora Salida: </label>
+        <input type="time" id="timeS" name="timeS" /><br>
+        <input type="submit" id="send-signup" name="signup" value="Registrar" />
+    </form>
+{% endblock %}
+
