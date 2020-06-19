@@ -89,7 +89,7 @@ def logout():
 def peticionqr():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
-    return render_template('crearpeticionqr.html',  name=name, picture=picture)
+    return render_template('crearpeticionQR.html',  name=name, picture=picture)
 
 
 @app.route("/qrcode", methods=["GET"])
