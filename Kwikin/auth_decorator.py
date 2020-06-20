@@ -22,7 +22,14 @@ def db_execute(query):
     vsm_db.close()
     return data
 
-print(db_execute("insert into usuarios (email) values ('guibenumo@gmail.com');"))
+def db_describe(query):
+    vsm_db = con # db conn
+    dbh = vsm_db.cursor()  # db cursor
+    # excecute sql statement
+    dbh.execute(query)
+    desc = dbh.description
+    return desc
+
 
 def is_logged_in(f):
     @wraps(f)
