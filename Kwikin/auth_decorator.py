@@ -1,5 +1,26 @@
 from flask import session, render_template
 from functools import wraps
+import sqlite3
+
+con = sqlite3.connect('kw.db')
+
+def db_execute(query):
+    query_lc = query.lower()
+    vsm_db = con # db conn
+    dbh = vsm_db.cursor()  # db cursor
+    # excecute sql statement
+    dbh.execute(query)
+    desc = dbh.description
+    if "select" in query_lc:
+        column_names = [col[0] for col in desc]
+        data = [dict(zip(column_names, row)) for row in dbh.fetchall()]  # store query in dictionary
+        dbh.close()
+    else:
+        vsm_db.commit()
+        dbh.close()
+        data = {}
+    vsm_db.close()
+    return data
 
 
 def is_logged_in(f):
