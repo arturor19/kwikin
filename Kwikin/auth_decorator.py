@@ -1,6 +1,7 @@
 from flask import session, render_template
 from functools import wraps
 import sqlite3
+import json
 
 db_sqlite = 'kw.db'
 
@@ -36,6 +37,20 @@ def is_logged_in(f):
         # You would add a check here and usethe user id or something to fetch
         # the other data for that user/check if they exist
         if user:
+            return f(*args, **kwargs)
+        return render_template('404.html')
+    return decorated_function
+
+def is_user(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            grupo = (db_execute(
+                "select id_grupo from asoc_usuario_grupo where id_usuario = (select id_usuario from usuarios "
+                "where email = '{}')".format("arturor19@gmail.com"))[0]['id_grupo'])
+        except:
+            grupo = None
+        if grupo is not None:
             return f(*args, **kwargs)
         return render_template('404.html')
     return decorated_function
