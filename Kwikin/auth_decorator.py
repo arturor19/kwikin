@@ -17,11 +17,12 @@ def db_execute(query):
         dbh.close()
     else:
         vsm_db.commit()
+        data = vsm_db.total_changes
         dbh.close()
-        data = {}
     vsm_db.close()
     return data
 
+print(db_execute("insert into usuarios (email) values ('guibenumo@gmail.com');"))
 
 def is_logged_in(f):
     @wraps(f)
