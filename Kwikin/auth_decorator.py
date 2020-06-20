@@ -2,11 +2,11 @@ from flask import session, render_template
 from functools import wraps
 import sqlite3
 
-con = sqlite3.connect('kw.db')
+db_sqlite = 'kw.db'
 
 def db_execute(query):
     query_lc = query.lower()
-    vsm_db = sqlite3.connect('kw.db') # db conn
+    vsm_db = sqlite3.connect(db_sqlite) # db conn
     dbh = vsm_db.cursor()  # db cursor
     # excecute sql statement
     dbh.execute(query)
@@ -22,7 +22,7 @@ def db_execute(query):
     return data
 
 def db_describe(query):
-    vsm_db = con # db conn
+    vsm_db = sqlite3.connect(db_sqlite) # db conn
     dbh = vsm_db.cursor()  # db cursor
     # excecute sql statement
     dbh.execute(query)
