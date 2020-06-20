@@ -6,7 +6,7 @@ con = sqlite3.connect('kw.db')
 
 def db_execute(query):
     query_lc = query.lower()
-    vsm_db = con # db conn
+    vsm_db = sqlite3.connect('kw.db') # db conn
     dbh = vsm_db.cursor()  # db cursor
     # excecute sql statement
     dbh.execute(query)
@@ -14,11 +14,10 @@ def db_execute(query):
     if "select" in query_lc:
         column_names = [col[0] for col in desc]
         data = [dict(zip(column_names, row)) for row in dbh.fetchall()]  # store query in dictionary
-        dbh.close()
     else:
         vsm_db.commit()
         data = vsm_db.total_changes
-        dbh.close()
+    dbh.close()
     vsm_db.close()
     return data
 
@@ -30,7 +29,6 @@ def db_describe(query):
     desc = dbh.description
     return desc
 
-
 def is_logged_in(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -41,3 +39,7 @@ def is_logged_in(f):
             return f(*args, **kwargs)
         return render_template('404.html')
     return decorated_function
+
+#print(db_describe('select * from asoc_usuario_grupo'))
+#print(db_execute('select * from usuarios'))
+#print(db_execute("insert into asoc_usuario_grupo (id_grupo, id_usuario) values (1, 2);"))
