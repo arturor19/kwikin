@@ -50,8 +50,14 @@ def is_user(f):
         except:
             grupo = None
         if grupo is not None:
+            name = session['profile']['name']
+            id_google = session['profile']['name']
+            picture = session['profile']['picture']
+            #db_execute("update usuarios set name= '{}, 'id_google = '{}', picture = '{}' where email = '{}'")
             return f(*args, **kwargs)
-        return render_template('404.html')
+        else:
+            return render_template('404.html')
+
     return decorated_function
 
 #print(db_describe('select * from asoc_usuario_grupo'))
