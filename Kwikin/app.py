@@ -1,7 +1,7 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, send_from_directory
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, HiddenField
 from authlib.integrations.flask_client import OAuth
-from auth_decorator import is_logged_in
+from auth_decorator import is_logged_in, is_user
 import os
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, DataRequired
@@ -68,6 +68,7 @@ def index():
     return render_template('login.html')
 
 @app.route('/dashboard')
+@is_user
 @is_logged_in
 def dashboard():
     name = dict(session)['profile']['name']
@@ -84,17 +85,28 @@ def logout():
         flash('You are now logged out', 'success')
     return render_template('login.html')
 
-@app.route('/crearqr')
+@app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
+    if request.method == 'POST':
+        print(request.form)
+        fecha_entrada = request.form['dateE']
+        fecha_salida = request.form['dateS']
+        nombre = request.form['name']
+        qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
+        return send_file(qr, mimetype="image/png")
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('crearpeticionQR.html',  name=name, picture=picture)
 
 
-@app.route("/qrcode", methods=["GET"])
+@app.route("/qrcode", methods=['GET', 'POST'])
 def get_qrcode():
-    qr = qrcode("quedsfsiii", mode="raw", start_date="20/02/2020 12:00", end_date="20/02/2054 12:00")
+    if request.method == 'POST':
+        fecha_entrada = request.form['dateE']
+        fecha_salida = request.form['dateS']
+        nombre = request.form['name']
+        qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
     print(qr)
     return send_file(qr, mimetype="image/png")
 
@@ -157,6 +169,7 @@ def unique():
 # Dashboard
 @app.route('/dashboardpaborrar')
 @is_logged_in
+@is_user
 def dashboardpaboorar():
 
     mysql = sqlite3.connect('qr.db')
