@@ -52,7 +52,7 @@ def is_user(f):
         if grupo is not None:
             email = session['profile']['email']
             name = session['profile']['name']
-            id_google = str(session['profile']['id'])
+            id_google = (session['profile']['id'])
             picture = session['profile']['picture']
             db_execute(f'update usuarios set nombre = "{name}", id_google = {id_google}, imagen = "{picture}" where '
                        f'email = "{email}"')
@@ -60,6 +60,8 @@ def is_user(f):
         else:
             return render_template('404.html')
     return decorated_function
+
+
 
 #print(db_describe('select * from asoc_usuario_grupo'))
 #print(db_execute('select * from usuarios'))
