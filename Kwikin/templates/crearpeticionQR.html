@@ -8,7 +8,7 @@
         <h2 class="display-6">Por favor, llena el formulario</h2>
     </div>
 
-        <div>
+        <div class="container">
             <form action="" class="" method="post">
                 <table>
                     <tr>
@@ -21,6 +21,12 @@
                     <tr>
                         <td><label for="dateS">Salida: </label></td>
                         <td><input type="datetime-local" id="dateS" name="dateS" /></td>
+                    {% for message in get_flashed_messages() %}
+                        <div class="alert alert-warning">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+                            </div>
+                         {% endfor %}
                     </tr>
                     <tr>
                         <td><label for="recurrent">Recurrente: </label></td>

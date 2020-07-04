@@ -26,7 +26,7 @@ qrcode = QRcode(app)
 # Session config
 app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['SESSION_COOKIE_NAME'] = 'google-login-session'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)
 cipher = AES.new("1234567890123456".encode("utf8"), AES.MODE_ECB)
 
 # oAuth Setup
@@ -82,7 +82,6 @@ def dashboard():
 def logout():
     for key in list(session.keys()):
         session.pop(key)
-        flash('You are now logged out', 'success')
     return render_template('login.html')
 
 @app.route('/crearqr', methods=['GET', 'POST'])
@@ -90,11 +89,14 @@ def logout():
 def peticionqr():
     if request.method == 'POST':
         print(request.form)
-        fecha_entrada = request.form['dateE']
-        fecha_salida = request.form['dateS']
-        nombre = request.form['name']
-        qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
-        return send_file(qr, mimetype="image/png")
+        if request.form['dateE'] > request.form['dateS']:
+            flash('Revisa las fechas')
+        else:
+            fecha_entrada = request.form['dateE']
+            fecha_salida = request.form['dateS']
+            nombre = request.form['name']
+            qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
+            return send_file(qr, mimetype="image/png")
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('crearpeticionQR.html',  name=name, picture=picture)
