@@ -9,7 +9,7 @@ from functools import wraps
 import sqlite3
 from Crypto.Cipher import AES
 import base64
-from datetime import timedelta
+from datetime import timedelta, datetime
 import time
 from flask_qrcode import QRcode
 import io
@@ -89,7 +89,7 @@ def logout():
 def peticionqr():
     if request.method == 'POST':
         print(request.form)
-        if request.form['dateE'] > request.form['dateS']:
+        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(datetime.now()):
             flash('Revisa las fechas')
         else:
             fecha_entrada = request.form['dateE']
