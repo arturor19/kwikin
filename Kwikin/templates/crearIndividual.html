@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Crear Individual</title>
+{% endblock %}
+{%block body %}
+<section class="container-fluid">
+    <section class="row">
+        <section class="col-12 col-sm-6 col-md-3">
+            <form action="" class="" method="post">
+              <div class="form-group">
+                <label for="correo">Email:</label>
+                <td><input class="col-12 form-control-sm" type="email" id="correo" name="correo"/>
+              </div>
+              <div class="form-group">
+                <label for="direccion">Dirección:</label>
+                <input class="col-12 form-control-sm" type="text" id="direccion" name="direccion"/>
+                <input type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
+                <label class="form-check-label" for="checkguardia">Guardia</label>
+              </div>
+                <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
+                   {% for message in get_flashed_messages() %}
+                <div class="alert alert-warning">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+                            </div>
+                         {% endfor %}
+            </form>
+        </section>
+    </section>
+
+</section>
+{% endblock %}
+

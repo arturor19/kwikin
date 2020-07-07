@@ -37,7 +37,7 @@ def is_logged_in(f):
         # the other data for that user/check if they exist
         if user:
             return f(*args, **kwargs)
-        return render_template('404.html')
+        return render_template('login.html')
     return decorated_function
 
 def is_user(f):

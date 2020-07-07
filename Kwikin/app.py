@@ -90,7 +90,7 @@ def peticionqr():
     if request.method == 'POST':
         print(request.form)
         if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(datetime.now()):
-            flash('Revisa las fechas')
+            flash('Por favor valida que las fechas sean correctas')
         else:
             fecha_entrada = request.form['dateE']
             fecha_salida = request.form['dateS']
@@ -112,6 +112,57 @@ def get_qrcode():
     print(qr)
     return send_file(qr, mimetype="image/png")
 
+@app.route('/crearInd', methods=['GET', 'POST'] )
+@is_user
+@is_logged_in
+def crearInd():
+    if request.method == 'POST':
+        domicilio = request.form['direccion']
+        email = request.form['correo']
+        checkguardia = request.form.get('checkguardia')
+        print(request.form)
+        if checkguardia == 'on':
+            grupo = 4
+        else:
+            grupo = 3
+        # Create Cursor
+        mysql = sqlite3.connect('kw.db')
+        cur = mysql.cursor()
+        try:
+        # Execute
+            cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
+            domicilio, email))
+            flash('Usuario agregado correctamente')
+
+        # Commit to DB
+            mysql.commit()
+
+
+
+
+        except:
+            flash('Correo ya existe')
+        try:
+            cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+            mysql.commit()
+        except:
+            flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
+        cur.close()
+
+# f"INSERT INTO asoc_usuario_grupo VALUES ({grupo}, (SELECT id_usuario FROM Usuarios WHERE email = {email}))"
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    return render_template('crearIndividual.html', name=name, picture=picture)
+
+@app.route('/crearBulk', methods=['GET', 'POST'] )
+@is_user
+@is_logged_in
+def crearBulk():
+
+
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    return render_template('crearBulk.html', name=name, picture=picture)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
