@@ -3,6 +3,7 @@ from wtforms import Form, StringField, TextAreaField, PasswordField, validators,
 from authlib.integrations.flask_client import OAuth
 from auth_decorator import is_logged_in, is_user
 import os
+import pandas as pd
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, DataRequired
 from functools import wraps
@@ -137,9 +138,6 @@ def crearInd():
         # Commit to DB
             mysql.commit()
 
-
-
-
         except:
             flash('Correo ya existe')
         try:
@@ -149,7 +147,6 @@ def crearInd():
             flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
         cur.close()
 
-# f"INSERT INTO asoc_usuario_grupo VALUES ({grupo}, (SELECT id_usuario FROM Usuarios WHERE email = {email}))"
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('crearIndividual.html', name=name, picture=picture)
@@ -157,11 +154,32 @@ def crearInd():
 @app.route('/crearBulk', methods=['GET', 'POST'] )
 @is_user
 @is_logged_in
-def crearBulk():
-
-
+def upload():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
+    if request.method == 'POST':
+        mysql = sqlite3.connect('kw.db')
+        cur = mysql.cursor()
+        df = pd.read_csv(request.files.get('file'))
+        for index, row in df.iterrows():
+            email = row['Email']
+            domicilio = row['Direccion']
+            if '@gmail.com' in email:
+                try:
+                    cur.execute(f"INSERT INTO usuarios(domicilio, email) VALUES('{domicilio}','{email}')")
+                except:
+                    flash(f'El correo {email} ya existe')
+                mysql.commit()
+                cur.execute(
+                    f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+                mysql.commit()
+            else:
+                flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
+        cur.close()
+        return render_template('crearBulk.html', name=name, picture=picture)
+
+
+
     return render_template('crearBulk.html', name=name, picture=picture)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
