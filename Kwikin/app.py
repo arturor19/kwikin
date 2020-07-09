@@ -171,7 +171,8 @@ def upload():
                     flash(f'El correo {email} ya existe')
                 mysql.commit()
                 cur.execute(
-                    f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+                    f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
+                    f"usuarios WHERE email = '{email}'))")
                 mysql.commit()
             else:
                 flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
