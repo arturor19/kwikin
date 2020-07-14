@@ -121,21 +121,16 @@ def crearInd():
         domicilio = request.form['direccion']
         email = request.form['correo']
         checkguardia = request.form.get('checkguardia')
-        print(request.form)
         if checkguardia == 'on':
             grupo = 4
         else:
             grupo = 3
-        # Create Cursor
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
         try:
-        # Execute
             cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
             domicilio, email))
             flash('Usuario agregado correctamente')
-
-        # Commit to DB
             mysql.commit()
 
         except:
@@ -146,7 +141,6 @@ def crearInd():
         except:
             flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
         cur.close()
-
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('crearIndividual.html', name=name, picture=picture)
@@ -178,10 +172,51 @@ def upload():
                 flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
         cur.close()
         return render_template('crearBulk.html', name=name, picture=picture)
-
-
-
     return render_template('crearBulk.html', name=name, picture=picture)
+
+@app.route('/gestionusuarios', methods=['GET', 'POST'] )
+@is_user
+@is_logged_in
+def gestionusuarios():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    # Create cursor
+    cur = mysql.cursor()
+
+    # Get articles
+    # result = cur.execute("SELECT * FROM articles")
+    # Show articles only from the user logged in
+    result = cur.execute("SELECT * FROM usuarios")
+
+    usuarios = cur.fetchall()
+
+    array = []
+    for row in usuarios:
+        status = (row[4])
+        email = (row[3])
+        nombre = (row[1])
+        domicilio = (row[5])
+
+        array.append({'status': (status),
+                      'email': email,
+                      'nombre': nombre,
+                      'domicilio': domicilio})
+
+    print(array)
+
+    print(result.rowcount)
+    #if int(len(array)) > 0:
+    return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture)
+   # else:
+      #  msg = 'No Articles Found'
+      #  return render_template('gestionusuarios.html', msg=msg, name=name, picture=picture)
+    # Close connection
+    cur.close()
+
+
+
+
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
