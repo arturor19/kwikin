@@ -215,8 +215,37 @@ def gestionusuarios():
     cur.close()
 
 
+@app.route('/ventas', methods=['GET', 'POST'] )
+@is_user
+@is_logged_in
+def ventas():
+    if request.method == 'POST':
+        domicilio = request.form['direccion']
+        email = request.form['correo']
+        checkguardia = request.form.get('checkguardia')
+        if checkguardia == 'on':
+            grupo = 4
+        else:
+            grupo = 3
+        mysql = sqlite3.connect('kw.db')
+        cur = mysql.cursor()
+        try:
+            cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
+            domicilio, email))
+            flash('Usuario agregado correctamente')
+            mysql.commit()
 
-
+        except:
+            flash('Correo ya existe')
+        try:
+            cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+            mysql.commit()
+        except:
+            flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
+        cur.close()
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    return render_template('ventas.html', name=name, picture=picture)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
