@@ -5,7 +5,13 @@
 <title>Gestión de Usarios</title>
 {% endblock %}
 {%block body %}
+<script type="text/javascript" class="init">
 
+$(document).ready(function() {
+	$('#dtOrderExample').DataTable();
+} );
+
+	</script>
 </table>
 <!-- Table  -->
     <table id="dtOrderExample" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
