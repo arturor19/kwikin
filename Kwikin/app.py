@@ -132,7 +132,6 @@ def crearInd():
             domicilio, email))
             flash('Usuario agregado correctamente')
             mysql.commit()
-
         except:
             flash('Correo ya existe')
         try:
@@ -174,23 +173,16 @@ def upload():
         return render_template('crearBulk.html', name=name, picture=picture)
     return render_template('crearBulk.html', name=name, picture=picture)
 
-@app.route('/gestionusuarios', methods=['GET', 'POST'] )
+@app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'] )
 @is_user
 @is_logged_in
 def gestionusuarios():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     mysql = sqlite3.connect('kw.db')
-    # Create cursor
     cur = mysql.cursor()
-
-    # Get articles
-    # result = cur.execute("SELECT * FROM articles")
-    # Show articles only from the user logged in
     result = cur.execute("SELECT * FROM usuarios")
-
     usuarios = cur.fetchall()
-
     array = []
     for row in usuarios:
         status = (row[4])
@@ -202,18 +194,36 @@ def gestionusuarios():
                       'email': email,
                       'nombre': nombre,
                       'domicilio': domicilio})
-
-    print(array)
-
-    print(result.rowcount)
-    #if int(len(array)) > 0:
-    return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture)
-   # else:
-      #  msg = 'No Articles Found'
-      #  return render_template('gestionusuarios.html', msg=msg, name=name, picture=picture)
-    # Close connection
+    if int(result.rowcount) > 0:
+        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture)
+    else:
+        msg = 'No hay usuarios asociados al coto'
+        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture,msg=msg)
     cur.close()
 
+@app.route('/actusuario', methods=['POST'])
+@is_user
+@is_logged_in
+def actusuario():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    ids = None
+    if request.method == "POST":
+        ids=request.form['data']
+        result = cur.execute("SELECT status FROM usuarios WHERE email = '%s';" % ids)
+        result = cur.fetchone()
+        if str(result) == "('Activo',)":
+            cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestionusuarios.html',  name=name, picture=picture)
+        elif str(result) == "('Inactivo',)":
+            cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestionusuarios.html', name=name, picture=picture)
+    cur.close()
+    return render_template('gestionusuarios.html', name=name, picture=picture)
 
 @app.route('/ventas', methods=['GET', 'POST'] )
 @is_user

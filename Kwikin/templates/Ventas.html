@@ -5,7 +5,7 @@
 {% endblock %}
 {%block body %}
 
-section class="container-fluid">
+<section class="container-fluid">
     <section class="row">
         <section class="col-12 col-sm-6 col-md-3">
             <form action="" class="" method="post">
@@ -18,21 +18,30 @@ section class="container-fluid">
                 <input class="col-12 form-control-sm" type="text"  id="domiciliocoto" name="domiciliocoto"/>
               </div>
                 <div class="form-group">
-                <label for="nombreadmin">Dirección coto:</label>
+                <label for="nombreadmin">Contacto:</label>
                 <input class="col-12 form-control-sm" type="text"  id="nombreadmin" name="nombreadmin"/>
               </div>
               <div class="form-group">
-                <label for="correoadmin">Correo Administrador:</label>
+                <label for="correoadmin">Correo Contacto:</label>
                 <input class="col-12 form-control-sm" type="email"  id="correoadmin" name="correoadmin"/>
               </div>
-                <div class="form-group">
-                <label for="dateS">Salida:  </label>
-                <input class="col-12 form-control-sm" type="datetime-local" id="dateS" name="dateS"/>
+                    <div class="form-group">
+                <label for="nombreadmin2">Contacto 2:</label>
+                <input class="col-12 form-control-sm" type="text"  id="nombreadmin2" name="nombreadmin2"/>
               </div>
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                <label class="form-check-label" for="exampleCheck1">Recurrente</label>
-              </div><br>
+              <div class="form-group">
+                <label for="correoadmin2">Correo Contacto 2:</label>
+                <input class="col-12 form-control-sm" type="email"  id="correoadmin2" name="correoadmin2"/>
+              </div>
+                    <div class="form-group">
+                <label for="nombreadmin3">Contacto 3:</label>
+                <input class="col-12 form-control-sm" type="text"  id="nombreadmin3" name="nombreadmin3"/>
+              </div>
+              <div class="form-group">
+                <label for="correoadmin3">Correo Contacto 3:</label>
+                <input class="col-12 form-control-sm" type="email"  id="correoadmin3" name="correoadmin3"/>
+              </div>
+
                    <input type="submit" id="send-signup" name="crearqr" value="Registrar"/>
                    {% for message in get_flashed_messages() %}
                         <div class="alert alert-warning">
