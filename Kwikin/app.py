@@ -153,23 +153,29 @@ def upload():
     if request.method == 'POST':
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
-        df = pd.read_csv(request.files.get('file'))
-        for index, row in df.iterrows():
-            email = row['Email']
-            domicilio = row['Direccion']
-            if '@gmail.com' in email:
-                try:
-                    cur.execute(f"INSERT INTO usuarios(domicilio, email) VALUES('{domicilio}','{email}')")
-                except:
-                    flash(f'El correo {email} ya existe')
-                mysql.commit()
-                cur.execute(
-                    f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
-                    f"usuarios WHERE email = '{email}'))")
-                mysql.commit()
-            else:
-                flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
-        cur.close()
+        try:
+            df = pd.read_csv(request.files.get('file'))
+        except:
+            flash(f'El formato no es valido o el archivo no existe')
+        try:
+            for index, row in df.iterrows():
+                email = row['Email']
+                domicilio = row['Direccion']
+                if '@gmail.com' in email:
+                    try:
+                        cur.execute(f"INSERT INTO usuarios(domicilio, email) VALUES('{domicilio}','{email}')")
+                    except:
+                        flash(f'El correo {email} ya existe')
+                    mysql.commit()
+                    cur.execute(
+                        f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
+                        f"usuarios WHERE email = '{email}'))")
+                    mysql.commit()
+                else:
+                    flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
+            cur.close()
+        except:
+            flash(f'El formato no es valido o el archivo no existe')
         return render_template('crearBulk.html', name=name, picture=picture)
     return render_template('crearBulk.html', name=name, picture=picture)
 
