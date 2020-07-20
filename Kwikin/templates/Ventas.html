@@ -3,58 +3,147 @@
 {% block head %}
 <title>Ventas</title>
 {% endblock %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 {%block body %}
 
-<section class="container-fluid">
-    <section class="row">
-        <section class="col-12 col-sm-6 col-md-3">
-            <form action="" class="" method="post">
-              <div class="form-group">
-                <label for="namecoto">Nombre de coto:</label>
-                <td><input class="col-12 form-control-sm" type="text" id="namecoto" name="namecoto"/>
-              </div>
-                <div class="form-group">
-                <label for="domiciliocoto">Dirección coto:</label>
-                <input class="col-12 form-control-sm" type="text"  id="domiciliocoto" name="domiciliocoto"/>
-              </div>
-                <div class="form-group">
-                <label for="nombreadmin">Contacto:</label>
-                <input class="col-12 form-control-sm" type="text"  id="nombreadmin" name="nombreadmin"/>
-              </div>
-              <div class="form-group">
-                <label for="correoadmin">Correo Contacto:</label>
-                <input class="col-12 form-control-sm" type="email"  id="correoadmin" name="correoadmin"/>
-              </div>
-                    <div class="form-group">
-                <label for="nombreadmin2">Contacto 2:</label>
-                <input class="col-12 form-control-sm" type="text"  id="nombreadmin2" name="nombreadmin2"/>
-              </div>
-              <div class="form-group">
-                <label for="correoadmin2">Correo Contacto 2:</label>
-                <input class="col-12 form-control-sm" type="email"  id="correoadmin2" name="correoadmin2"/>
-              </div>
-                    <div class="form-group">
-                <label for="nombreadmin3">Contacto 3:</label>
-                <input class="col-12 form-control-sm" type="text"  id="nombreadmin3" name="nombreadmin3"/>
-              </div>
-              <div class="form-group">
-                <label for="correoadmin3">Correo Contacto 3:</label>
-                <input class="col-12 form-control-sm" type="email"  id="correoadmin3" name="correoadmin3"/>
-              </div>
+<body>
+<form class="modal multi-step" id="demo-modal-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
+                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
+            </div>
+            <div class="modal-body step step-1">
+                This is step 1.
+            </div>
+            <div class="modal-body step step-2">
+                This is the final step
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-1', 2)">Continue</button>
+            </div>
+        </div>
+    </div>
+</form>
+<form class="modal multi-step" id="demo-modal-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
+                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
+                <h4 class="modal-title step-3" data-step="3">Final Step</h4>
+                <div class="m-progress">
+                    <div class="m-progress-bar-wrapper">
+                        <div class="m-progress-bar">
+                        </div>
+                    </div>
+                    <div class="m-progress-stats">
+                        <span class="m-progress-current">
+                        </span>
+                        /
+                        <span class="m-progress-total">
+                        </span>
+                    </div>
+                    <div class="m-progress-complete">
+                        Completed
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body step-1" data-step="1">
+                This is step 1.
+            </div>
+            <div class="modal-body step-2" data-step="3">
+                This is the second step.
+            </div>
+            <div class="modal-body step-3" data-step="3">
+                This is the final step.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-2', 2)">Continue</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-2', 3)">Continue</button>
+            </div>
+        </div>
+    </div>
+</form>
+<form class="modal multi-step" id="demo-modal-3">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
+                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
+                <h4 class="modal-title step-3" data-step="3">Final Step</h4>
+                <div class="m-progress">
+                    <div class="m-progress-bar-wrapper">
+                        <div class="m-progress-bar">
+                        </div>
+                    </div>
+                    <div class="m-progress-stats">
+                        <span class="m-progress-current">
+                        </span>
+                        /
+                        <span class="m-progress-total">
+                        </span>
+                    </div>
+                    <div class="m-progress-complete">
+                        Completed
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body step-1" data-step="1">
+                This is step 1.
+            </div>
+            <div class="modal-body step-2" data-step="2">
+                This is the second step.
+            </div>
+            <div class="modal-body step-3" data-step="3">
+                This is the final step.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 1)">Back</button>
+                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-3', 2)">Continue</button>
+                <button type="button" class="btn btn-primary step step-3" data-step="3" onclick="sendEvent('#demo-modal-3', 2)">Back</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 3)">Continue</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="container">
+    <div class="row">
+        <h1>
+            Simple Multi-step modal
+        </h1>
+        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-1">Show</button>
+    </div>
+    <div class="row">
+        <h1>
+            Progress bar and text  Multi-step modal
+        </h1>
+        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-2">Show</button>
+    </div>
+    <div class="row">
+        <h1>
+            Progress bar with back buttons
+        </h1>
+        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-3">Show</button>
+    </div>
+</div>
+<script src="{{ url_for('.static', filename='vendor/multi-step-modal.js') }}"></script>
 
-                   <input type="submit" id="send-signup" name="crearqr" value="Registrar"/>
-                   {% for message in get_flashed_messages() %}
-                        <div class="alert alert-warning">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-                            </div>
-                         {% endfor %}
-            </form>
-        </section>
-    </section>
-
-</section>
-
+<script>
+sendEvent = function(sel, step) {
+    var sel_event = new CustomEvent('next.m.' + step, {detail: {step: step}});
+    window.dispatchEvent(sel_event);
+}
+</script>
+</body>
+</script>
 
 {% endblock %}
 
