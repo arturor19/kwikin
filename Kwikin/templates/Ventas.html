@@ -10,33 +10,14 @@
 {%block body %}
 
 <body>
-<form class="modal multi-step" id="demo-modal-1">
+
+<form class="modal multi-step" id="demo-modal-3" action="/crearventa">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
-                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
-            </div>
-            <div class="modal-body step step-1">
-                This is step 1.
-            </div>
-            <div class="modal-body step step-2">
-                This is the final step
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-1', 2)">Continue</button>
-            </div>
-        </div>
-    </div>
-</form>
-<form class="modal multi-step" id="demo-modal-2">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
-                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
-                <h4 class="modal-title step-3" data-step="3">Final Step</h4>
+                <h4 class="modal-title step-1" data-step="1">Información del coto</h4>
+                <h4 class="modal-title step-2" data-step="2">Información de administrador</h4>
+                <h4 class="modal-title step-3" data-step="3">Selecciona Producto</h4>
                 <div class="m-progress">
                     <div class="m-progress-bar-wrapper">
                         <div class="m-progress-bar">
@@ -50,66 +31,40 @@
                         </span>
                     </div>
                     <div class="m-progress-complete">
-                        Completed
+                        Listo
                     </div>
                 </div>
             </div>
             <div class="modal-body step-1" data-step="1">
-                This is step 1.
-            </div>
-            <div class="modal-body step-2" data-step="3">
-                This is the second step.
-            </div>
-            <div class="modal-body step-3" data-step="3">
-                This is the final step.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-2', 2)">Continue</button>
-                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-2', 3)">Continue</button>
-            </div>
-        </div>
-    </div>
-</form>
-<form class="modal multi-step" id="demo-modal-3">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title step-1" data-step="1">Step 1</h4>
-                <h4 class="modal-title step-2" data-step="2">Step 2</h4>
-                <h4 class="modal-title step-3" data-step="3">Final Step</h4>
-                <div class="m-progress">
-                    <div class="m-progress-bar-wrapper">
-                        <div class="m-progress-bar">
-                        </div>
-                    </div>
-                    <div class="m-progress-stats">
-                        <span class="m-progress-current">
-                        </span>
-                        /
-                        <span class="m-progress-total">
-                        </span>
-                    </div>
-                    <div class="m-progress-complete">
-                        Completed
-                    </div>
-                </div>
-            </div>
-            <div class="modal-body step-1" data-step="1">
-                This is step 1.
+
+                <label for="Coto">Nombre de coto:</label>
+                <td><input class="col-12 form-control-sm" type="text" id="Coto" name="Coto"/>
+                    <label for="CotoDir">Dirección:</label>
+                <td><input class="col-12 form-control-sm" type="Text" id="CotoDir" name="CotoDir"/>
+                <label for="CotoCP">Código Postal:</label>
+                <td><input class="col-12 form-control-sm" type="Integer" id="CotoCP" name="CotoCP"/>
             </div>
             <div class="modal-body step-2" data-step="2">
-                This is the second step.
+                <div class="form-group">
+                <label for="correo">Email:</label>
+                <td><input class="col-12 form-control-sm" type="email" id="correo" name="correo"/>
+              </div>
+                <div class="form-group">
+                <label for="teladmin">Telefono:</label>
+                <td><input class="col-12 form-control-sm" type="Text" id="teladmin" name="teladmin"/>
+              </div>
             </div>
+
             <div class="modal-body step-3" data-step="3">
-                This is the final step.
+                Selecciona Producto.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 1)">Back</button>
-                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-3', 2)">Continue</button>
-                <button type="button" class="btn btn-primary step step-3" data-step="3" onclick="sendEvent('#demo-modal-3', 2)">Back</button>
-                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 3)">Continue</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Salir</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 1)">Atras</button>
+                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-3', 2)">Continuar</button>
+                <button type="button" class="btn btn-primary step step-3" data-step="3" onclick="sendEvent('#demo-modal-3', 2)">Atras</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 3)">Continuar</button>
+                <button type="submit" class="btn btn-primary step step-3" data-step="3" id="closemodal">Confirmar</button>
             </div>
         </div>
     </div>
@@ -117,22 +72,24 @@
 <div class="container">
     <div class="row">
         <h1>
-            Simple Multi-step modal
+            Bienvenido {{ name }}
         </h1>
-        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-1">Show</button>
+           <div>
+            <p> Recuerda ofrecer todos nuuestros productos y hacer una comparación con lo que mejor se adapten a las necesidades de nuestro cliente </p>
+           </div>
+        <div>
+            <ul>Nuestros productos son</ul>
+            <li>Cotos Con guardia</li>
+            <li>Porteros virtuales</li>
+            <li>Otros </li>
+
+        </div>
+
     </div>
-    <div class="row">
-        <h1>
-            Progress bar and text  Multi-step modal
-        </h1>
-        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-2">Show</button>
-    </div>
-    <div class="row">
-        <h1>
-            Progress bar with back buttons
-        </h1>
-        <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-3">Show</button>
-    </div>
+</div>
+<br>
+<div>
+    <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-3" type="button">Iniciar</button>
 </div>
 <script src="{{ url_for('.static', filename='vendor/multi-step-modal.js') }}"></script>
 
@@ -142,8 +99,17 @@ sendEvent = function(sel, step) {
     window.dispatchEvent(sel_event);
 }
 </script>
-</body>
+<script>
+
 </script>
-
+<script>
+    $('#closemodal').click(function() {
+    $('#demo-modal-3').modal('hide');
+    sendEvent('#demo-modal-3', 1);
+    $('#demo-modal-3').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+    <script src="{{ url_for('.static', filename='js/sb-admin-2.js') }}"></script>
 {% endblock %}
-

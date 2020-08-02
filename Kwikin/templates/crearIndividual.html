@@ -1,34 +1,61 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<title>Crear Individual</title>
+<title>Crear usuario</title>
 {% endblock %}
 {%block body %}
-<section class="container-fluid">
-    <section class="row">
-        <section class="col-12 col-sm-6 col-md-3">
-            <form action="" class="" method="post">
-              <div class="form-group">
-                <label for="correo">Email:</label>
-                <td><input class="col-12 form-control-sm" type="email" id="correo" name="correo"/>
-              </div>
-              <div class="form-group">
-                <label for="direccion">Dirección:</label>
-                <input class="col-12 form-control-sm" type="text" id="direccion" name="direccion"/>
-                <input type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
-                <label class="form-check-label" for="checkguardia">Guardia</label>
-              </div>
-                <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
-                   {% for message in get_flashed_messages() %}
-                <div class="alert alert-warning">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-                            </div>
-                         {% endfor %}
-            </form>
-        </section>
-    </section>
+<div class="modal fade" id="Modaluser" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+    <div class="modal-dialog">
 
-</section>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Crear usuario</h1>
+            </div>
+            <div class="modal-body">
+              <form action="/crearInd" class="" method="post">
+                  <div style="margin:5px;" class="form-group">
+                      <label for="correo">Email:</label>
+                      <input style="margin:26px;" class="form-control-sm" type="email" id="correo" name="correo"/>
+                  </div>
+                  <div style="margin:5px;" class="form-group">
+                      <label for="direccion">Dirección:</label>
+                      <input class="form-control-sm" type="text" id="direccion" name="direccion"/>
+                  </div>
+                  <div style="margin:5px;" class="form-group">
+                      <label for="telefono">Teléfono:</label>
+                      <input style="margin:5px;" class="form-control-sm" type="text" id="telefono" name="telefono"/>
+                  </div>
+                  <div style="margin:15px;" class="form-group">
+                      <input style="center" type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
+                      <label class="form-check-label" for="checkguardia">Seguridad</label>
+                  </div>
+                  <div style="margin:15px;" class="form-group">
+                      <input type="checkbox" class="form-check-input" name="checkadmin" id="checkadmin"/>
+                      <label class="form-check-label" for="checkadmin">Administrador</label>
+                  </div>
+                  <div class="modal-footer">
+                      <div style="text-align:center;" class="form-group">
+                          <input type="submit" name="cerraruser" data-dismiss="modal" value="Cancelar"/>
+                          <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
+
+                           {% for message in get_flashed_messages() %}
+                        <div class="alert alert-warning">
+                                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                    {{ message }}
+                        </div>
+                                 {% endfor %}
+                      </div>
+                  </div>
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+<div>
+    <button class="btn btn-default" data-toggle="modal" data-target="#Modaluser" type="button">Iniciar</button>
+</div>
+<script>
+
+</script>
 {% endblock %}
 

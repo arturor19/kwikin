@@ -46,4 +46,31 @@
     e.preventDefault();
   });
 
+    $( "#demo-modal-3" ).submit(function( event ) {
+  event.preventDefault();
+  var new_event = {
+        'Coto': document.getElementById('Coto').value,
+        'CotoDir': document.getElementById('CotoDir').value,
+        'CotoCP': document.getElementById('CotoCP').value,
+        'correo': document.getElementById('correo').value,
+        'teladmin': document.getElementById('teladmin').value
+       };
+       console.log(new_event);
+
+
+    $.ajax({
+        url: '/crearventa',
+        data: $('form').serialize(),
+        type: 'POST',
+        timeout: 500,
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+
+    });
+
 })(jQuery); // End of use strict

@@ -17,7 +17,7 @@ import io
 
 
 #../templates', static_folder='../static'
-app = Flask(__name__, template_folder='templates', static_folder='static')
+application = app = Flask(__name__, template_folder='templates', static_folder='static')
 qrcode = QRcode(app)
 
 # Config MySQL
@@ -102,17 +102,6 @@ def peticionqr():
     picture = dict(session)['profile']['picture']
     return render_template('crearpeticionQR.html',  name=name, picture=picture)
 
-
-@app.route("/qrcode", methods=['GET', 'POST'])
-def get_qrcode():
-    if request.method == 'POST':
-        fecha_entrada = request.form['dateE']
-        fecha_salida = request.form['dateS']
-        nombre = request.form['name']
-        qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
-    print(qr)
-    return send_file(qr, mimetype="image/png")
-
 @app.route('/crearInd', methods=['GET', 'POST'] )
 @is_user
 @is_logged_in
@@ -120,25 +109,36 @@ def crearInd():
     if request.method == 'POST':
         domicilio = request.form['direccion']
         email = request.form['correo']
+        telefono = request.form['telefono']
         checkguardia = request.form.get('checkguardia')
-        if checkguardia == 'on':
+        checkadmin = request.form.get('checkadmin')
+        if checkguardia == 'on' and checkadmin == 'off':
             grupo = 4
+        elif checkadmin == 'on' and checkguardia == 'off':
+            grupo = 2
+        elif checkadmin == 'on' and checkguardia == 'on':
+            grupo = ""
+            flash('Solo puedes seleccionar un tipo de usuario')
         else:
             grupo = 3
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
-        try:
-            cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
-            domicilio, email))
-            flash('Usuario agregado correctamente')
-            mysql.commit()
-        except:
-            flash('Correo ya existe')
-        try:
-            cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
-            mysql.commit()
-        except:
-            flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
+
+        if domicilio == "" or email == "" or telefono == "" or grupo == "":
+            flash('Por favor revisa que todos los datos esten completos')
+        else:
+            try:
+                cur.execute("INSERT INTO usuarios(domicilio, email, telefono) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                domicilio, email, telefono))
+                flash('Usuario agregado correctamente')
+                mysql.commit()
+            except:
+                flash('Correo ya existe')
+            try:
+                cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+                mysql.commit()
+            except:
+                flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
         cur.close()
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -161,9 +161,10 @@ def upload():
             for index, row in df.iterrows():
                 email = row['Email']
                 domicilio = row['Direccion']
+                telefono = row['telefono']
                 if '@gmail.com' in email:
                     try:
-                        cur.execute(f"INSERT INTO usuarios(domicilio, email) VALUES('{domicilio}','{email}')")
+                        cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
                     except:
                         flash(f'El correo {email} ya existe')
                     mysql.commit()
@@ -262,6 +263,21 @@ def ventas():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('ventas.html', name=name, picture=picture)
+
+@app.route('/crearventa', methods=['GET', 'POST'])
+def crearventa():
+    Cotopy = request.form['Coto'];
+    CotoDirpy = request.form['CotoDir'];
+    CotoCPpy = request.form['CotoCP'];
+    correopy = request.form['correo'];
+    teladminpy = request.form['teladmin'];
+    vendedorpy = dict(session)['profile']['email'] #esta variable sirve para saber quien creo el coto y poder mapearlo
+    print(Cotopy, CotoDirpy, CotoCPpy, correopy, teladminpy, vendedorpy)
+    return render_template("ventas.html")
+    '''db.execute(
+        "INSERT INTO events (user_id, title, description, place, start, end) VALUES (:user, :title, :description, :place, :start, :end)",
+        user=session["user_id"], title=title, description=description, place=place, start=start, end=end)'''
+    
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
