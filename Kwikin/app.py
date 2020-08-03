@@ -165,6 +165,7 @@ def upload():
                 if '@gmail.com' in email:
                     try:
                         cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
+                        flash(f'Archivo agregado correctamente', 'success')
                     except:
                         flash(f'El correo {email} ya existe', 'danger')
                     mysql.commit()
@@ -173,7 +174,7 @@ def upload():
                         f"usuarios WHERE email = '{email}'))")
                     mysql.commit()
                 else:
-                    flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
+                    flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail', 'danger')
             cur.close()
         except:
             flash(f"El formato no es valido o el archivo no existe", "danger")
