@@ -123,22 +123,20 @@ def crearInd():
             grupo = 3
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
-
-        if domicilio == "" or email == "" or telefono == "" or grupo == "":
-            flash('Por favor revisa que todos los datos esten completos', 'danger')
+        if '@gmail.com' in email:
+            if domicilio == "" or email == "" or telefono == "" or grupo == "":
+                flash('Por favor revisa que todos los datos esten completos', 'danger')
+            else:
+                try:
+                    cur.execute("INSERT INTO usuarios(domicilio, email, telefono) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                    domicilio, email, telefono))
+                    cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+                    flash(f'Usuario {email} agregado correctamente', 'success')
+                    mysql.commit()
+                except:
+                    flash(f'Correo {email} ya existe','danger')
         else:
-            try:
-                cur.execute("INSERT INTO usuarios(domicilio, email, telefono) VALUES(\"%s\", \"%s\", \"%s\")" % (
-                domicilio, email, telefono))
-                flash(f'Usuario {email} agregado correctamente', 'success')
-                mysql.commit()
-            except:
-                flash(f'Correo {email} ya existe','danger')
-            try:
-                cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
-                mysql.commit()
-            except:
-                flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador', 'danger')
+            flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail', 'danger')
         cur.close()
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
