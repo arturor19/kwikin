@@ -153,9 +153,6 @@ def upload():
         cur = mysql.cursor()
         try:
             df = pd.read_csv(request.files.get('file'))
-        except:
-            flash(f"El formato no es valido o el archivo no existe", "danger")
-        try:
             for index, row in df.iterrows():
                 email = row['Email']
                 domicilio = row['Direccion']
@@ -163,13 +160,12 @@ def upload():
                 if '@gmail.com' in email:
                     try:
                         cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
+                        cur.execute(
+                            f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
+                            f"usuarios WHERE email = '{email}'))")
                         flash(f'Archivo agregado correctamente', 'success')
                     except:
                         flash(f'El correo {email} ya existe', 'danger')
-                    mysql.commit()
-                    cur.execute(
-                        f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
-                        f"usuarios WHERE email = '{email}'))")
                     mysql.commit()
                 else:
                     flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail', 'danger')
