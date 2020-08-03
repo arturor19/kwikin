@@ -118,27 +118,27 @@ def crearInd():
             grupo = 2
         elif checkadmin == 'on' and checkguardia == 'on':
             grupo = ""
-            flash('Solo puedes seleccionar un tipo de usuario')
+            flash(f'{email} no fue dado de alta. Solo puedes seleccionar un tipo de usuario', 'danger')
         else:
             grupo = 3
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
 
         if domicilio == "" or email == "" or telefono == "" or grupo == "":
-            flash('Por favor revisa que todos los datos esten completos')
+            flash('Por favor revisa que todos los datos esten completos', 'danger')
         else:
             try:
                 cur.execute("INSERT INTO usuarios(domicilio, email, telefono) VALUES(\"%s\", \"%s\", \"%s\")" % (
                 domicilio, email, telefono))
-                flash('Usuario agregado correctamente')
+                flash(f'Usuario {email} agregado correctamente', 'success')
                 mysql.commit()
             except:
-                flash('Correo ya existe')
+                flash(f'Correo {email} ya existe','danger')
             try:
                 cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
                 mysql.commit()
             except:
-                flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
+                flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador', 'danger')
         cur.close()
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -156,7 +156,7 @@ def upload():
         try:
             df = pd.read_csv(request.files.get('file'))
         except:
-            flash(f'El formato no es valido o el archivo no existe')
+            flash(f"El formato no es valido o el archivo no existe", "danger")
         try:
             for index, row in df.iterrows():
                 email = row['Email']
@@ -166,7 +166,7 @@ def upload():
                     try:
                         cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
                     except:
-                        flash(f'El correo {email} ya existe')
+                        flash(f'El correo {email} ya existe', 'danger')
                     mysql.commit()
                     cur.execute(
                         f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
@@ -176,7 +176,7 @@ def upload():
                     flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail')
             cur.close()
         except:
-            flash(f'El formato no es valido o el archivo no existe')
+            flash(f"El formato no es valido o el archivo no existe", "danger")
         return render_template('crearBulk.html', name=name, picture=picture)
     return render_template('crearBulk.html', name=name, picture=picture)
 

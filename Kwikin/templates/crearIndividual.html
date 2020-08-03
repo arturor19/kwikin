@@ -12,18 +12,14 @@
                 <h1 class="modal-title">Crear usuario</h1>
             </div>
             <div class="modal-body">
-              <form action="/crearInd" class="" method="post">
-                  <div style="margin:5px;" class="form-group">
+              <form id="IndForm" action="/crearInd" class="" method="post">
+                  <div class="form-group">
                       <label for="correo">Email:</label>
                       <input style="margin:26px;" class="form-control-sm" type="email" id="correo" name="correo"/>
-                  </div>
-                  <div style="margin:5px;" class="form-group">
                       <label for="direccion">Dirección:</label>
-                      <input class="form-control-sm" type="text" id="direccion" name="direccion"/>
-                  </div>
-                  <div style="margin:5px;" class="form-group">
+                      <input class="form-control-sm" type="text" id="direccion" name="direccion"/><br>
                       <label for="telefono">Teléfono:</label>
-                      <input style="margin:5px;" class="form-control-sm" type="text" id="telefono" name="telefono"/>
+                      <input style="margin:5px;" class="form-control-sm" type="text" id="telefono" name="telefono"/><br>
                   </div>
                   <div style="margin:15px;" class="form-group">
                       <input style="center" type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
@@ -37,15 +33,25 @@
                       <div style="text-align:center;" class="form-group">
                           <input type="submit" name="cerraruser" data-dismiss="modal" value="Cancelar"/>
                           <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
-
-                           {% for message in get_flashed_messages() %}
-                        <div class="alert alert-warning">
-                                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                    {{ message }}
-                        </div>
-                                 {% endfor %}
                       </div>
                   </div>
+
+                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                       {% endfor %}
+                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+
+
                 </form>
              </div>
         </div>
@@ -55,7 +61,13 @@
     <button class="btn btn-default" data-toggle="modal" data-target="#Modaluser" type="button">Iniciar</button>
 </div>
 <script>
+ $(document).ready(function() {
+    var messages = "{{ get_flashed_messages() }}";
 
+    if (typeof messages != 'undefined' && messages != '[]') {
+        $("#Modaluser").modal();
+    };
+});
 </script>
 {% endblock %}
 
