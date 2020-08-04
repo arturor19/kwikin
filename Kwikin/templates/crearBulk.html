@@ -9,7 +9,8 @@
 <form method=post enctype=multipart/form-data>
     <input class="form-control-sm" type=file name=file><br><br>
     <input class="form-control-sm" type=submit value=Cargar>
-</form>
+</form><br>
+<a class="btn btn-secondary btn-sm" href="/gestionusuarios">Continuar</a><br><br>
 
                             {% for message in get_flashed_messages(category_filter=["danger"]) %}
                         <div class="alert alert-danger" role="alert">

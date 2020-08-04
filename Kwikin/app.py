@@ -140,7 +140,8 @@ def crearInd():
         cur.close()
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
-    return render_template('crearIndividual.html', name=name, picture=picture)
+    return redirect(url_for('gestionusuarios', name=name, picture=picture))
+
 
 @app.route('/crearBulk', methods=['GET', 'POST'] )
 @is_user
@@ -156,14 +157,14 @@ def upload():
             for index, row in df.iterrows():
                 email = row['Email']
                 domicilio = row['Direccion']
-                telefono = row['telefono']
+                telefono = row['Telefono']
                 if '@gmail.com' in email:
                     try:
                         cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
                         cur.execute(
                             f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
                             f"usuarios WHERE email = '{email}'))")
-                        flash(f'Archivo agregado correctamente', 'success')
+                        flash(f'{email} agregado correctamente', 'success')
                     except:
                         flash(f'El correo {email} ya existe', 'danger')
                     mysql.commit()

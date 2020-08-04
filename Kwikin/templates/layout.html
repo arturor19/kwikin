@@ -99,21 +99,6 @@
       </div>
 
 
-      <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseusuarios" aria-expanded="true" aria-controls="collapseusuarios">
-          <i class="fas fa-user-plus"></i>
-          <span>Crear Usuarios</span>
-        </a>
-        <div id="collapseusuarios" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Crear Usuarios:</h6>
-            <a class="collapse-item" href="/crearInd">Individual</a>
-            <a class="collapse-item" href="/crearBulk">Masiva</a>
-          </div>
-        </div>
-      </li>
-
       <!-- Nav Item - Tables -->
       <li class="nav-item">
         <a class="nav-link" href="/gestionusuarios">
@@ -317,7 +302,11 @@
   <!--script src="{{ url_for('.static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script-- #Comentado por datatable issue>
   <!-- Custom scripts for all pages-->
   <script src="{{ url_for('.static', filename='js/sb-admin-2.min.js') }}"></script>
-
+<script>
+     $('#CrearIndividual').click(function() {
+    $('#Modaluser').modalService.showModal();
+    }) ;
+</script>
 
 
 </html>
