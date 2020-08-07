@@ -45,7 +45,7 @@
     }, 1000, 'easeInOutExpo');
     e.preventDefault();
   });
-
+// pasar info de java por medio de ajax para crear coto
     $( "#demo-modal-3" ).submit(function( event ) {
   event.preventDefault();
   var new_event = {

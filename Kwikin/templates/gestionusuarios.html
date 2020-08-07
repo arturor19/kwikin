@@ -52,7 +52,8 @@ $.extend( true, $.fn.dataTable.defaults, {
             "print": "Imprimir",
             "colvis": "Visibilidad columnas",
             "collection": "Colección",
-            "upload": "Seleccione fichero...."
+            "upload": "Seleccione fichero....",
+
         },
         "select": {
             "rows": {
@@ -219,7 +220,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 <script>
        $('#closemodal').click(function() {
     $('#Modaluser').modal('hide');
-    sendEvent('#demo-modal-3', 1);
+    sendEvent('#Modaluser', 1);
     $('#Modaluser').on('hidden.bs.modal', function(e) {
         $(this).removeData();
     }) ;

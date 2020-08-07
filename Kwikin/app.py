@@ -88,19 +88,44 @@ def logout():
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    now = datetime.utcnow()
+    now = str(now)
+    result = cur.execute("SELECT * FROM qr")
+    qr = cur.fetchall()
+    array = []
+    for row in qr:
+        Nombre = (row[4])
+        Entrada = (row[2])
+        Salida = (row[3])
+        Entrada_Real = (row[5])
+        Salida_Real = (row[6])
+
+        array.append({'Nombre': Nombre,
+                      'Entrada': Entrada,
+                      'Salida': Salida,
+                      'Entrada_Real': Entrada_Real,
+                      'Salida_Real': Salida_Real})
+
     if request.method == 'POST':
-        print(request.form)
+
         if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(datetime.now()):
-            flash('Por favor valida que las fechas sean correctas')
+            flash('Por favor valida que las fechas sean correctas', 'danger')
         else:
+            print(request.form)
             fecha_entrada = request.form['dateE']
             fecha_salida = request.form['dateS']
-            nombre = request.form['name']
+            nombre = request.form['nombreqr']
+            cur.execute("INSERT INTO qr(Nombre, inicio, fin) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                nombre, fecha_entrada, fecha_salida))
+            mysql.commit()
+            cur.close()
             qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
             return send_file(qr, mimetype="image/png")
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
-    return render_template('crearpeticionQR.html',  name=name, picture=picture)
+    return render_template('crearpeticionQR.html', qr=array, name=name, picture=picture, now=now)
 
 @app.route('/crearInd', methods=['GET', 'POST'] )
 @is_user
