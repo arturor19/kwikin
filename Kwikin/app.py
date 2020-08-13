@@ -68,6 +68,12 @@ def authorize():
 def index():
     return render_template('login.html')
 
+@app.route('/ayudabulk', methods=["GET", "POST"])
+def ayudabulk():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    return render_template('AyudaBulk.html', name=name, picture=picture)
+
 @app.route('/dashboard')
 @is_user
 @is_logged_in
@@ -88,11 +94,12 @@ def logout():
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
+    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     now = datetime.utcnow()
     now = str(now)
-    result = cur.execute("SELECT * FROM qr")
+    result = cur.execute("SELECT * FROM qr WHERE email=\"%s\"" % (email))
     qr = cur.fetchall()
     array = []
     for row in qr:

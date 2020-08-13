@@ -182,11 +182,12 @@ $.extend( true, $.fn.dataTable.defaults, {
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">Cargar Usuarios</h1>
+                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
             </div>
             <div class="modal-body">
               <form method=post enctype=multipart/form-data action="/crearBulk">
                   <input class="form-control-sm" type=file name=file><br><br>
-                  <input class="form-control-sm" type=submit value=Cargar>
+                  <input class="form-control-sm" type=submit data-toggle="tooltip" data-placement="top" alt="Recuerda que el archivo CSV debe contener Email, Direccion, Telefono"  title="Recuerda que el archivo CSV debe contener Email,	Direccion, Telefono" value="Cargar">
               </form>
 
                             {% for message in get_flashed_messages(category_filter=["danger"]) %}
@@ -215,6 +216,11 @@ $.extend( true, $.fn.dataTable.defaults, {
     if (typeof messages != 'undefined' && messages != '[]') {
         $("#Modaluser").modal();
     };
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
 <script>

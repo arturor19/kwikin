@@ -88,14 +88,10 @@ $.extend( true, $.fn.dataTable.defaults, {
             {% for codigos in qr %}
              <tr>
                  <td scope="row">
-                     <ul class="list-inline m-0">
-                         <li class="list-inline-item">
-                             <button class="btn btn-success btn-sm rounded-1" type="button" data-toggle="tooltip" data-placement="top" title="Edit" {{'disabled' if codigos.Entrada < now else ''}}><i class="fa fa-edit"></i></button>
-                         </li>
-                         <li class="list-inline-item">
-                             <button class="btn btn-danger btn-sm rounded-1" type="button" data-toggle="tooltip" data-placement="top" title="Delete" {{'disabled' if codigos.Salida < now else ''}}><i class="fa fa-trash"></i></button>
-                         </li>
-                     </ul>
+                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+                             <button class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Copiar"><i class="fa fa-clipboard" aria-hidden="true"></i></button>
+                             <button class="btn btn-success btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Editar" {{'disabled' if codigos.Entrada < now else ''}}><i class="fa fa-edit"></i></button>
+                         </div>
                  <td><a>{{codigos.Nombre}}</td>
                  <td><a>{{codigos.Entrada}}</a></td>
                  <td><a>{{codigos.Salida}}</a></td>
