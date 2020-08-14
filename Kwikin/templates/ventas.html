@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Ventas</title>
+{% endblock %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+{%block body %}
+
+<body>
+
+<form class="modal multi-step" id="demo-modal-3" action="/crearventa">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title step-1" data-step="1">Información del coto</h4>
+                <h4 class="modal-title step-2" data-step="2">Información de administrador</h4>
+                <h4 class="modal-title step-3" data-step="3">Selecciona Producto</h4>
+                <div class="m-progress">
+                    <div class="m-progress-bar-wrapper">
+                        <div class="m-progress-bar">
+                        </div>
+                    </div>
+                    <div class="m-progress-stats">
+                        <span class="m-progress-current">
+                        </span>
+                        /
+                        <span class="m-progress-total">
+                        </span>
+                    </div>
+                    <div class="m-progress-complete">
+                        Listo
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body step-1" data-step="1">
+
+                <label for="Coto">Nombre de coto:</label>
+                <td><input class="col-12 form-control-sm" type="text" id="Coto" name="Coto"/>
+                    <label for="CotoDir">Dirección:</label>
+                <td><input class="col-12 form-control-sm" type="Text" id="CotoDir" name="CotoDir"/>
+                <label for="CotoCP">Código Postal:</label>
+                <td><input class="col-12 form-control-sm" type="Integer" id="CotoCP" name="CotoCP"/>
+            </div>
+            <div class="modal-body step-2" data-step="2">
+                <div class="form-group">
+                <label for="correo">Email:</label>
+                <td><input class="col-12 form-control-sm" type="email" id="correo" name="correo"/>
+              </div>
+                <div class="form-group">
+                <label for="teladmin">Telefono:</label>
+                <td><input class="col-12 form-control-sm" type="Text" id="teladmin" name="teladmin"/>
+              </div>
+            </div>
+
+            <div class="modal-body step-3" data-step="3">
+                Selecciona Producto.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Salir</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 1)">Atras</button>
+                <button type="button" class="btn btn-primary step step-1" data-step="1" onclick="sendEvent('#demo-modal-3', 2)">Continuar</button>
+                <button type="button" class="btn btn-primary step step-3" data-step="3" onclick="sendEvent('#demo-modal-3', 2)">Atras</button>
+                <button type="button" class="btn btn-primary step step-2" data-step="2" onclick="sendEvent('#demo-modal-3', 3)">Continuar</button>
+                <button type="submit" class="btn btn-primary step step-3" data-step="3" id="closemodal">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="container">
+    <div class="row">
+        <h1>
+            Bienvenido {{ name }}
+        </h1>
+           <div>
+            <p> Recuerda ofrecer todos nuuestros productos y hacer una comparación con lo que mejor se adapten a las necesidades de nuestro cliente </p>
+           </div>
+        <div>
+            <ul>Nuestros productos son</ul>
+            <li>Cotos Con guardia</li>
+            <li>Porteros virtuales</li>
+            <li>Otros </li>
+
+        </div>
+
+    </div>
+</div>
+<br>
+<div>
+    <button class="btn btn-default" data-toggle="modal" data-target="#demo-modal-3" type="button">Iniciar</button>
+</div>
+<script src="{{ url_for('.static', filename='vendor/multi-step-modal.js') }}"></script>
+
+<script>
+sendEvent = function(sel, step) {
+    var sel_event = new CustomEvent('next.m.' + step, {detail: {step: step}});
+    window.dispatchEvent(sel_event);
+}
+</script>
+<script>
+
+</script>
+<script>
+    $('#closemodal').click(function() {
+    $('#demo-modal-3').modal('hide');
+    sendEvent('#demo-modal-3', 1);
+    $('#demo-modal-3').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+    <script src="{{ url_for('.static', filename='js/sb-admin-2.js') }}"></script>
+{% endblock %}

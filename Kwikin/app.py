@@ -72,7 +72,7 @@ def index():
 def ayudabulk():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
-    return render_template('AyudaBulk.html', name=name, picture=picture)
+    return render_template('ayudabulk.html', name=name, picture=picture)
 
 @app.route('/dashboard')
 @is_user
@@ -99,21 +99,25 @@ def peticionqr():
     cur = mysql.cursor()
     now = datetime.utcnow()
     now = str(now)
-    result = cur.execute("SELECT * FROM qr WHERE email=\"%s\"" % (email))
-    qr = cur.fetchall()
-    array = []
-    for row in qr:
-        Nombre = (row[4])
-        Entrada = (row[2])
-        Salida = (row[3])
-        Entrada_Real = (row[5])
-        Salida_Real = (row[6])
+    try:
+        array = []
+        result = cur.execute("SELECT * FROM qr WHERE email=\"%s\"" % (email))
+        qr = cur.fetchall()
 
-        array.append({'Nombre': Nombre,
-                      'Entrada': Entrada,
-                      'Salida': Salida,
-                      'Entrada_Real': Entrada_Real,
-                      'Salida_Real': Salida_Real})
+        for row in qr:
+            Nombre = (row[4])
+            Entrada = (row[2])
+            Salida = (row[3])
+            Entrada_Real = (row[5])
+            Salida_Real = (row[6])
+
+            array.append({'Nombre': Nombre,
+                          'Entrada': Entrada,
+                          'Salida': Salida,
+                          'Entrada_Real': Entrada_Real,
+                          'Salida_Real': Salida_Real})
+    except:
+        arr = []
 
     if request.method == 'POST':
 
