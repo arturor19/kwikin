@@ -101,7 +101,10 @@ def peticionqr():
     now = str(now)
     try:
         array = []
-        result = cur.execute("SELECT * FROM qr WHERE email=\"%s\"" % (email))
+        result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
+SELECT id_usuario FROM usuarios where email = '{email}'
+));""")
         qr = cur.fetchall()
 
         for row in qr:
@@ -117,7 +120,7 @@ def peticionqr():
                           'Entrada_Real': Entrada_Real,
                           'Salida_Real': Salida_Real})
     except:
-        arr = []
+        array = []
 
     if request.method == 'POST':
 
@@ -128,11 +131,21 @@ def peticionqr():
             fecha_entrada = request.form['dateE']
             fecha_salida = request.form['dateS']
             nombre = request.form['nombreqr']
-            cur.execute("INSERT INTO qr(Nombre, inicio, fin) VALUES(\"%s\", \"%s\", \"%s\")" % (
-                nombre, fecha_entrada, fecha_salida))
+            codigo_qr = hex(int(time.time() * 100))
+            qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
+            cur.execute("INSERT INTO qr(codigo_qr, Nombre, inicio, fin) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
+                codigo_qr, nombre, fecha_entrada, fecha_salida))
+            mysql.commit()
+            insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES 
+(
+(SELECT id_usuario FROM usuarios where email = '{email}'),
+(SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
+(SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
+);"""
+            cur.execute(insert_asoc_qr_usuario)
             mysql.commit()
             cur.close()
-            qr = qrcode("quedsfsiii", mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
+
             return send_file(qr, mimetype="image/png")
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
