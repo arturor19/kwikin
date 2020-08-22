@@ -99,33 +99,35 @@ def peticionqr():
     cur = mysql.cursor()
     now = datetime.utcnow()
     now = str(now)
-    try:
-        array = []
-        result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+    array = []
+    result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
 SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
 SELECT id_usuario FROM usuarios where email = '{email}'
 ));""")
-        qr = cur.fetchall()
+    qr = cur.fetchall()
 
-        for row in qr:
-            Nombre = (row[4])
-            Entrada = (row[2])
-            Salida = (row[3])
-            Entrada_Real = (row[5])
-            Salida_Real = (row[6])
+    for row in qr:
+        Nombre = (row[4])
+        Entrada = (row[2])
+        Salida = (row[3])
+        Entrada_Real = (row[5])
+        Salida_Real = (row[6])
+        estado = (row[7])
+        id_qr = (row[1])
 
-            array.append({'Nombre': Nombre,
-                          'Entrada': Entrada,
-                          'Salida': Salida,
-                          'Entrada_Real': Entrada_Real,
-                          'Salida_Real': Salida_Real})
-    except:
-        array = []
+        array.append({'Nombre': Nombre,
+                    'Entrada': Entrada,
+                    'Salida': Salida,
+                    'Entrada_Real': Entrada_Real,
+                    'Salida_Real': Salida_Real,
+                    'estado': estado,
+                    'id_qr': id_qr})
 
     if request.method == 'POST':
-
         if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(datetime.now()):
             flash('Por favor valida que las fechas sean correctas', 'danger')
+        elif request.form['nombreqr'] == "":
+            flash('Por favor agrega nombre', 'danger')
         else:
             print(request.form)
             fecha_entrada = request.form['dateE']
@@ -145,11 +147,23 @@ SELECT id_usuario FROM usuarios where email = '{email}'
             cur.execute(insert_asoc_qr_usuario)
             mysql.commit()
             cur.close()
-
-            return send_file(qr, mimetype="image/png")
+            qr_data = send_file(qr, mimetype="image/png")
+            return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
+          # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
-    return render_template('crearpeticionQR.html', qr=array, name=name, picture=picture, now=now)
+    return render_template('crearpeticionqr.html', qr=array, name=name, picture=picture, now=now)
+
+@app.route('/codigoqr', methods=['GET'] )
+@is_user
+@is_logged_in
+def codigoqr():
+    if request.method == 'GET':
+        qr_data = request.args.get('qr_data')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        return render_template('codigoqr.html', qr_data=qr_data, mode="raw", start_date=start_date,
+                         end_date=end_date)
 
 @app.route('/crearInd', methods=['GET', 'POST'] )
 @is_user
@@ -222,8 +236,8 @@ def upload():
             cur.close()
         except:
             flash(f"El formato no es valido o el archivo no existe", "danger")
-        return render_template('crearBulk.html', name=name, picture=picture)
-    return render_template('crearBulk.html', name=name, picture=picture)
+        return render_template('crearbulk.html', name=name, picture=picture)
+    return render_template('crearbulk.html', name=name, picture=picture)
 
 @app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'] )
 @is_user
@@ -276,6 +290,30 @@ def actusuario():
             return render_template('gestionusuarios.html', name=name, picture=picture)
     cur.close()
     return render_template('gestionusuarios.html', name=name, picture=picture)
+
+@app.route('/actqr', methods=['POST'])
+@is_user
+@is_logged_in
+def actqr():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    qrid = None
+    if request.method == "POST":
+        qrid = request.form['dataqr']
+        result = cur.execute("SELECT estado FROM qr WHERE codigo_qr = '%s';" % qrid)
+        result = cur.fetchone()
+        print(qrid)
+        try:
+            cur.execute("UPDATE qr SET estado = 'Inactivo' WHERE codigo_qr = '%s';" % qrid)
+            mysql.commit()
+            return render_template('gestionusuarios.html', name=name, picture=picture)
+        except:
+            flash(f'No se pudo eliminar el registro')
+            return render_template('gestionusuarios.html', name=name, picture=picture)
+    cur.close()
+    return render_template('crearpeticionqr.html', name=name, picture=picture)
 
 @app.route('/ventas', methods=['GET', 'POST'] )
 @is_user

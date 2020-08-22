@@ -73,7 +73,7 @@ $.extend( true, $.fn.dataTable.defaults, {
       <!-- Table head -->
       <thead>
         <tr>
-            <th>Estado</th>
+            <th></th>
             <th>Nombre</th>
             <th>Entrada</th>
             <th>Salida</th>
@@ -87,16 +87,19 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for codigos in qr %}
              <tr>
-                 <td scope="row">
-                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                             <button class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Copiar"><i class="fa fa-clipboard" aria-hidden="true"></i></button>
-                             <button class="btn btn-success btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Editar" {{'disabled' if codigos.Entrada < now else ''}}><i class="fa fa-edit"></i></button>
-                         </div>
-                 <td><a>{{codigos.Nombre}}</td>
-                 <td><a>{{codigos.Entrada}}</a></td>
-                 <td><a>{{codigos.Salida}}</a></td>
-                 <td><a>{{codigos.Entrada_Real}}</a></td>
-                 <td><a>{{codigos.Salida_Real}}</a></td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}" scope="row">
+
+                             <a class="fa fa-trash" aria-hidden="true" href="{{ url_for('peticionqr') }}" data-placement="top" id="mytrash" name={{codigos.id_qr}}   title="Eliminar" {{'disabled' if codigos.Salida < now or codigos.estado == "Inactivo" else ''}}</a>
+
+
+                             <a type="button" data-toggle="modal" data-target="#ModalQR" class="fas fa-qrcode"  data-toggle="tooltip" data-placement="top" title="Editar"></a>
+
+                 </td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Nombre}}</a></td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada}}</a></td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida}}</a></td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada_Real}}</a></td>
+                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida_Real}}</a></td>
              </tr>
             {% endfor %}
       </tbody>
@@ -137,19 +140,19 @@ $.extend( true, $.fn.dataTable.defaults, {
 
                   <div class="modal-footer">
                       <div style="text-align:center;" class="form-group">
-                          <input type="submit" name="cerraruserqr" data-dismiss="modal" value="Cancelar"/>
+                          <input type="button" name="cerraruserqr" data-dismiss="modal" value="Cancelar"/>
                           <input type="submit" id="crearqr" name="crearqr" value="Crear QR"/>
                       </div>
                   </div>
 
-                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        {% for message in get_flashed_messages(category_filter=["danger"]) %}
                         <div class="alert alert-danger" role="alert">
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
                             {{ message }}
 
                         </div>
-                       {% endfor %}
-                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        {% endfor %}
+                        {% for message in get_flashed_messages(category_filter=["success"]) %}
                         <div class="alert alert-success" role="alert">
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
                             {{ message }}
@@ -170,27 +173,30 @@ $.extend( true, $.fn.dataTable.defaults, {
     var messages = "{{ get_flashed_messages() }}";
 
     if (typeof messages != 'undefined' && messages != '[]') {
-        $("#Modalqr").modal();
+        $("#ModalQR").modal();
     };
 });
 </script>
 <script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script>
        $('#cerraruserqr').click(function() {
-    $('#Modalqr').modal('hide');
-    sendEvent('#Modalqr', 1);
-    $('#Modalqr').on('hidden.bs.modal', function(e) {
+    $('#ModalQR').modal('hide');
+    sendEvent('#ModalQR', 1);
+    $('#ModalQR').on('hidden.bs.modal', function(e) {
         $(this).removeData();
     }) ;
 });
 </script>
 <script type="text/javascript">
-$(dtOrderExample2).ready(function(){
-    var $mycheckbox = $('input[name="mycheckbox"]');
-    $mycheckbox.change(function() {
-        var ids = $(this).prop('id');
+$(mytrash).click(function(){
+        var qrid = $(this).prop('name');
         $.ajax({
-            url: '/actusuario',
-            data: {'data':ids},
+            url: '/actqr',
+            data: {'dataqr':qrid},
             type: 'POST',
             timeout: 500,
             success: function(response) {
@@ -200,10 +206,8 @@ $(dtOrderExample2).ready(function(){
                 console.log(error);
                }
          });
-       });
 
      });
 
 </script>
-
 {% endblock %}
