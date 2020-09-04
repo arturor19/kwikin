@@ -8,7 +8,7 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, DataRequired
 from functools import wraps
 import sqlite3
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 import base64
 from datetime import timedelta, datetime
 import time
@@ -84,6 +84,15 @@ def dashboard():
     given_name = dict(session)['profile']['given_name']
     picture = dict(session)['profile']['picture']
     return render_template('dashboard.html', name=name, picture=picture)
+
+
+@app.route('/scannerqr')
+def scannerqr():
+    name = dict(session)['profile']['name']
+    email = dict(session)['profile']['email']
+    picture = dict(session)['profile']['picture']
+    return render_template('scannerqr.html', name=name, picture=picture)
+
 
 @app.route('/logout')
 def logout():
@@ -349,11 +358,11 @@ def ventas():
 
 @app.route('/crearventa', methods=['GET', 'POST'])
 def crearventa():
-    Cotopy = request.form['Coto'];
-    CotoDirpy = request.form['CotoDir'];
-    CotoCPpy = request.form['CotoCP'];
-    correopy = request.form['correo'];
-    teladminpy = request.form['teladmin'];
+    Cotopy = request.form['Coto']
+    CotoDirpy = request.form['CotoDir']
+    CotoCPpy = request.form['CotoCP']
+    correopy = request.form['correo']
+    teladminpy = request.form['teladmin']
     vendedorpy = dict(session)['profile']['email'] #esta variable sirve para saber quien creo el coto y poder mapearlo
     print(Cotopy, CotoDirpy, CotoCPpy, correopy, teladminpy, vendedorpy)
     return render_template("ventas.html")

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scanner QR </title>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/html5-qrcode.min.js') }}"></script>
+ 	<form name="scanqr" id="scanqr" action="/validarqr" method="get">
+      <input type="hidden" id="qr" name="qr" value="" />
+    </form>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12" style="text-align: center;margin-bottom: 20px;">
+			<div id="reader" style="display: inline-block;"></div>
+			<div class="empty"></div>
+			<div id="scanned-result"></div>
+		</div>
+	</div>
+</div>
+    <script>
+function onScanSuccess(qrMessage) {
+	// handle the scanned code as you like
+	console.log(`QR matched = ${qrMessage}`);
+	document.getElementById('qr').value = qrMessage;
+	document.scanqr.submit();
+}
+
+let html5QrcodeScanner = new Html5QrcodeScanner(
+	"reader", { fps: 10, qrbox: 250 }, /* verbose= */ true);
+html5QrcodeScanner.render(onScanSuccess);
+
+    </script>
+</html>
