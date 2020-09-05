@@ -146,18 +146,22 @@ SELECT id_usuario FROM usuarios where email = '{email}'
             nombre = request.form['nombreqr']
             codigo_qr = hex(int(time.time() * 100))
             qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
-            cur.execute("INSERT INTO qr(codigo_qr, Nombre, inicio, fin) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
+            try:
+                cur.execute("INSERT INTO qr(codigo_qr, Nombre, inicio, fin) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
                 codigo_qr, nombre, fecha_entrada, fecha_salida))
-            mysql.commit()
-            insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES 
+
+                mysql.commit()
+                insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES 
 (
 (SELECT id_usuario FROM usuarios where email = '{email}'),
 (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
 (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
 );"""
-            cur.execute(insert_asoc_qr_usuario)
-            mysql.commit()
-            cur.close()
+                cur.execute(insert_asoc_qr_usuario)
+                mysql.commit()
+                cur.close()
+            except:
+                flash(f'Codigo no creado correctamente, "danger")
             qr_data = send_file(qr, mimetype="image/png")
             return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
           # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
