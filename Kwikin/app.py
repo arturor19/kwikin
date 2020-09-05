@@ -321,7 +321,7 @@ def actqr():
             mysql.commit()
             return render_template('gestionusuarios.html', name=name, picture=picture)
         except:
-            flash(f'No se pudo eliminar el registro')
+            flash(f'No se pudo eliminar el registro', 'danger')
             return render_template('gestionusuarios.html', name=name, picture=picture)
     cur.close()
     return render_template('crearpeticionqr.html', name=name, picture=picture)
@@ -343,16 +343,16 @@ def ventas():
         try:
             cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
             domicilio, email))
-            flash('Usuario agregado correctamente')
+            flash('Usuario agregado correctamente', 'success')
             mysql.commit()
 
         except:
-            flash('Correo ya existe')
+            flash('Correo ya existe', 'danger')
         try:
             cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
             mysql.commit()
         except:
-            flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador')
+            flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador', 'danger')
         cur.close()
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -378,6 +378,8 @@ def crearventa():
 @is_user
 @is_logged_in
 def validarqr():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     mysql = sqlite3.connect('kw.db')
@@ -392,18 +394,22 @@ def validarqr():
         nombre = qrinfo[0][4]
         estado = qrinfo[0][7]
         if len(qrinfo[0][1]) > 0:
+            print("codigo")
+            print(ct)
             if fecha_inicio > str(ct) and fecha_fin < str(ct):
+                print("fecha")
                 if estado == "Activo":
+                    print("estado")
                     """cur.execute("INSERT)"""
                     return render_template("aprobado.html", name=name, picture=picture)
                 else:
-                    flash(f'el código ha sido cancelado')
+                    flash(f'el código ha sido cancelado', 'danger')
                     return render_template("noaprobado.html", name=name, picture=picture)
             else:
-                flash(f'Las fechas no son validas')
+                flash(f'Las fechas no son validas', 'danger')
                 return render_template("noaprobado.html", name=name, picture=picture)
         else:
-            flash(f'el código no es valido')
+            flash(f'el código no es valido', 'danger')
             return render_template("noaprobado.html", name=name, picture=picture)
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
