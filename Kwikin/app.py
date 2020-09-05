@@ -161,7 +161,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                 mysql.commit()
                 cur.close()
             except:
-                flash(f'Codigo no creado correctamente, "danger")
+                flash(f'Codigo no creado correctamente', 'danger')
             qr_data = send_file(qr, mimetype="image/png")
             return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
           # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
