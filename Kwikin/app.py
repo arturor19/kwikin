@@ -17,6 +17,7 @@ import io
 import pytz
 tz = pytz.timezone('America/Mexico_City')
 ct = datetime.now(tz=tz)
+tzone = ct
 
 #../templates', static_folder='../static'
 application = app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -95,6 +96,12 @@ def scannerqr():
     picture = dict(session)['profile']['picture']
     return render_template('scannerqr.html', name=name, picture=picture)
 
+@app.route('/scannerqrs')
+def scannerqrs():
+    name = dict(session)['profile']['name']
+    email = dict(session)['profile']['email']
+    picture = dict(session)['profile']['picture']
+    return render_template('scannerqrs.html', name=name, picture=picture)
 
 @app.route('/logout')
 def logout():
@@ -105,6 +112,9 @@ def logout():
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
     email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
@@ -135,12 +145,16 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                     'id_qr': id_qr})
 
     if request.method == 'POST':
-        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < ct.strftime("%Y-%m-%dT%H:%M:%SZ"):
+        tzone = ct.strftime("%Y-%m-%dT%H:%M")
+        datesal = datetime.strptime(str(request.form['dateS']),"%Y-%m-%dT%H:%M")
+        dateent = datetime.strptime(str(request.form['dateE']),"%Y-%m-%dT%H:%M")
+        if dateent > datesal or datesal < datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")+timedelta(minutes=1):
             flash('Por favor valida que las fechas sean correctas', 'danger')
+        elif datesal - dateent > timedelta(hours=48):
+            flash('Recuerda que los accesos se otorgan sólo por 48 horas', 'danger')
         elif request.form['nombreqr'] == "":
             flash('Por favor agrega nombre', 'danger')
         else:
-            print(request.form)
             fecha_entrada = request.form['dateE']
             fecha_salida = request.form['dateS']
             nombre = request.form['nombreqr']
@@ -162,6 +176,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                 cur.close()
             except:
                 flash(f'Codigo no creado correctamente', 'danger')
+                return render_template('crearpeticionqr.html', qr=array, name=name, picture=picture, now=now)
             qr_data = send_file(qr, mimetype="image/png")
             return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
           # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
@@ -384,6 +399,7 @@ def crearventa():
 def validarqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
+    tzone = ct
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     mysql = sqlite3.connect('kw.db')
@@ -393,17 +409,23 @@ def validarqr():
         result = cur.execute("SELECT * FROM qr WHERE codigo_qr = '%s';" % qrval)
         qrinfo = cur.fetchall()
         print(qrinfo[0])
+        qrid = int(qrinfo[0][0])
         fecha_inicio = qrinfo[0][2]
         fecha_fin = qrinfo[0][3]
         nombre = qrinfo[0][4]
         estado = qrinfo[0][7]
+        timestamp = tzone.strftime("%Y-%m-%dT%H:%M:%SZ")
+        tipo = "E"
         if len(qrinfo[0][1]) > 0:
-            if fecha_inicio < ct.strftime("%Y-%m-%dT%H:%M:%SZ") and fecha_fin > ct.strftime("%Y-%m-%dT%H:%M:%SZ"):
+            if fecha_inicio < tzone.strftime("%Y-%m-%dT%H:%M:%SZ") and fecha_fin > tzone.strftime("%Y-%m-%dT%H:%M:%SZ"):
                 print("fecha")
                 if estado == "Activo":
                     print("estado")
                     flash(f'Adelante {nombre}', 'success')
-                    """cur.execute("INSERT)"""
+                    cur.execute("INSERT INTO asoc_qr_registro (id_qr, timestamp, type) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                        qrid, timestamp, tipo))
+                    mysql.commit()
+                    cur.close()
                     return render_template("aprobado.html", name=name, picture=picture)
                 else:
                     flash(f'el código ha sido cancelado', 'danger')
@@ -414,6 +436,42 @@ def validarqr():
         else:
             flash(f'el código no es valido', 'danger')
             return render_template("noaprobado.html", name=name, picture=picture)
+
+
+@app.route('/validarqrs', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def validarqrs():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    if request.method == 'GET':
+        qrval = request.args.get('qrs')
+        result = cur.execute("SELECT * FROM qr WHERE codigo_qr = '%s';" % qrval)
+        qrinfo = cur.fetchall()
+        print(qrinfo[0])
+        qrid = int(qrinfo[0][0])
+        fecha_inicio = qrinfo[0][2]
+        fecha_fin = qrinfo[0][3]
+        nombre = qrinfo[0][4]
+        estado = qrinfo[0][7]
+        timestamp = tzone.strftime("%Y-%m-%dT%H:%M:%SZ")
+        tipo = "S"
+        if len(qrinfo[0][1]) > 0:
+            flash(f'Hasta Luego {nombre}', 'success')
+            cur.execute("INSERT INTO asoc_qr_registro (id_qr, timestamp, type) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                    qrid, timestamp, tipo))
+            mysql.commit()
+            cur.close()
+            return render_template("aprobado.html", name=name, picture=picture)
+        else:
+            flash(f'el código no es valido', 'danger')
+            return render_template("noaprobado.html", name=name, picture=picture)
+    return render_template("dashboard.html", name=name, picture=picture)
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
 def articles():
