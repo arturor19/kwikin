@@ -14,7 +14,9 @@ from datetime import timedelta, datetime
 import time
 from flask_qrcode import QRcode
 import io
-
+import pytz
+tz = pytz.timezone('America/Mexico_City')
+ct = datetime.now(tz=tz)
 
 #../templates', static_folder='../static'
 application = app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -106,7 +108,7 @@ def peticionqr():
     email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
-    now = datetime.utcnow()
+    now = ct
     now = str(now)
     array = []
     result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
@@ -133,7 +135,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                     'id_qr': id_qr})
 
     if request.method == 'POST':
-        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(datetime.now()):
+        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(ct):
             flash('Por favor valida que las fechas sean correctas', 'danger')
         elif request.form['nombreqr'] == "":
             flash('Por favor agrega nombre', 'danger')
@@ -357,6 +359,8 @@ def ventas():
     return render_template('ventas.html', name=name, picture=picture)
 
 @app.route('/crearventa', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
 def crearventa():
     Cotopy = request.form['Coto']
     CotoDirpy = request.form['CotoDir']
@@ -369,8 +373,38 @@ def crearventa():
     '''db.execute(
         "INSERT INTO events (user_id, title, description, place, start, end) VALUES (:user, :title, :description, :place, :start, :end)",
         user=session["user_id"], title=title, description=description, place=place, start=start, end=end)'''
-    
 
+@app.route('/validarqr', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def validarqr():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    if request.method == 'GET':
+        qrval = request.args.get('qr')
+        result = cur.execute("SELECT * FROM qr WHERE codigo_qr = '%s';" % qrval)
+        qrinfo = cur.fetchall()
+        print(qrinfo[0])
+        fecha_inicio = qrinfo[0][2]
+        fecha_fin = qrinfo[0][3]
+        nombre = qrinfo[0][4]
+        estado = qrinfo[0][7]
+        if len(qrinfo[0][1]) > 0:
+            if fecha_inicio > str(ct) and fecha_fin < str(ct):
+                if estado == "Activo":
+                    """cur.execute("INSERT)"""
+                    return render_template("aprobado.html", name=name, picture=picture)
+                else:
+                    flash(f'el código ha sido cancelado')
+                    return render_template("noaprobado.html", name=name, picture=picture)
+            else:
+                flash(f'Las fechas no son validas')
+                return render_template("noaprobado.html", name=name, picture=picture)
+        else:
+            flash(f'el código no es valido')
+            return render_template("noaprobado.html", name=name, picture=picture)
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
 def articles():
