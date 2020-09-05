@@ -10,7 +10,9 @@
 <script type="text/javascript" class="init">
 
 $(document).ready(function() {
-	$('#dtOrderExample').DataTable();
+	$('#dtOrderExample').DataTable({
+        "order": [[ 2, "asc" ]]
+    });
 } );
 
 </script>

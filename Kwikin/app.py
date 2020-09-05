@@ -135,7 +135,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                     'id_qr': id_qr})
 
     if request.method == 'POST':
-        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < str(ct):
+        if request.form['dateE'] > request.form['dateS'] or request.form['dateE'] < ct.strftime("%Y-%m-%dT%H:%M:%SZ"):
             flash('Por favor valida que las fechas sean correctas', 'danger')
         elif request.form['nombreqr'] == "":
             flash('Por favor agrega nombre', 'danger')
@@ -394,12 +394,11 @@ def validarqr():
         nombre = qrinfo[0][4]
         estado = qrinfo[0][7]
         if len(qrinfo[0][1]) > 0:
-            print("codigo")
-            print(ct)
-            if fecha_inicio > str(ct) and fecha_fin < str(ct):
+            if fecha_inicio < ct.strftime("%Y-%m-%dT%H:%M:%SZ") and fecha_fin > ct.strftime("%Y-%m-%dT%H:%M:%SZ"):
                 print("fecha")
                 if estado == "Activo":
                     print("estado")
+                    flash(f'Adelante {nombre}', 'success')
                     """cur.execute("INSERT)"""
                     return render_template("aprobado.html", name=name, picture=picture)
                 else:

@@ -7,7 +7,9 @@
 <script type="text/javascript" class="init">
 
 $(document).ready(function() {
-	$('#dtOrderExample2').DataTable();
+	$('#dtOrderExample2').DataTable({
+        "order": [[ 3, "desc" ]]
+    });
 } );
 
 </script>
@@ -87,14 +89,11 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for codigos in qr %}
              <tr>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}" scope="row">
-
-                             <a class="fa fa-trash" aria-hidden="true" href="{{ url_for('peticionqr') }}" data-placement="top" id="mytrash" name={{codigos.id_qr}}   title="Eliminar" {{'disabled' if codigos.Salida < now or codigos.estado == "Inactivo" else ''}}</a>
-
-
-                             <a type="button" data-toggle="modal" data-target="#ModalQR" class="fas fa-qrcode"  data-toggle="tooltip" data-placement="top" title="Editar"></a>
-
-                 </td>
+                     <td class="btn-group" style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}" >
+                         <a class="fa fa-trash" aria-hidden="true" href="{{ url_for('peticionqr') }}" data-placement="top" id="mytrash" name={{codigos.id_qr}}   title="Eliminar" {{'disabled' if codigos.Salida < now or codigos.estado == "Inactivo" else ''}}</a>
+                         <a>&nbsp</a>
+                         <a type="button" data-toggle="modal" data-target="#ModalQR" class="fas fa-qrcode"  data-toggle="tooltip" data-placement="top" title="Editar"></a>
+                     </td>
                  <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Nombre}}</a></td>
                  <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada}}</a></td>
                  <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida}}</a></td>
