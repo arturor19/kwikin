@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, send_from_directory
+from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, send_from_directory, jsonify
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, HiddenField
 from authlib.integrations.flask_client import OAuth
 from auth_decorator import is_logged_in, is_user
@@ -15,6 +15,7 @@ import time
 from flask_qrcode import QRcode
 import io
 import pytz
+import pymysql
 tz = pytz.timezone('America/Mexico_City')
 ct = datetime.now(tz=tz)
 tzone = ct
@@ -321,6 +322,31 @@ def actusuario():
     cur.close()
     return render_template('gestionusuarios.html', name=name, picture=picture)
 
+
+@app.route('/actdom', methods=['POST'])
+@is_user
+@is_logged_in
+def actdom():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    ids = None
+    if request.method == "POST":
+        ids=request.form['data']
+        result = cur.execute("SELECT status FROM usuarios WHERE email = '%s';" % ids)
+        result = cur.fetchone()
+        if str(result) == "('Activo',)":
+            cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestiondimicilios.html',  name=name, picture=picture)
+        elif str(result) == "('Inactivo',)":
+            cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestiondimicilios.html', name=name, picture=picture)
+    cur.close()
+    return render_template('gestiondimicilios.html', name=name, picture=picture)
+
 @app.route('/actqr', methods=['POST'])
 @is_user
 @is_logged_in
@@ -472,6 +498,30 @@ def validarqrs():
             flash(f'el código no es valido', 'danger')
             return render_template("noaprobado.html", name=name, picture=picture)
     return render_template("dashboard.html", name=name, picture=picture)
+
+
+@app.route('/calendar-events')
+def calendar_events():
+    mysql = sqlite3.connect('kw.db')
+    cursor = mysql.cursor(pymysql.cursors.DictCursor)
+    try:
+        cursor.execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP(end_date)*1000 as end FROM event FROM eventos")
+        rows = cursor.fetchall()
+        resp = jsonify({'success' : 1, 'result' : rows})
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        mysql.commit()
+        cursor.close()
+
+
+
+@app.route('/calendario')
+def calendario():
+    return render_template('calendar_events.html')
+
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
 def articles():
