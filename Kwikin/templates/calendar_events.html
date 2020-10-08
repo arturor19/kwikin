@@ -1,0 +1,219 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Calendario</title>
+
+	<meta charset="UTF-8">
+	<link type="text/css"  rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}"/>
+	<link type="text/css"  rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-responsive.css') }}"/>
+	<link type="text/css"  rel="stylesheet" href="{{ url_for('static', filename='css/calendar.min.css') }}"/>
+
+{% endblock %}
+{%block body %}
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+</head>
+
+<body>
+	<div class="container">
+		<div>
+			<h4>Terrazas</h4>
+		</div>
+
+		<div class="page-header">
+
+
+				<div class="btn-group">
+					<button class="btn btn-primary" data-calendar-nav="prev"><<</button>
+					<button class="btn" data-calendar-nav="today">Hoy</button>
+					<button class="btn btn-primary" data-calendar-nav="next">>></button>
+					<button class="btn btn-warning active" data-calendar-view="month">Mes</button>
+					<button class="btn btn-warning" data-calendar-view="day">Dia</button>
+				</div>
+				<div class="pull-right form-inline"><br>
+                <button class="btn btn-info" data-toggle='modal' data-target='#add_evento'>+</button>
+            	</div>
+
+
+			<h3></h3>
+		</div>
+
+		<div class="row">
+			<div class="span12">
+				<div id="calendar"></div>
+			</div>
+
+		</div>
+
+		<div class="clearfix"></div>
+		<br><br>
+
+		<div class="modal hide fade" id="events-modal">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3>Event</h3>
+			</div>
+			<div class="modal-body" style="height: 40px">
+			</div>
+			<div class="modal-footer">
+				<a href="#" data-dismiss="modal" class="btn">Close</a>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+
+		<!--<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>-->
+		<!--<script type="text/javascript" src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>-->
+		<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+		<script type="text/javascript" src="{{ url_for('static', filename='js/calendar.min.js') }}"></script>
+		<script type="text/javascript" src="{{ url_for('static', filename='js/language/es-MX.js') }}"></script>
+
+		<script>
+			(function($) {
+				"use strict";
+				var options = {
+					events_source: 'http://localhost:5000/calendar-events',
+					view: 'month',
+					language: 'es-MX',
+					tmpl_path: '../../static/tmpls/',
+					tmpl_cache: false,
+					onAfterViewLoad: function(view) {
+						$('.page-header h3').text(this.getTitle());
+						$('.btn-group button').removeClass('active');
+						$('button[data-calendar-view="' + view + '"]').addClass('active');
+					},
+					classes: {
+						months: {
+							general: 'label'
+						}
+					}
+				};
+
+				var calendar = $('#calendar').calendar(options);
+
+				$('.btn-group button[data-calendar-nav]').each(function(){
+					var $this = $(this);
+					$this.click(function() {
+						calendar.navigate($this.data('calendar-nav'));
+					});
+				});
+
+				$('.btn-group button[data-calendar-view]').each(function(){
+					var $this = $(this);
+					$this.click(function() {
+						calendar.view($this.data('calendar-view'));
+					});
+				});
+
+				$('#first_day').change(function(){
+					var value = $(this).val();
+					value = value.length ? parseInt(value) : null;
+					calendar.setOptions({first_day: value});
+					calendar.view();
+				});
+
+
+				$('#events-in-modal').change(function(){
+					var val = $(this).is(':checked') ? $(this).val() : null;
+					calendar.setOptions({modal: val});
+				});
+				$('#format-12-hours').change(function(){
+					var val = $(this).is(':checked') ? true : false;
+					calendar.setOptions({format12: val});
+					calendar.view();
+				});
+				$('#show_wbn').change(function(){
+					var val = $(this).is(':checked') ? true : false;
+					calendar.setOptions({display_week_numbers: val});
+					calendar.view();
+				});
+				$('#show_wb').change(function(){
+					var val = $(this).is(':checked') ? true : false;
+					calendar.setOptions({weekbox: val});
+					calendar.view();
+				});
+				$('#events-modal .modal-header, #events-modal .modal-footer').click(function(e){
+					//e.preventDefault();
+					//e.stopPropagation();
+				});
+			}(jQuery));
+		</script>
+
+	</div>
+<div class="modal fade" id="add_evento" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Agregar nuevo evento</h4>
+            </div>
+            <div class="modal-body">
+                <form action="" method="post">
+                    <label for="from">Inicio</label>
+                    <div class='input-group date' id='from'>
+                        <input type='text' id="from" name="from" class="form-control" readonly />
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+                    </div>
+
+                    <br>
+
+                    <label for="to">Final</label>
+                    <div class='input-group date' id='to'>
+                        <input type='text' name="to" id="to" class="form-control" readonly />
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+                    </div>
+
+                    <br>
+
+                    <label for="tipo">Tipo de evento</label>
+                    <select class="form-control" name="class" id="tipo">
+                        <option value="event-info">Informacion</option>
+                        <option value="event-success">Exito</option>
+                        <option value="event-important">Importantante</option>
+                        <option value="event-warning">Advertencia</option>
+                        <option value="event-special">Especial</option>
+                    </select>
+
+                    <br>
+
+
+                    <label for="title">Título</label>
+                    <input type="text" required autocomplete="off" name="title" class="form-control" id="title" placeholder="Introduce un título">
+
+                    <br>
+
+
+                    <label for="body">Evento</label>
+                    <textarea id="body" name="event" required class="form-control" rows="3"></textarea>
+
+                    <script type="text/javascript">
+                        $(function () {
+                            $('#from').datetimepicker({
+                                language: 'es',
+                                minDate: new Date()
+                            });
+                            $('#to').datetimepicker({
+                                language: 'es',
+                                minDate: new Date()
+                            });
+
+                        });
+                    </script>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+                  <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Agregar</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</body>
+</html>
+
+{% endblock %}

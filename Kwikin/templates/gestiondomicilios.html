@@ -2,7 +2,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<title>Gestión de Usuarios</title>
+<title>Gestión de domicilios</title>
 
 {% endblock %}
 {%block body %}
@@ -10,7 +10,7 @@
 <script type="text/javascript" class="init">
 
 $(document).ready(function() {
-	$('#dtOrderExample').DataTable({
+	$('#dtOrderExample4').DataTable({
         "order": [[ 2, "asc" ]]
     });
 } );
@@ -235,12 +235,12 @@ $(document).ready(function(){
 });
 </script>
 <script type="text/javascript">
-$(dtOrderExample).ready(function(){
+$(dtOrderExample4).ready(function(){
     var $mycheckbox = $('input[name="mycheckbox"]');
     $mycheckbox.change(function() {
         var ids = $(this).prop('id');
         $.ajax({
-            url: '/actusuario',
+            url: '/actdom',
             data: {'data':ids},
             type: 'POST',
             timeout: 500,

@@ -31,7 +31,7 @@ qrcode = QRcode(app)
 # Session config
 app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['SESSION_COOKIE_NAME'] = 'google-login-session'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15000)
 cipher = AES.new("1234567890123456".encode("utf8"), AES.MODE_ECB)
 
 # oAuth Setup
@@ -503,7 +503,7 @@ def validarqrs():
 @app.route('/calendar-events')
 def calendar_events():
     mysql = sqlite3.connect('kw.db')
-    cursor = mysql.cursor(pymysql.cursors.DictCursor)
+    cursor = mysql.cursor()
     try:
         cursor.execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP(end_date)*1000 as end FROM event FROM eventos")
         rows = cursor.fetchall()
@@ -515,6 +515,7 @@ def calendar_events():
     finally:
         mysql.commit()
         cursor.close()
+    return render_template('calendar_events.html', rows=rows)
 
 
 
