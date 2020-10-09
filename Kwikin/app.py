@@ -502,6 +502,7 @@ def validarqrs():
 
 @app.route('/calendar-events')
 def calendar_events():
+    picture = session['profile']['picture']
     mysql = sqlite3.connect('kw.db')
     cursor = mysql.cursor()
     try:
@@ -515,13 +516,14 @@ def calendar_events():
     finally:
         mysql.commit()
         cursor.close()
-    return render_template('calendar_events.html', rows=rows)
+    return render_template('calendar_events.html', rows=rows, picture=picture)
 
 
 
 @app.route('/calendario')
 def calendario():
-    return render_template('calendar_events.html')
+    picture = session['profile']['picture']
+    return render_template('calendar_events.html', picture=picture)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
