@@ -525,6 +525,11 @@ def calendario():
     picture = session['profile']['picture']
     return render_template('calendar_events.html', picture=picture)
 
+
+@app.route('/avisodeprivacidad')
+def avisodeprivacidad():
+    return render_template('avisodeprivacidad.html')
+
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
 def articles():
