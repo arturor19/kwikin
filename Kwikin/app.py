@@ -559,11 +559,11 @@ def test_calendario():
                 "text": "Terraza Alberca",
                 "color": "#37bbe4"
             }, {
-                "d": "1/14/2020",
+                "d": "10/14/2020",
                 "text": "Terraza Wifi ",
                 "color": "#37bbe4"
             },{
-                "d": "1/15/2020",
+                "d": "10/15/2020",
                 "text": "Terraza Wifi ",
                 "color": "#37bbe4"
             }
