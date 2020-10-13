@@ -551,22 +551,31 @@ def test_calendario():
 
     test = '''try {
     mbscjsonp1([{
-                "d": "10/14/2020",
-                "text": "Area Comun",
-                "color": "#37bbe4"
+                "start": "2020-10-12T07:00:00.000Z",
+                "end": "2020-10-12T08:00:00.000Z",
+                "text": "Area Comun.",
+                "color": "#f67944"
             }, {
-                "d": "10/14/2020",
+                "start": "2020-10-13T07:00:00.000Z",
+                "end": "2020-10-13T07:15:00.000Z",
+                "text": "Terraza Wifi",
+                "color": "#6e7f29"
+            }, {
+                "start": "2020-10-13T07:00:00.000Z",
+                "end": "2020-10-13T07:15:00.000Z",
                 "text": "Terraza Alberca",
-                "color": "#37bbe4"
+                "color": "#6e7f29"
             }, {
-                "d": "10/14/2020",
-                "text": "Terraza Wifi ",
-                "color": "#37bbe4"
-            },{
-                "d": "10/15/2020",
-                "text": "Terraza Wifi ",
-                "color": "#37bbe4"
-            }
+                "start": "2020-10-13T07:00:00.000Z",
+                "end": "2020-10-13T07:15:00.000Z",
+                "text": "Area Comun",
+                "color": "#6e7f29"
+            }, {
+                "start": "2020-10-12T07:00:00.000Z",
+                "end": "2020-10-13T07:15:00.000Z",
+                "text": "Terraza Wifi",
+                "color": "#6e7f29"
+            },
         ]);
 } catch (ex) {}'''
     return test
