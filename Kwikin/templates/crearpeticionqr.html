@@ -67,7 +67,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 <section>
     <div>
         <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#ModalQR" >Crear QR</button>
-        <p>Los registros se crean en hora local del fraccionamiento</p>
+        <h6 style="font-size:50%;">*Los registros se crean en hora local del fraccionamiento</h6>
     </div>
 </section><br>
 <section>
@@ -120,23 +120,60 @@ $.extend( true, $.fn.dataTable.defaults, {
             <div class="modal-body">
               <form id="IndFormqr" action="/crearqr" class="" method="post">
                   <div class="form-group">
-                      <label for="nombreqr" class="col-12 col-form-label">Nombre:</label>
-                      <div class="col-sm-8">
-                        <input class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
+                    <div id="acordionqr" class="panel-group">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <button class="btn btn-secondary btn-sm" type="button" data-target="#panelbodyone" data-toggle="collapse" data-parent="#acordionqr">
+                                        Información visitante
+                                    </button>
+                                </h4>
+                            </div>
+                            <div id="panelbodyone" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <label for="nombreqr" class="col-12 col-form-label">Nombre:</label>
+                                        <div class="col-sm-8">
+                                    <input class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
+                                        </div>
+                                     <label for="nombreqr" class="col-12 col-form-label">Email:</label>
+                                        <div class="col-sm-8">
+                                    <input class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
+                                        </div>
+                                     <label for="nombreqr" class="col-12 col-form-label">Placas:</label>
+                                        <div class="col-sm-8">
+                                    <input class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                      <br>
+                      <div class="form-group">
+                          <div id="acordionqr2" class="panel-group">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <button class="btn btn-secondary btn-sm" type="button" data-target="#panelbodytwo" data-toggle="collapse" data-parent="#acordionqr2">
+                                            Información QR
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="panelbodytwo" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <label for="dateE">Entrada:</label>
+                                        <input class="col-12 form-control-sm" type="datetime-local" min="today" id="dateE" name="dateE"/>
+                                        <br>
+                                        <label for="dateS">Salida:  </label>
+                                        <input class="col-12 form-control-sm" type="datetime-local" id="dateS" name="dateS"/>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                            <label class="form-check-label" for="exampleCheck1">Recurrente</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
                       </div>
-                  </div>
-                  <div class="form-group">
-                       <label for="dateE">Entrada:</label>
-                       <input class="col-12 form-control-sm" type="datetime-local" min="today" id="dateE" name="dateE"/>
-                  </div>
-                  <div class="form-group">
-                       <label for="dateS">Salida:  </label>
-                       <input class="col-12 form-control-sm" type="datetime-local" id="dateS" name="dateS"/>
-                  </div>
-                  <div class="form-check">
-                       <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                       <label class="form-check-label" for="exampleCheck1">Recurrente</label>
-                  </div><br>
 
                   <div class="modal-footer">
                       <div style="text-align:center;" class="form-group">
