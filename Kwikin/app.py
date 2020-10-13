@@ -189,12 +189,13 @@ SELECT id_usuario FROM usuarios where email = '{email}'
 @is_user
 @is_logged_in
 def codigoqr():
+    picture = session['profile']['picture']
     if request.method == 'GET':
         qr_data = request.args.get('qr_data')
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
         return render_template('codigoqr.html', qr_data=qr_data, mode="raw", start_date=start_date,
-                         end_date=end_date)
+                         end_date=end_date, picture=picture)
 
 @app.route('/crearInd', methods=['GET', 'POST'] )
 @is_user
@@ -525,9 +526,173 @@ def calendario():
     picture = session['profile']['picture']
     return render_template('calendar_events.html', picture=picture)
 
-@app.route('/avisodeprivacidad')
-def avisodeprivacidad():
-    return render_template('avisodeprivacidad.html')
+
+@app.route('/calendario_ini/remote')
+def calendario_ini():
+    test_cal = ''
+    if request.method == 'GET':
+        callback = request.args.get('callback')
+        print(callback)
+    if callback in "in mbsc_jsonp_comp_demo-responsive-month-view":
+        test_cal = '''try { window['mbsc_jsonp_comp_demo-responsive-month-view']('{"calendar":{},"datetime":{"wheels":[[{"cssClass":"mbsc-dt-whl-d","label":"Día","data":[{"value":1,"display":"1"},{"value":2,"display":"2"},{"value":3,"display":"3"},{"value":4,"display":"4"},{"value":5,"display":"5"},{"value":6,"display":"6"},{"value":7,"display":"7"},{"value":8,"display":"8"},{"value":9,"display":"9"},{"value":10,"display":"10"},{"value":11,"display":"11"},{"value":12,"display":"12"},{"value":13,"display":"13"},{"value":14,"display":"14"},{"value":15,"display":"15"},{"value":16,"display":"16"},{"value":17,"display":"17"},{"value":18,"display":"18"},{"value":19,"display":"19"},{"value":20,"display":"20"},{"value":21,"display":"21"},{"value":22,"display":"22"},{"value":23,"display":"23"},{"value":24,"display":"24"},{"value":25,"display":"25"},{"value":26,"display":"26"},{"value":27,"display":"27"},{"value":28,"display":"28"},{"value":29,"display":"29"},{"value":30,"display":"30"},{"value":31,"display":"31"}]},{"cssClass":"mbsc-dt-whl-m","label":"Mes","data":[{"value":0,"display":"<span class=\\\\"mbsc-dt-month\\\\">Enero</span>"},{"value":1,"display":"<span class=\\\\"mbsc-dt-month\\\\">Febrero</span>"},{"value":2,"display":"<span class=\\\\"mbsc-dt-month\\\\">Marzo</span>"},{"value":3,"display":"<span class=\\\\"mbsc-dt-month\\\\">Abril</span>"},{"value":4,"display":"<span class=\\\\"mbsc-dt-month\\\\">Mayo</span>"},{"value":5,"display":"<span class=\\\\"mbsc-dt-month\\\\">Junio</span>"},{"value":6,"display":"<span class=\\\\"mbsc-dt-month\\\\">Julio</span>"},{"value":7,"display":"<span class=\\\\"mbsc-dt-month\\\\">Agosto</span>"},{"value":8,"display":"<span class=\\\\"mbsc-dt-month\\\\">Septiembre</span>"},{"value":9,"display":"<span class=\\\\"mbsc-dt-month\\\\">Octubre</span>"},{"value":10,"display":"<span class=\\\\"mbsc-dt-month\\\\">Noviembre</span>"},{"value":11,"display":"<span class=\\\\"mbsc-dt-month\\\\">Diciembre</span>"}]},{"cssClass":"mbsc-dt-whl-y","label":"A&ntilde;o","data":"function getYearValue(i, inst) {\\\\r\\\\n    var s = inst.settings;\\\\r\\\\n    return {\\\\r\\\\n      value: i,\\\\r\\\\n      display: (/yy/i.test(s.dateDisplay) ? i : (i + \\'\\').substr(2, 2)) + (s.yearSuffix || \\'\\')\\\\r\\\\n    };\\\\r\\\\n  }","getIndex":"function getYearIndex(v) {\\\\r\\\\n    return v;\\\\r\\\\n  }"}]],"wheelOrder":{"d":0,"m":1,"y":2},"isoParts":{"y":1,"m":1,"d":1}},"html1":"<div lang=\\\\"es\\\\" class=\\\\"mbsc-fr mbsc-no-touch mbsc-ios","html2":" mbsc-fr-nobtn\\\\"><div class=\\\\"mbsc-fr-popup mbsc-ltr","html3":"<div class=\\\\"mbsc-fr-w\\\\"><div aria-live=\\\\"assertive\\\\" class=\\\\"mbsc-fr-aria mbsc-fr-hdn\\\\"></div>","html4":"</div></div></div></div></div>"}'); } catch (ex) {}'''
+    elif "mbsc_jsonp_comp_" in callback:
+        id_num_cal = str(callback).replace("mbsc_jsonp_comp_",'')
+        head_cal = ("try { window['mbsc_jsonp_comp_" + id_num_cal +  "']")
+        tail_cal = '''('{"html1":"<div lang=\\\\"es\\\\" class=\\\\"mbsc-fr mbsc-no-touch mbsc-ios","html2":" mbsc-fr-nobtn\\\\"><div class=\\\\"mbsc-fr-persp\\\\"><div role=\\\\"dialog\\\\" class=\\\\"mbsc-fr-scroll\\\\"><div class=\\\\"mbsc-fr-popup mbsc-ltr","html3":"<div class=\\\\"mbsc-fr-focus\\\\" tabindex=\\\\"-1\\\\"></div><div class=\\\\"mbsc-fr-w\\\\"><div aria-live=\\\\"assertive\\\\" class=\\\\"mbsc-fr-aria mbsc-fr-hdn\\\\"></div>","html4":"</div></div></div></div></div></div></div>"}'); } catch (ex) {}'''
+        test_cal = head_cal + tail_cal
+    return test_cal
+
+
+@app.route('/calendario_data')
+def test_calendario():
+    if request.method == 'GET':
+        coto = request.args.get('coto')
+        print(coto)
+
+    test = '''try {
+    mbscjsonp1([{
+                "start": "2020-10-12T07:00:00.000Z",
+                "end": "2020-10-12T08:00:00.000Z",
+                "text": "Product team mtg.",
+                "color": "#f67944"
+            }, {
+                "start": "2020-10-13T07:00:00.000Z",
+                "end": "2020-10-13T07:15:00.000Z",
+                "text": "Green box to post office",
+                "color": "#6e7f29"
+            }, {
+                "start": "2020-10-11T07:45:00.000Z",
+                "end": "2020-10-11T08:00:00.000Z",
+                "text": "Quick mtg. with Martin",
+                "color": "#de3d83"
+            }, {
+                "start": "2020-10-08T08:30:00.000Z",
+                "end": "2020-10-08T09:30:00.000Z",
+                "text": "Product team mtg.",
+                "color": "#f67944"
+            }, {
+                "start": "2020-10-08T10:00:00.000Z",
+                "end": "2020-10-08T10:30:00.000Z",
+                "text": "Stakeholder mtg.",
+                "color": "#f67944"
+            }, {
+                "start": "2020-10-08T14:00:00.000Z",
+                "end": "2020-10-08T15:00:00.000Z",
+                "text": "General orientation",
+                "color": "#f67944"
+            }, {
+                "d": "10/14",
+                "text": "Dexter BD",
+                "color": "#37bbe4"
+            }, {
+                "d": "10/14",
+                "text": "Dia del BB perron",
+                "color": "#37bbe4"
+            }, {
+                "d": "1/19/2021",
+                "text": "Mi cumple",
+                "color": "#37bbe4"
+            }, {
+                "d": "10/5",
+                "text": "Luke BD",
+                "color": "#37bbe4"
+            }, {
+                "d": "w3",
+                "text": "Employment (Semi-weekly)",
+                "color": "#635045"
+            }, {
+                "start": "2020-10-09T23:00:00.000Z",
+                "end": "2020-10-14T23:00:00.000Z",
+                "text": "Sam OFF",
+                "color": "#ca4747"
+            }, {
+                "start": "2020-10-17T23:00:00.000Z",
+                "end": "2020-10-28T23:00:00.000Z",
+                "text": "Europe tour",
+                "color": "#56ca70"
+            }, {
+                "start": "2020-02-06T23:00:00.000Z",
+                "end": "2020-02-24T23:00:00.000Z",
+                "text": "Dean OFF",
+                "color": "#99ff33"
+            }, {
+                "start": "2020-03-04T23:00:00.000Z",
+                "end": "2020-03-13T23:00:00.000Z",
+                "text": "Mike OFF",
+                "color": "#e7b300"
+            }, {
+                "start": "2020-05-06T23:00:00.000Z",
+                "end": "2020-05-15T23:00:00.000Z",
+                "text": "John OFF",
+                "color": "#669900"
+            }, {
+                "start": "2020-05-31T23:00:00.000Z",
+                "end": "2020-06-10T23:00:00.000Z",
+                "text": "Carol OFF",
+                "color": "#6699ff"
+            }, {
+                "start": "2020-07-01T23:00:00.000Z",
+                "end": "2020-07-16T23:00:00.000Z",
+                "text": "Jason OFF",
+                "color": "#cc9900"
+            }, {
+                "start": "2020-08-05T23:00:00.000Z",
+                "end": "2020-08-13T23:00:00.000Z",
+                "text": "Ashley OFF",
+                "color": "#339966"
+            }, {
+                "start": "2020-09-09T23:00:00.000Z",
+                "end": "2020-09-19T23:00:00.000Z",
+                "text": "Marisol OFF",
+                "color": "#8701a9"
+            }, {
+                "start": "2020-09-30T23:00:00.000Z",
+                "end": "2020-10-11T23:00:00.000Z",
+                "text": "Sharon OFF",
+                "color": "#cc6699"
+            }, {
+                "d": "12/25",
+                "text": "Christmas Day",
+                "color": "#ff0066"
+            }, {
+                "d": "11/2",
+                "text": "File Form 720 for the third quarter",
+                "color": "#a63e14"
+            }, {
+                "d": "11/2",
+                "text": "File Form 730 and pay tax on wagers accepted during September",
+                "color": "#a63e14"
+            }, {
+                "d": "11/2",
+                "text": "File Form 2290 and pay the tax for vehicles first used during September",
+                "color": "#a63e14"
+            }, {
+                "d": "11/2",
+                "text": "File Form 941 for the third quarter",
+                "color": "#a63e14"
+            }, {
+                "d": "11/2",
+                "text": "Deposit FUTA owed through Sep if more than $500",
+                "color": "#a63e14"
+            }, {
+                "d": "11/30",
+                "text": "Deposit payroll tax for payments on Nov 21-24 if the semiweekly deposit rule applies",
+                "color": "#a63e14"
+            }, {
+                "d": "11/30",
+                "text": "File Form 730 and pay tax on wagers accepted during October",
+                "color": "#a63e14"
+            }, {
+                "d": "11/30",
+                "text": "File Form 2290 and pay the tax for vehicles first used during October",
+                "color": "#a63e14"
+            }
+        ]);
+} catch (ex) {}'''
+    return test
+
+
+
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
