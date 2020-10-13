@@ -563,7 +563,7 @@ def test_calendario():
                 "text": "Terraza Wifi ",
                 "color": "#37bbe4"
             },{
-                "d": "1/15/2021",
+                "d": "1/15/2020",
                 "text": "Terraza Wifi ",
                 "color": "#37bbe4"
             }
