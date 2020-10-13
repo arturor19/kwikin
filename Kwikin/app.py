@@ -691,7 +691,9 @@ def test_calendario():
 } catch (ex) {}'''
     return test
 
-
+@app.route('/avisodeprivacidad')
+def avisodeprivacidad():
+    return render_template('avisodeprivacidad.html')
 
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
