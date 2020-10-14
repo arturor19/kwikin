@@ -589,6 +589,55 @@ def test_calendario():
 def avisodeprivacidad():
     return render_template('avisodeprivacidad.html')
 
+@app.route('/crearevento', methods=['GET', 'POST'])
+@is_logged_in
+def peticionevento():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    now = ct
+    now = str(now)
+
+    if request.method == 'POST':
+        try:
+            fechaevento = request.form['fechaevento']
+            terraza = request.form['terraza']
+
+            if fechaevento < now:
+                flash('Por favor valida que las fechas sean correctas', 'danger')
+            elif terraza == 'Selecciona terraza':
+                flash('Por favor selecciona una terraza del listado', 'danger')
+            else:
+                try:
+                    cur.execute("INSERT INTO eventos(terraza, nombre, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
+                    terraza, name, email, fechaevento))
+
+                    mysql.commit()
+                    flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe', 'success')
+                    #insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES
+  #  (
+  #  (SELECT id_usuario FROM usuarios where email = '{email}'),
+  # (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
+  #  (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
+  #  );"""
+    #                cur.execute(insert_asoc_qr_usuario)
+    #                mysql.commit()
+                    cur.close()
+                except:
+                    flash(f'Evento no creado correctamente', 'danger')
+                    return render_template('calendar_events.html', name=name, picture=picture, now=now)
+                return render_template('calendar_events.html', name=name, picture=picture, now=now)
+        except:
+            flash(f'Revisa todos los campos', 'danger')
+            return render_template('calendar_events.html', name=name, picture=picture, now=now)
+
+    return render_template('calendar_events.html', name=name, picture=picture, now=now)
+
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
