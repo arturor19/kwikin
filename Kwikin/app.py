@@ -638,6 +638,61 @@ def peticionevento():
 
     return render_template('calendar_events.html', name=name, picture=picture, now=now)
 
+@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'] )
+@is_user
+@is_logged_in
+def gestioneventos():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    result = cur.execute("SELECT * FROM eventos")
+    eventos = cur.fetchall()
+    array = []
+    for row in eventos:
+        estado = (row[5])
+        email = (row[3])
+        nombre = (row[2])
+        terraza = (row[1])
+        dia = (row[4])
+
+        array.append({'estado': (estado),
+                      'email': email,
+                      'nombre': nombre,
+                      'terraza': terraza,
+                      'dia': dia})
+    if int(result.rowcount) > 0:
+        return render_template('gestioneventos.html', eventos=array, name=name, picture=picture)
+    else:
+        msg = 'No hay eventos asociados al coto'
+        return render_template('gestioneventos.html', eventos=array, name=name, picture=picture,msg=msg)
+    cur.close()
+
+@app.route('/acteventos', methods=['POST'])
+@is_user
+@is_logged_in
+def acteventos():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    event = None
+    if request.method == "POST":
+        events=request.form['data']
+        result = cur.execute("SELECT status FROM eventos WHERE email = '%s';" % ids)
+        result = cur.fetchone()
+        if str(result) == "('Aprobado',)":
+            cur.execute("UPDATE eventos SET status = 'No Aprobado' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestioneventos.html',  name=name, picture=picture)
+        elif str(result) == "('No Aprobado',)":
+            cur.execute("UPDATE eventos SET status = 'Aprobado' WHERE email = '%s';" % ids)
+            mysql.commit()
+            return render_template('gestioneventos.html', name=name, picture=picture)
+    cur.close()
+    return render_template('gestioneventos.html', name=name, picture=picture)
+
+
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
