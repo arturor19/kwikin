@@ -61,18 +61,20 @@
       <hr class="sidebar-divider">
 
       <!-- Heading -->
-      <div class="sidebar-heading">
-        Funciones Admin
-      </div>
+      <a class="sidebar-heading" data-toggle="collapse" href="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+           Admin
+      </a>
 
 
-      <!-- Nav Item - Tables -->
+       <!-- Nav Item - Tables -->
+      <div class="collapse" id="collapseAdmin">
       <li class="nav-item">
         <a class="nav-link" href="/gestionusuarios">
           <i class="fas fa-fw fa-users"></i>
           <span>Gestión de Usuarios</span></a>
       </li>
-       <li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link" href="/gestioneventos">
           <i class="fa fa-calendar"></i>
           <span>Gestión eventos</span></a>
@@ -82,6 +84,8 @@
           <i class="fas fa-fw fa-home"></i>
           <span>Gestión de Domicilios</span></a>
       </li>
+      </div>
+      <br>
 
       <!-- Divider -->
       <hr class="sidebar-divider">
