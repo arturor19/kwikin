@@ -644,28 +644,42 @@ def peticionevento():
 def gestioneventos():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
-    result = cur.execute("SELECT * FROM eventos")
+    now = ct
+    now = datetime.strftime((now),"%Y-%m-%d")
+    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
     eventos = cur.fetchall()
-    array = []
+    array_eventos = []
     for row in eventos:
         estado = (row[5])
         email = (row[3])
         nombre = (row[2])
         terraza = (row[1])
         dia = (row[4])
+        domicilio = (row[11])
+        telefono = (row[13])
+        id_eventos = (row[0])
 
-        array.append({'estado': (estado),
+        array_eventos.append({'estado': (estado),
+                      'id_eventos': id_eventos,
                       'email': email,
                       'nombre': nombre,
                       'terraza': terraza,
+                      'domicilio': domicilio,
+                      'telefono' : telefono,
                       'dia': dia})
+
     if int(result.rowcount) > 0:
-        return render_template('gestioneventos.html', eventos=array, name=name, picture=picture)
+        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventos.html', eventos=array, name=name, picture=picture,msg=msg)
+        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture,msg=msg)
+
     cur.close()
 
 @app.route('/acteventos', methods=['POST'])
@@ -674,24 +688,100 @@ def gestioneventos():
 def acteventos():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
-    event = None
+    now = ct
+    now = datetime.strftime((now), "%Y-%m-%d")
+    result = cur.execute(
+        "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
+    eventos = cur.fetchall()
+    array_eventos = []
     if request.method == "POST":
-        events=request.form['data']
-        result = cur.execute("SELECT status FROM eventos WHERE email = '%s';" % ids)
-        result = cur.fetchone()
-        if str(result) == "('Aprobado',)":
-            cur.execute("UPDATE eventos SET status = 'No Aprobado' WHERE email = '%s';" % ids)
-            mysql.commit()
-            return render_template('gestioneventos.html',  name=name, picture=picture)
-        elif str(result) == "('No Aprobado',)":
-            cur.execute("UPDATE eventos SET status = 'Aprobado' WHERE email = '%s';" % ids)
-            mysql.commit()
-            return render_template('gestioneventos.html', name=name, picture=picture)
-    cur.close()
-    return render_template('gestioneventos.html', name=name, picture=picture)
+        eventsvalue = request.form['mycheckboxE']
+        events = request.form['idhidden']
+        print(eventsvalue)
+        print(events)
+        result1 = cur.execute("SELECT estado FROM eventos WHERE id_eventos = '%s';" % events)
+        result1 = cur.fetchone()
+        cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, events))
+        mysql.commit()
+        cur.close()
+        for row in eventos:
+            estado = (row[5])
+            email = (row[3])
+            nombre = (row[2])
+            terraza = (row[1])
+            dia = (row[4])
+            domicilio = (row[11])
+            telefono = (row[13])
+            id_eventos = (row[0])
 
+            array_eventos.append({'estado': (estado),
+                                  'id_eventos': id_eventos,
+                                  'email': email,
+                                  'nombre': nombre,
+                                  'terraza': terraza,
+                                  'domicilio': domicilio,
+                                  'telefono': telefono,
+                                  'dia': dia})
+        print(result1)
+        if int(result1.rowcount) > 0:
+            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+        else:
+            msg = 'No hay eventos asociados al coto'
+            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture, msg=msg)
+
+
+        return render_template('gestioneventos.html', name=name, picture=picture)
+    else:
+        return render_template('gestioneventos.html', name=name, picture=picture)
+
+@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'] )
+@is_user
+@is_logged_in
+def gestioneventoshistorico():
+    name = dict(session)['profile']['name']
+    picture = dict(session)['profile']['picture']
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
+    mysql = sqlite3.connect('kw.db')
+    cur = mysql.cursor()
+    now = ct
+    now = str(now)
+    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia < '%s';" % now)
+    eventos = cur.fetchall()
+    array = []
+    for row in eventos:
+        estado = (row[5])
+        email = (row[3])
+        nombre = (row[2])
+        terraza = (row[1])
+        dia = (row[4])
+        domicilio = (row[11])
+        telefono = (row[13])
+        id_eventos = (row[0])
+
+        array.append({'estado': (estado),
+                      'id_eventos': id_eventos,
+                      'email': email,
+                      'nombre': nombre,
+                      'terraza': terraza,
+                      'domicilio': domicilio,
+                      'telefono' : telefono,
+                      'dia': dia})
+
+    if int(result.rowcount) > 0:
+        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture)
+    else:
+        msg = 'No hay eventos asociados al coto'
+        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture,msg=msg)
+    cur.close()
 
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD

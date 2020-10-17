@@ -20,9 +20,10 @@
   <link rel="shortcut icon" href="{{ url_for('.static', filename='/img/favicon.ico') }}" type="image/x-icon">
   <!-- Bootstrap data tables-->
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
 </head>
 
 <body id="page-top" >
@@ -64,6 +65,7 @@
       <a class="sidebar-heading" data-toggle="collapse" href="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
         <i class="fa fa-bars" aria-hidden="true"></i>
            Admin
+      </a>
       </a>
 
 
@@ -276,11 +278,11 @@
 
   <!-- Bootstrap core JavaScript-->
 
-  <!--script src="{{ url_for('.static', filename='vendor/jquery/jquery.min.js') }}"></script  #Comentado por datatable issue-->
+
   <script src="{{ url_for('.static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
   <!-- Core plugin JavaScript-->
-  <!--script src="{{ url_for('.static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script-- #Comentado por datatable issue>
+
   <!-- Custom scripts for all pages-->
   <script src="{{ url_for('.static', filename='js/sb-admin-2.min.js') }}"></script>
 <script>
