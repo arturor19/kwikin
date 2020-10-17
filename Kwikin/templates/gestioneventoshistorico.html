@@ -123,7 +123,14 @@ $.extend( true, $.fn.dataTable.defaults, {
 			</div>
 		</div>
 	</div>
-      <script> $('#edit').modal(show); </script>
+      <script>  $(document).ready(function($) {
+        $("#acteventos").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#edit').modal('show');
+
+      });
+    }); </script>
             {% endfor %}
 </tbody>
 
