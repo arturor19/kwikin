@@ -89,16 +89,10 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for evento in eventos %}
              <tr>
-                 <td><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
-                 <td><a>{{evento.terraza}}</a></td>
-                 <td><a>{{evento.dia}}</a></td>
-                 <td><a>{{disponible}}</a></td>
-                 <td scope="row">
-                     <div class="custom-control custom-checkbox">
-                         <input type="checkbox" class="custom-control-input" id={{evento.id_eventos}} name="mycheckboxE"  value={{evento.estado}} {{'checked' if evento.estado == "Aprobado" else ''}}>
-                         <label class="custom-control-label" for={{evento.id_eventos}}></label>
-                     </div>
-                 </td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.terraza}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.dia}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.estado}}</a></td>
              </tr>
     <div class="modal fade" id="edit{{ evento.id_eventos }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">

@@ -6,7 +6,7 @@
 
 {% endblock %}
 {%block body %}
-
+<body>
 <script type="text/javascript" class="init">
 
 $(document).ready(function() {
@@ -80,7 +80,6 @@ $.extend( true, $.fn.dataTable.defaults, {
             <th>Nombre</th>
             <th>Terraza</th>
             <th>Fecha</th>
-            <th>Estado</th>
         </tr>
       </thead>
       <!-- Table head -->
@@ -89,10 +88,10 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for evento in eventos %}
              <tr>
-                 <td><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
-                 <td><a>{{evento.terraza}}</a></td>
-                 <td><a>{{evento.dia}}</a></td>
-                 <td><a>{{evento.estado}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.terraza}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.dia}}</a></td>
+
              </tr>
     <div class="modal fade" id="edit{{ evento.id_eventos }}" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
@@ -122,25 +121,53 @@ $.extend( true, $.fn.dataTable.defaults, {
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="Aprobado">Aprobado</option>
                                 <option value="No Aprobado">No Aprobado</option>
-                         <label class="custom-control-label" for={{evento.id_eventos}}></label>
-                     </Select>
+                                <label class="custom-control-label" for={{evento.id_eventos}}></label>
+                             </Select>
                         </div>
+
+
                         <div class="form-group">
                             <input type="hidden" name="idhidden" value={{evento.id_eventos}}>
                         </div>
+                        <div class="form-group">
+                            <input type="hidden" name="terrazahidden" value={{evento.terraza}}>
+                        </div>
 					</div>
 					<div class="modal-footer">
-						<input type="button" class="btn btn-default" data-dismiss="modal" value="Cerrar">
-                        <button type="submit" name="action" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+						<input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
 					</div>
+
 				</form>
 			</div>
 		</div>
 	</div>
       <script>
-      $('#edit').modal({show:true});
+
+     $(document).ready(function($) {
+        $("#acteventos").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#edit').modal('show');
+
+      });
+    });
 
        </script>
+            {% endfor %}
+            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+                    {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
             {% endfor %}
 </tbody>
 
@@ -150,14 +177,36 @@ $.extend( true, $.fn.dataTable.defaults, {
     </form>
 </section>
 
+<script>
+        $(document).ready(function() {
+        var messages = "{{ get_flashed_messages() }}";
 
+        if (typeof messages != 'undefined' && messages != '[]') {
+        $("#edit").modal();
+            };
+        });
+    </script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script>
+       $('#cerrareventogestion').click(function() {
+    $('#edit').modal('hide');
+    sendEvent('#edit', 1);
+    $('#edit').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
 <script>
 $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
 
-
+</body>
 
 {% endblock %}
 

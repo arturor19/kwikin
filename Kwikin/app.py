@@ -702,37 +702,49 @@ def acteventos():
     array_eventos = []
     if request.method == "POST":
         eventsvalue = request.form['mycheckboxE']
-        events = request.form['idhidden']
+        eventsid = request.form['idhidden']
+        terraza = request.form['terrazahidden']
+        cur.execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)
+        dia = cur.fetchone()
         print(eventsvalue)
-        print(events)
-        result = cur.execute("SELECT estado FROM eventos WHERE id_eventos = '%s';" % events)
-        result = cur.fetchone()
-        cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, events))
-        mysql.commit()
-        cur.execute(
-            "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-        eventos = cur.fetchall()
-        array_eventos = []
-        cur.close()
-        for row in eventos:
-            estado = (row[5])
-            email = (row[3])
-            nombre = (row[2])
-            terraza = (row[1])
-            dia = (row[4])
-            domicilio = (row[11])
-            telefono = (row[13])
-            id_eventos = (row[0])
+        print(eventsid)
+        print(terraza)
+        print(dia[0])
+        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'")
+        validador = cur.execute(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'").fetchone()
+        print(validador)
+        if validador != None and eventsvalue == 'Aprobado':
+            flash(f'La terraza {terraza} ya esta apartada el dia {dia[0]}, revisa fecha', 'danger')
+            return redirect(url_for('gestioneventos'))
+        else:
+            cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
+            mysql.commit()
+            cur.execute(
+                "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
+            eventos = cur.fetchall()
+            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia[0]} con éxito', 'success')
+            array_eventos = []
+            cur.close()
 
-            array_eventos.append({'estado': (estado),
-                                  'id_eventos': id_eventos,
-                                  'email': email,
-                                  'nombre': nombre,
-                                  'terraza': terraza,
-                                  'domicilio': domicilio,
-                                  'telefono': telefono,
-                                  'dia': dia})
-        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+            for row in eventos:
+                estado = (row[5])
+                email = (row[3])
+                nombre = (row[2])
+                terraza = (row[1])
+                dia = (row[4])
+                domicilio = (row[11])
+                telefono = (row[13])
+                id_eventos = (row[0])
+
+                array_eventos.append({'estado': (estado),
+                                      'id_eventos': id_eventos,
+                                      'email': email,
+                                      'nombre': nombre,
+                                      'terraza': terraza,
+                                      'domicilio': domicilio,
+                                      'telefono': telefono,
+                                      'dia': dia})
+            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
     return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
 
 
