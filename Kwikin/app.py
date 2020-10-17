@@ -696,7 +696,7 @@ def acteventos():
     cur = mysql.cursor()
     now = ct
     now = datetime.strftime((now), "%Y-%m-%d")
-    result = cur.execute(
+    result1 = cur.execute(
         "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
     eventos = cur.fetchall()
     array_eventos = []
@@ -705,10 +705,14 @@ def acteventos():
         events = request.form['idhidden']
         print(eventsvalue)
         print(events)
-        result1 = cur.execute("SELECT estado FROM eventos WHERE id_eventos = '%s';" % events)
-        result1 = cur.fetchone()
+        result = cur.execute("SELECT estado FROM eventos WHERE id_eventos = '%s';" % events)
+        result = cur.fetchone()
         cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, events))
         mysql.commit()
+        cur.execute(
+            "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
+        eventos = cur.fetchall()
+        array_eventos = []
         cur.close()
         for row in eventos:
             estado = (row[5])
@@ -728,17 +732,9 @@ def acteventos():
                                   'domicilio': domicilio,
                                   'telefono': telefono,
                                   'dia': dia})
-        print(result1)
-        if int(result1.rowcount) > 0:
-            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
-        else:
-            msg = 'No hay eventos asociados al coto'
-            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture, msg=msg)
+        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+    return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
 
-
-        return render_template('gestioneventos.html', name=name, picture=picture)
-    else:
-        return render_template('gestioneventos.html', name=name, picture=picture)
 
 @app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'] )
 @is_user
