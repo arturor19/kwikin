@@ -121,7 +121,7 @@ def peticionqr():
     cur = mysql.cursor()
     now = ct
     now = str(now)
-    array = []
+    array_qr = []
     result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
 SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
 SELECT id_usuario FROM usuarios where email = '{email}'
@@ -132,21 +132,27 @@ SELECT id_usuario FROM usuarios where email = '{email}'
         Nombre = (row[4])
         Entrada = (row[2])
         Salida = (row[3])
-        Entrada_Real = (row[5])
-        Salida_Real = (row[6])
-        estado = (row[7])
+        email = (row[5])
+        placas = (row[6])
+        entrada_real = (row[7])
+        fin_real = (row[8])
+        estado = (row[9])
         id_qr = (row[1])
 
-        array.append({'Nombre': Nombre,
+        array_qr.append({'Nombre': Nombre,
                     'Entrada': Entrada,
                     'Salida': Salida,
-                    'Entrada_Real': Entrada_Real,
-                    'Salida_Real': Salida_Real,
+                    'entrada_real': entrada_real,
+                    'fin_real': fin_real,
                     'estado': estado,
+                    'email': email,
+                    'placas': placas,
                     'id_qr': id_qr})
 
+    
     if request.method == 'POST':
         try:
+            print(request.form['dateS'])
             tzone = ct.strftime("%Y-%m-%dT%H:%M")
             datesal = datetime.strptime(str(request.form['dateS']),"%Y-%m-%dT%H:%M")
             dateent = datetime.strptime(str(request.form['dateE']),"%Y-%m-%dT%H:%M")
@@ -185,10 +191,11 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                 return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
         except:
             flash(f'Revisa todos los campos', 'danger')
-            return render_template('crearpeticionqr.html', qr=array, name=name, picture=picture, now=now)
+            return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
           # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
 
-    return render_template('crearpeticionqr.html', qr=array, name=name, picture=picture, now=now)
+    return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
+
 
 @app.route('/codigoqr', methods=['GET'] )
 @is_user
@@ -359,9 +366,42 @@ def actdom():
 def actqr():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
-    qrid = None
+    now = ct
+    now = str(now)
+    array_qr = []
+    result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+    SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
+    SELECT id_usuario FROM usuarios where email = '{email}'
+    ));""")
+    qr = cur.fetchall()
+
+    for row in qr:
+        Nombre = (row[4])
+        Entrada = (row[2])
+        Salida = (row[3])
+        emailvis = (row[5])
+        placas = (row[6])
+        entrada_real = (row[7])
+        fin_real = (row[8])
+        estado = (row[9])
+        id_qr = (row[1])
+
+        array_qr.append({'Nombre': Nombre,
+                         'Entrada': Entrada,
+                         'Salida': Salida,
+                         'entrada_real': entrada_real,
+                         'fin_real': fin_real,
+                         'estado': estado,
+                         'emailvis': emailvis,
+                         'placas': placas,
+                         'id_qr': id_qr})
+
     if request.method == "POST":
         qrid = request.form['dataqr']
         result = cur.execute("SELECT estado FROM qr WHERE codigo_qr = '%s';" % qrid)

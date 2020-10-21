@@ -76,12 +76,10 @@ $.extend( true, $.fn.dataTable.defaults, {
       <!-- Table head -->
       <thead>
         <tr>
-            <th></th>
+
             <th>Nombre</th>
             <th>Entrada</th>
             <th>Salida</th>
-            <th>Entrada Real</th>
-            <th>Salida Real</th>
         </tr>
       </thead>
       <!-- Table head -->
@@ -90,17 +88,90 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for codigos in qr %}
              <tr>
-                     <td class="btn-group" style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}" >
-                         <a class="fa fa-trash" aria-hidden="true" href="{{ url_for('peticionqr') }}" data-placement="top" id="mytrash" name={{codigos.id_qr}}   title="Eliminar" {{'disabled' if codigos.Salida < now or codigos.estado == "Inactivo" else ''}}</a>
-                         <a>&nbsp</a>
-                         <a type="button" data-toggle="modal" data-target="#ModalQR" class="fas fa-qrcode"  data-toggle="tooltip" data-placement="top" title="Editar"></a>
-                     </td>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Nombre}}</a></td>
+                 <td><a href="#" data-toggle="modal" data-target='#editqr{{ codigos.id_qr }}'>{{codigos.Nombre}}</a></td>
                  <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada}}</a></td>
                  <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida}}</a></td>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada_Real}}</a></td>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida_Real}}</a></td>
              </tr>
+            <div class="modal fade" id="editqr{{ codigos.id_qr }}" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="post" action="/actqr">
+					<div class="modal-header">
+						<h4 class="modal-title">Tus códigos QR</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Placas</label>
+							<input disabled type="text" class="form-control" value="{{ codigos.placas }}" name="codigosplacas">
+						</div>
+						<div class="form-group">
+							<label>Email</label>
+							<input disabled type="email" value="{{ codigos.emailvis }}" name="codigosemail" class="form-control">
+						</div>
+						<div class="form-group">
+							<label>Entrada Real</label>
+							<input disabled type="Text" class="form-control" value="{{ codigos.entrada_real }}" name="codigosentradareal"></input>
+						</div>
+                        <div class="form-group">
+							<label>Entrada Salida</label>
+							<input disabled type="Text" class="form-control" value="{{ codigos.fin_real }}" name="codigosfinreal"></input>
+						</div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <Select class="custom-select" id={{codigos.id_qr}} name="mycheckboxQR">
+                                <option Selected value="{{codigos.estado}}">{{codigos.estado}}</option>
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                                <label class="custom-control-label" for={{codigos.id_qr}}></label>
+                             </Select>
+                        </div>
+
+					</div>
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" name="cerraractqr"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="actqr" id="actqr" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+					</div>
+
+				</form>
+            </div>
+        </div>
+	</div>
+      <script>
+
+     $(document).ready(function($) {
+        $("#actqr").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#editqr').modal('show');
+
+      });
+    });
+
+       </script>
+                 <script>
+       $('#cerraractqr').click(function() {
+    $('#editqr').modal('hide');
+    sendEvent('#edit', 1);
+    $('#editqr').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+            {% endfor %}
+       {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+                    {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
             {% endfor %}
       </tbody>
 
