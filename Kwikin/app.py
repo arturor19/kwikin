@@ -62,6 +62,7 @@ def authorize():
     user = oauth.google.userinfo()  # uses openid endpoint to fetch user info
     # Here you use the profile/user data that you got and query your database find/register the user
     # and set ur own data in the session not the profile from google
+    print(user_info)
     session['profile'] = user_info
     session.permanent = True  # make the session permanant so it keeps existing after broweser gets closed
     return redirect(url_for('dashboard'))
@@ -72,19 +73,16 @@ def index():
 
 @app.route('/ayudabulk', methods=["GET", "POST"])
 def ayudabulk():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
+    name = session['profile']['name']
+    picture = session['profile']['picture']
     return render_template('ayudabulk.html', name=name, picture=picture)
 
 @app.route('/dashboard')
 @is_user
 @is_logged_in
 def dashboard():
-    name = dict(session)['profile']['name']
-    email = dict(session)['profile']['email']
-    family_name = dict(session)['profile']['family_name']
-    given_name = dict(session)['profile']['given_name']
-    picture = dict(session)['profile']['picture']
+    name = session['profile']['name']
+    picture = session['profile']['picture']
     return render_template('dashboard.html', name=name, picture=picture)
 
 
@@ -111,12 +109,11 @@ def logout():
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
+    name = session['profile']['name']
+    picture = session['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
-    tzone = ct
-    email = dict(session)['profile']['email']
+    email = session['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     now = ct
@@ -132,7 +129,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
         Nombre = (row[4])
         Entrada = (row[2])
         Salida = (row[3])
-        email = (row[5])
+        email_qr = (row[5])
         placas = (row[6])
         entrada_real = (row[7])
         fin_real = (row[8])
@@ -145,56 +142,59 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                     'entrada_real': entrada_real,
                     'fin_real': fin_real,
                     'estado': estado,
-                    'email': email,
+                    'email': email_qr,
                     'placas': placas,
                     'id_qr': id_qr})
 
     
     if request.method == 'POST':
+        tzone = ct.strftime("%Y-%m-%dT%H:%M")
+        qr_ent = str(request.form['dateE'])
+        qr_sal = str(request.form['dateS'])
+        if qr_ent != '' and qr_sal == '' :
+            dateent = datetime.strptime(qr_ent,"%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(qr_ent, "%Y-%m-%dT%H:%M") + timedelta(days=1)
+        elif qr_ent == '' and qr_sal != '':
+            dateent = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(qr_sal, "%Y-%m-%dT%H:%M")
+        elif qr_ent == '' and qr_sal == '':
+            dateent = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M") + timedelta(days=1)
+        elif qr_ent != '' and qr_sal != '':
+            dateent = datetime.strptime(qr_ent,"%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(qr_sal,"%Y-%m-%dT%H:%M") + timedelta(days=1)
+        if dateent > datesal or datesal < datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")+timedelta(minutes=1):
+            flash('Por favor valida que las fechas sean correctas', 'danger')
+        elif datesal - dateent > timedelta(hours=48):
+            flash('Recuerda que los accesos se otorgan sólo por 48 horas', 'danger')
+        elif request.form['nombreqr'] == "":
+            flash('Por favor agrega nombre', 'danger')
+        fecha_entrada = dateent
+        fecha_salida = datesal
+        nombre = request.form['nombreqr']
+        placas = request.form['placasqr']
+        emailqr = request.form['emailqr']
+        codigo_qr = hex(int(time.time() * 100))
+        qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
         try:
-            print(request.form['dateS'])
-            tzone = ct.strftime("%Y-%m-%dT%H:%M")
-            datesal = datetime.strptime(str(request.form['dateS']),"%Y-%m-%dT%H:%M")
-            dateent = datetime.strptime(str(request.form['dateE']),"%Y-%m-%dT%H:%M")
-            if dateent > datesal or datesal < datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")+timedelta(minutes=1):
-                flash('Por favor valida que las fechas sean correctas', 'danger')
-            elif datesal - dateent > timedelta(hours=48):
-                flash('Recuerda que los accesos se otorgan sólo por 48 horas', 'danger')
-            elif request.form['nombreqr'] == "":
-                flash('Por favor agrega nombre', 'danger')
-            else:
-                fecha_entrada = request.form['dateE']
-                fecha_salida = request.form['dateS']
-                nombre = request.form['nombreqr']
-                placas = request.form['placasqr']
-                emailqr = request.form['emailqr']
-                codigo_qr = hex(int(time.time() * 100))
-                qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
-                try:
-                    cur.execute("INSERT INTO qr(codigo_qr, nombre, inicio, fin, placas, correo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-                    codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr))
-
-                    mysql.commit()
-                    insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES 
+            cur.execute("INSERT INTO qr(codigo_qr, visitante, inicio, fin, placas, correo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+            codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr))
+            mysql.commit()
+            insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr) VALUES 
     (
     (SELECT id_usuario FROM usuarios where email = '{email}'),
-    (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
-    (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
+    (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}')
     );"""
-                    cur.execute(insert_asoc_qr_usuario)
-                    mysql.commit()
-                    cur.close()
-                except:
-                    flash(f'Codigo no creado correctamente', 'danger')
-                    return render_template('crearpeticionqr.html', qr=array, name=name, picture=picture, now=now)
-                qr_data = send_file(qr, mimetype="image/png")
-                return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
+            cur.execute(insert_asoc_qr_usuario)
+            mysql.commit()
+            cur.close()
         except:
-            flash(f'Revisa todos los campos', 'danger')
+            flash(f'Codigo no creado correctamente', 'danger')
             return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
-          # return render_template('codigoqr.html', qr_data=codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
+        qr_data = send_file(qr, mimetype="image/png")
+        return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
 
-    return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
+    return render_template('crearpeticionqr.html', qr=array_qr, name=name, now=now)
 
 
 @app.route('/codigoqr', methods=['GET'] )
