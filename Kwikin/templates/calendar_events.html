@@ -64,9 +64,9 @@
                           <div class="input-group-prepend">
                             <select class="custom-select col-12 form-control-sm" id="terraza" name="terraza">
                               <option selected>Selecciona terraza</option>
-                              <option value="1">One</option>
-                              <option value="2">Two</option>
-                              <option value="3">Three</option>
+                              {% for terraza in terrazas %}
+                              <option value="{{ terraza.terraza }}">{{ terraza.terraza }}</option>
+                              {% endfor %}
                             </select>
                           </div>
                       </div>

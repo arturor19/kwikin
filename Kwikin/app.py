@@ -1,8 +1,9 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, send_from_directory, jsonify
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, HiddenField
 from authlib.integrations.flask_client import OAuth
-from auth_decorator import is_logged_in, is_user
+from auth_decorator import is_logged_in, is_user, db_execute
 import os
+import json
 import pandas as pd
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, DataRequired
@@ -549,27 +550,24 @@ def validarqrs():
 @app.route('/calendar-events')
 def calendar_events():
     picture = session['profile']['picture']
-    mysql = sqlite3.connect('kw.db')
-    cursor = mysql.cursor()
     try:
-        cursor.execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP(end_date)*1000 as end FROM event FROM eventos")
-        rows = cursor.fetchall()
+        rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
+                          "end_date)*1000 as end FROM event FROM eventos")
         resp = jsonify({'success' : 1, 'result' : rows})
+
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
-    finally:
-        mysql.commit()
-        cursor.close()
     return render_template('calendar_events.html', rows=rows, picture=picture)
 
 
 
 @app.route('/calendario')
 def calendario():
+    arr_terr = db_execute('select * from terrazas')
     picture = session['profile']['picture']
-    return render_template('calendar_events.html', picture=picture)
+    return render_template('calendar_events.html', picture=picture, terrazas=arr_terr)
 
 
 @app.route('/calendario_ini/remote')
@@ -687,23 +685,21 @@ def gestioneventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
+    email = session['profile']['email']
     now = ct
     now = datetime.strftime((now),"%Y-%m-%d")
-    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-    eventos = cur.fetchall()
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia >= '%s';" % now)
     array_eventos = []
     for row in eventos:
-        estado = (row[5])
-        email = (row[3])
-        nombre = (row[2])
-        terraza = (row[1])
-        dia = (row[4])
-        domicilio = (row[11])
-        telefono = (row[13])
-        id_eventos = (row[0])
+        estado = (row['estado'])
+        email = (row['correo'])
+        nombre = (row['nombre'])
+        terraza = (row['terraza'])
+        dia = (row['dia'])
+        domicilio = (row['domicilio'])
+        telefono = (row['telefono'])
+        id_eventos = (row['id_eventos'])
 
         array_eventos.append({'estado': (estado),
                       'id_eventos': id_eventos,
@@ -714,20 +710,18 @@ def gestioneventos():
                       'telefono' : telefono,
                       'dia': dia})
 
-    if int(result.rowcount) > 0:
+    if len(eventos) > 0:
         return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
     else:
         msg = 'No hay eventos asociados al coto'
         return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture,msg=msg)
 
-    cur.close()
+
 
 @app.route('/acteventos', methods=['POST'])
 @is_user
 @is_logged_in
 def acteventos():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -736,45 +730,41 @@ def acteventos():
     cur = mysql.cursor()
     now = ct
     now = datetime.strftime((now), "%Y-%m-%d")
-    result1 = cur.execute(
-        "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-    eventos = cur.fetchall()
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia >= '%s';" % now)
     array_eventos = []
-    if request.method == "POST":
+    if request.method == 'POST':
         eventsvalue = request.form['mycheckboxE']
         eventsid = request.form['idhidden']
         terraza = request.form['terrazahidden']
-        cur.execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)
-        dia = cur.fetchone()
+        print(eventsvalue, eventsid, terraza)
+        dia = db_execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)[0]['dia']
         print(eventsvalue)
         print(eventsid)
         print(terraza)
-        print(dia[0])
-        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'")
-        validador = cur.execute(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'").fetchone()
+        print(dia)
+        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
+        validador = db_execute(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
         print(validador)
-        if validador != None and eventsvalue == 'Aprobado':
-            flash(f'La terraza {terraza} ya esta apartada el dia {dia[0]}, revisa fecha', 'danger')
+        if len(validador) > 0 and eventsvalue == 'Aprobado':
+            flash(f'La terraza {terraza} ya esta apartada el dia {dia}, revisa fecha', 'danger')
             return redirect(url_for('gestioneventos'))
         else:
-            cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
-            mysql.commit()
-            cur.execute(
+            db_execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
+            db_execute(
                 "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-            eventos = cur.fetchall()
-            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia[0]} con éxito', 'success')
+            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia} con éxito', 'success')
             array_eventos = []
-            cur.close()
 
             for row in eventos:
-                estado = (row[5])
-                email = (row[3])
-                nombre = (row[2])
-                terraza = (row[1])
-                dia = (row[4])
-                domicilio = (row[11])
-                telefono = (row[13])
-                id_eventos = (row[0])
+                estado = (row['estado'])
+                email = (row['correo'])
+                nombre = (row['nombre'])
+                terraza = (row['terraza'])
+                dia = (row['dia'])
+                domicilio = (row['domicilio'])
+                telefono = (row['telefono'])
+                id_eventos = (row['id_eventos'])
 
                 array_eventos.append({'estado': (estado),
                                       'id_eventos': id_eventos,
@@ -784,8 +774,9 @@ def acteventos():
                                       'domicilio': domicilio,
                                       'telefono': telefono,
                                       'dia': dia})
-            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
-    return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+        return render_template('gestioneventos.html', eventos=array_eventos)
+
+    return render_template('gestioneventos.html', eventos=array_eventos)
 
 
 @app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'] )
@@ -804,31 +795,31 @@ def gestioneventoshistorico():
     now = str(now)
     result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia < '%s';" % now)
     eventos = cur.fetchall()
-    array = []
+    array_eventos = []
     for row in eventos:
-        estado = (row[5])
-        email = (row[3])
-        nombre = (row[2])
-        terraza = (row[1])
-        dia = (row[4])
-        domicilio = (row[11])
-        telefono = (row[13])
-        id_eventos = (row[0])
+        estado = (row['estado'])
+        email = (row['correo'])
+        nombre = (row['nombre'])
+        terraza = (row['terraza'])
+        dia = (row['dia'])
+        domicilio = (row['domicilio'])
+        telefono = (row['telefono'])
+        id_eventos = (row['id_eventos'])
 
-        array.append({'estado': (estado),
-                      'id_eventos': id_eventos,
-                      'email': email,
-                      'nombre': nombre,
-                      'terraza': terraza,
-                      'domicilio': domicilio,
-                      'telefono' : telefono,
-                      'dia': dia})
+        array_eventos.append({'estado': (estado),
+                              'id_eventos': id_eventos,
+                              'email': email,
+                              'nombre': nombre,
+                              'terraza': terraza,
+                              'domicilio': domicilio,
+                              'telefono': telefono,
+                              'dia': dia})
 
     if int(result.rowcount) > 0:
-        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture)
+        return render_template('gestioneventoshistorico.html', eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture,msg=msg)
+        return render_template('gestioneventoshistorico.html', eventos=array_eventos, msg=msg)
     cur.close()
 
 
