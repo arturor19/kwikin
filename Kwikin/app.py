@@ -110,32 +110,27 @@ def logout():
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
-    name = session['profile']['name']
-    picture = session['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
     now = ct
     now = str(now)
     array_qr = []
-    result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+    qr = db_execute(f"""SELECT * FROM qr WHERE id_qr in (
 SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
 SELECT id_usuario FROM usuarios where email = '{email}'
 ));""")
-    qr = cur.fetchall()
 
     for row in qr:
-        Nombre = (row[4])
-        Entrada = (row[2])
-        Salida = (row[3])
-        email_qr = (row[5])
-        placas = (row[6])
-        entrada_real = (row[7])
-        fin_real = (row[8])
-        estado = (row[9])
-        id_qr = (row[1])
+        Nombre = (row['visitante'])
+        Entrada = (row['inicio'])
+        Salida = (row['fin'])
+        email_qr = (row['correo_visitante'])
+        placas = (row['placas'])
+        entrada_real = (row['inicio_real'])
+        fin_real = (row['fin_real'])
+        estado = (row['estado'])
+        id_qr = (row['codigo_qr'])
 
         array_qr.append({'Nombre': Nombre,
                     'Entrada': Entrada,
@@ -191,11 +186,11 @@ SELECT id_usuario FROM usuarios where email = '{email}'
             cur.close()
         except:
             flash(f'Codigo no creado correctamente', 'danger')
-            return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
+            return render_template('crearpeticionqr.html', qr=array_qr, now=now)
         qr_data = send_file(qr, mimetype="image/png")
         return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
 
-    return render_template('crearpeticionqr.html', qr=array_qr, name=name, now=now)
+    return render_template('crearpeticionqr.html', qr=array_qr, now=now)
 
 
 @app.route('/codigoqr', methods=['GET'] )
@@ -549,6 +544,7 @@ def validarqrs():
 
 @app.route('/calendar-events')
 def calendar_events():
+    arr_terr = db_execute('select * from terrazas')
     picture = session['profile']['picture']
     try:
         rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
@@ -559,7 +555,7 @@ def calendar_events():
         return resp
     except Exception as e:
         print(e)
-    return render_template('calendar_events.html', rows=rows, picture=picture)
+    return render_template('calendar_events.html', rows=rows, picture=picture, terrazas=arr_terr)
 
 
 
@@ -588,39 +584,27 @@ def calendario_ini():
 
 @app.route('/calendario_data')
 def test_calendario():
+    colores = {1:"#fd7e14",
+2:"#6f42c1",
+3:"#e83e8c",
+4:"#e74a3b",
+5:"#fd7e14",
+6:"#f6c23e",
+7:"#1cc88a"}
+    arr_evetos_aprobados = db_execute("select t2.id_terrazas, t2.terraza, e.dia from eventos e, terrazas t2 where "
+                                      "e.estado = 'Aprobado' and t2.terraza = e.terraza")
+    arr_cal = []
+    for event in arr_evetos_aprobados:
+        start = event['dia']
+        text = event['terraza']
+        color = colores[event['id_terrazas']]
+        arr_cal.append({"start": start, "text": text, "color": color})
+    events_json = json.dumps(arr_cal, indent=4)
     if request.method == 'GET':
         coto = request.args.get('coto')
         print(coto)
 
-    test = '''try {
-    mbscjsonp1([{
-                "start": "2020-10-12T07:00:00.000Z",
-                "end": "2020-10-12T08:00:00.000Z",
-                "text": "Area Comun.",
-                "color": "#f67944"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Wifi",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Alberca",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Area Comun",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-12T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Wifi",
-                "color": "#6e7f29"
-            },
-        ]);
-} catch (ex) {}'''
+    test = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
     return test
 
 @app.route('/avisodeprivacidad')
@@ -630,6 +614,7 @@ def avisodeprivacidad():
 @app.route('/crearevento', methods=['GET', 'POST'])
 @is_logged_in
 def peticionevento():
+    arr_terr = db_execute('select * from terrazas')
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
@@ -668,20 +653,19 @@ def peticionevento():
                     cur.close()
                 except:
                     flash(f'Evento no creado correctamente', 'danger')
-                    return render_template('calendar_events.html', name=name, picture=picture, now=now)
-                return render_template('calendar_events.html', name=name, picture=picture, now=now)
+                    return render_template('calendar_events.html', name=name, picture=picture, now=now,
+                                           terrazas=arr_terr)
+                return render_template('calendar_events.html', name=name, picture=picture, now=now,terrazas=arr_terr)
         except:
             flash(f'Revisa todos los campos', 'danger')
-            return render_template('calendar_events.html', name=name, picture=picture, now=now)
+            return render_template('calendar_events.html', name=name, picture=picture, now=now,terrazas=arr_terr)
 
-    return render_template('calendar_events.html', name=name, picture=picture, now=now)
+    return render_template('calendar_events.html', name=name, picture=picture, now=now,terrazas=arr_terr)
 
 @app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'] )
 @is_user
 @is_logged_in
 def gestioneventos():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -711,10 +695,10 @@ def gestioneventos():
                       'dia': dia})
 
     if len(eventos) > 0:
-        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+        return render_template('gestioneventos.html', eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture,msg=msg)
+        return render_template('gestioneventos.html', eventos=array_eventos, msg=msg)
 
 
 
@@ -725,7 +709,6 @@ def acteventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     now = ct
@@ -754,47 +737,24 @@ def acteventos():
             db_execute(
                 "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
             flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia} con éxito', 'success')
-            array_eventos = []
+            return redirect(url_for('gestioneventos'))
 
-            for row in eventos:
-                estado = (row['estado'])
-                email = (row['correo'])
-                nombre = (row['nombre'])
-                terraza = (row['terraza'])
-                dia = (row['dia'])
-                domicilio = (row['domicilio'])
-                telefono = (row['telefono'])
-                id_eventos = (row['id_eventos'])
+        return redirect(url_for('gestioneventos'))
 
-                array_eventos.append({'estado': (estado),
-                                      'id_eventos': id_eventos,
-                                      'email': email,
-                                      'nombre': nombre,
-                                      'terraza': terraza,
-                                      'domicilio': domicilio,
-                                      'telefono': telefono,
-                                      'dia': dia})
-        return render_template('gestioneventos.html', eventos=array_eventos)
-
-    return render_template('gestioneventos.html', eventos=array_eventos)
+    return redirect(url_for('gestioneventos'))
 
 
 @app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'] )
 @is_user
 @is_logged_in
 def gestioneventoshistorico():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
     now = ct
     now = str(now)
-    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia < '%s';" % now)
-    eventos = cur.fetchall()
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia < '%s';" % now)
     array_eventos = []
     for row in eventos:
         estado = (row['estado'])
@@ -815,7 +775,7 @@ def gestioneventoshistorico():
                               'telefono': telefono,
                               'dia': dia})
 
-    if int(result.rowcount) > 0:
+    if len(eventos) > 0:
         return render_template('gestioneventoshistorico.html', eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
