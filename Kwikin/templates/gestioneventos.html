@@ -87,9 +87,9 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for evento in eventos %}
              <tr>
-                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
-                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.terraza}}</a></td>
-                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F9D493;" {% endif %}><a>{{evento.dia}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{evento.terraza}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{evento.dia}}</a></td>
 
              </tr>
     <div class="modal fade" id="edit{{ evento.id_eventos }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -111,7 +111,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 						</div>
 						<div class="form-group">
 							<label>Teléfono</label>
-							<input disabled type="Text" class="form-control" value="{{ evento.telefono }}" name="telefonoeventos"></input>
+							<input disabled type="Text" class="form-control" value="{{ evento.telefono }}" name="telefonoeventos">
 						</div>
                         <div class="form-group">
                             <label>Estado</label>
