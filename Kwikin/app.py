@@ -124,14 +124,23 @@ def peticionqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
-    now = ct
-    now = str(now)
+    now = ct.strftime("%Y-%m-%d %H:%M:%S")
     array_qr = []
-    qr = db_execute(f"""SELECT * FROM qr WHERE id_qr in (
-SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
-SELECT id_usuario FROM usuarios where email = '{email}'
-));""")
-
+    print(f"""SELECT * from qr q , asoc_qr_usuario aqu , usuarios u 
+where 
+q.id_qr = aqu.id_qr and
+q.id_qr = u.id_usuario and 
+q.estado = 'Activo' and
+u.email = '{email}' and 
+q.fin >= '{now[0:19]}'""")
+    qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
+where 
+aqu.id_qr = q.id_qr AND 
+u.email = '{email}' and
+q.fin >= '{now}' AND 
+q.estado = 'Activo'""")
+    print(now)
+    print(json.dumps(qr, indent=4))
     for row in qr:
         Nombre = (row['visitante'])
         Entrada = (row['inicio'])
@@ -142,7 +151,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
         fin_real = (row['fin_real'])
         estado = (row['estado'])
         id_qr = (row['id_qr'])
-        codigo_qr = (row['id_qr'])
+        codigo_qr = (row['codigo_qr'])
 
         array_qr.append({'Nombre': Nombre,
                          'Entrada': Entrada,
@@ -154,6 +163,7 @@ SELECT id_usuario FROM usuarios where email = '{email}'
                          'placas': placas,
                          'codigo_qr': codigo_qr,
                          'id_qr': id_qr})
+        print(json.dumps(array_qr, indent=4))
     if request.method == 'POST':
         tzone = ct.strftime("%Y-%m-%dT%H:%M")
         qr_ent = str(request.form['dateE'])
@@ -383,10 +393,13 @@ def actqr():
     now = ct
     now = str(now)
     array_qr = []
-    qr = db_execute(f"""SELECT * FROM qr WHERE id_qr in (
-    SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
-    SELECT id_usuario FROM usuarios where email = '{email}'
-    ));""")
+    qr = db_execute(f"""SELECT * from qr q , asoc_qr_usuario aqu , usuarios u 
+    where 
+    q.id_qr = aqu.id_qr and
+    q.id_qr = u.id_usuario and 
+    q.estado = 'Activo' and
+    u.email = '{email}' and 
+    q.fin <= CURRENT_TIMESTAMP""")
 
     for row in qr:
         Nombre = (row['visitante'])
@@ -398,18 +411,7 @@ def actqr():
         fin_real = (row['fin_real'])
         estado = (row['estado'])
         id_qr = (row['id_qr'])
-        codigo_qr = (row['id_qr'])
-
-        array_qr.append({'Nombre': Nombre,
-                         'Entrada': Entrada,
-                         'Salida': Salida,
-                         'entrada_real': entrada_real,
-                         'fin_real': fin_real,
-                         'estado': estado,
-                         'email_qr': email_qr,
-                         'placas': placas,
-                         'codigo_qr': codigo_qr,
-                         'id_qr': id_qr})
+        codigo_qr = (row['codigo_qr'])
 
     if request.method == "POST":
         qrid = request.form['idqrhidden']
