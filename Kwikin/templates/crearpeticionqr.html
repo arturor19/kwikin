@@ -144,13 +144,26 @@ $.extend( true, $.fn.dataTable.defaults, {
                                <div class="form-group">
                                    <input type="hidden" name="testhidden" value={{codigo.fin_real}}>
                                </div>
+                         <form method="post" action="/verqr">
+                                <div class="form-group">
+                                   <input type="hidden" name="starthidden" value={{codigo.Entrada}}>
+                               </div>
+                               <div class="form-group">
+                                   <input type="hidden" name="endhidden" value={{codigo.Salida}}>
+                               </div>
+                                <div class="form-group">
+                                   <input type="hidden" name="qrhidden" value={{codigo.codigo_qr}}>
+                               </div>
+                             <button type="submit" name="verqr" id="verqr" class="btn btn-outline-primary float-sm-right" style="width:100px"><i class="fa fa-qrcode"></i> Ver</button>
+                         </form>
                       </div>
 
 					<div class="modal-footer">
 						<input type="button" class="btn btn-default" name="cerrarqrgestion"  data-dismiss="modal" value="Cerrar">
-                        <button type="submit" name="verqr" id="verqr" class="btn btn-primary" style="width:100px"><i class="fa fa-qrcode"></i> Ver</button>
-                        <button type="submit" name="actqr" id="actqr" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
-					</div>
+                        <button type="submit" name="actqr" id="actqr" class="btn btn-primary" style="width:100px"> Actualizar</button>
+                    </div>
+
+
 
 				</form>
 			</div>
