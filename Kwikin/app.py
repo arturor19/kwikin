@@ -202,7 +202,8 @@ q.estado = 'Activo'""")
             id_qr = db_execute(("SELECT id_qr FROM qr WHERE codigo_qr = '%s';" % codigo_qr))[0]['id_qr']
 
             db_execute("INSERT INTO asoc_qr_usuario(id_usuario, id_qr) VALUES (\"%s\", \"%s\")" % (id_usuario, id_qr))
-            return redirect(url_for('peticionqr', qr=array_qr))
+            return redirect(
+                url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida, qr=array_qr))
 
         except:
             flash(f'Codigo no creado correctamente', 'danger')
