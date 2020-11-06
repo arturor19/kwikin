@@ -1,14 +1,17 @@
-{% extends "layout.html" %}
+
+{% extends "layout_cel.html" %}
 
 {% block head %}
-<title>Crear QR</title>
+<title>Generar Códigos QR</title>
+
 {% endblock %}
-{% block body %}
+{%block body %}
+<body>
 <script type="text/javascript" class="init">
 
 $(document).ready(function() {
-	$('#dtOrderExample2').DataTable({
-        "order": [[ 3, "desc" ]]
+	$('#dtOrderQR').DataTable({
+        "order": [[ 2, "asc" ]]
     });
 } );
 
@@ -67,17 +70,21 @@ $.extend( true, $.fn.dataTable.defaults, {
 <section>
     <div>
         <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#ModalQR" >Crear QR</button>
-        <h6 style="font-size:50%;">*Los registros se crean en hora local del fraccionamiento</h6>
+        <a class="btn btn-primary btn-sm align-middle" href="/gestionqrhistorico" type="button">Histórico</a>
+       <h6 style="font-size:50%;">*Los registros se crean en hora local del fraccionamiento</h6>
     </div>
+
 </section><br>
+
+</div>
+<br>
 <section>
-    <form action="" class="" method="post">
-    <table id="dtOrderExample2" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+    <div style="width:90%; margin:0 auto;">
+    <table id="dtOrderQR" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
       <!-- Table head -->
       <thead>
         <tr>
-
-            <th>Nombre</th>
+            <th>Visitante</th>
             <th>Entrada</th>
             <th>Salida</th>
         </tr>
@@ -86,56 +93,68 @@ $.extend( true, $.fn.dataTable.defaults, {
 
       <!-- Table body -->
       <tbody>
-            {% for codigos in qr %}
+            {% for codigo in qr %}
              <tr>
-                 <td><a href="#" data-toggle="modal" data-target='#editqr{{ codigos.id_qr }}'>{{codigos.Nombre}}</a></td>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Entrada}}</a></td>
-                 <td style="{{'color: #fff; background: #858796;' if codigos.estado == "Inactivo" or codigos.Salida < now else ''}}"><a>{{codigos.Salida}}</a></td>
+                 <td {% if codigo.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a href="#" data-toggle="modal" data-target='#editqr{{ codigo.id_qr }}'>{{codigo.Nombre}}</a></td>
+                 <td {% if codigo.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigo.Entrada}}</a></td>
+                 <td {% if codigo.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigo.Salida}}</a></td>
+
              </tr>
-            <div class="modal fade" id="editqr{{ codigos.id_qr }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="editqr{{ codigo.id_qr }}" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<form method="post" action="/actqr">
 					<div class="modal-header">
-						<h4 class="modal-title">Tus códigos QR</h4>
+						<h4 class="modal-title">Información</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 					</div>
-					<div class="modal-body">
-						<div class="form-group">
-							<label>Placas</label>
-							<input disabled type="text" class="form-control" value="{{ codigos.placas }}" name="codigosplacas">
-						</div>
-						<div class="form-group">
-							<label>Email</label>
-							<input disabled type="email" value="{{ codigos.emailvis }}" name="codigosemail" class="form-control">
-						</div>
-						<div class="form-group">
-							<label>Entrada Real</label>
-							<input disabled type="Text" class="form-control" value="{{ codigos.entrada_real }}" name="codigosentradareal"></input>
-						</div>
-                        <div class="form-group">
-							<label>Entrada Salida</label>
-							<input disabled type="Text" class="form-control" value="{{ codigos.fin_real }}" name="codigosfinreal"></input>
-						</div>
-                        <div class="form-group">
-                            <label>Estado</label>
-                            <Select class="custom-select" id={{codigos.id_qr}} name="mycheckboxQR">
-                                <option Selected value="{{codigos.estado}}">{{codigos.estado}}</option>
-                                <option value="Activo">Activo</option>
-                                <option value="Inactivo">Inactivo</option>
-                                <label class="custom-control-label" for={{codigos.id_qr}}></label>
-                             </Select>
-                        </div>
+					 <div class="modal-body">
+                         <div class="form-group">
+                            <label>Nombre</label>
+                            <input  type="text" class="form-control" value="{{ codigo.Nombre }}" name="codigovisitante">
+                         </div>
+                         <div class="form-group">
+                            <label>Email</label>
+                            <input  type="email" value="{{ codigo.email_qr }}" name="codigoemailvisitante" class="form-control">
+                         </div>
+                         <div class="form-group">
+                            <label>Placas</label>
+                            <input type="Text" class="form-control" value="{{ codigo.placas }}" name="codigoplacas">
+                         </div>
+                         <div class="form-group">
+                            <label>Valido Desde</label>
+                            <input type="Text" class="form-control" value="{{ codigo.Entrada }}" name="codigoEntrada">
+                            <label>Hasta</label>
+                            <input type="Text" class="form-control" value="{{ codigo.Salida }}" name="codigoSalida">
+                         </div>
+                               <div class="form-group">
+                                   <label>Estado</label>
+                                   <Select class="custom-select" id={{codigo.id_qr}} name="mycheckboxQR">
+                                       <option Selected value="{{codigo.estado}}">{{codigo.estado}}</option>
+                                       <option value="Activo">Activo</option>
+                                       <option value="Inactivo">Inactivo</option>
+                                       <label class="custom-control-label" for={{codigo.id_qr}}></label>
+                                    </Select>
+                               </div>
 
-					</div>
+
+                               <div class="form-group">
+                                   <input type="hidden" name="idqrhidden" value={{codigo.id_qr}}>
+                               </div>
+                               <div class="form-group">
+                                   <input type="hidden" name="testhidden" value={{codigo.fin_real}}>
+                               </div>
+                      </div>
+
 					<div class="modal-footer">
-						<input type="button" class="btn btn-default" name="cerraractqr"  data-dismiss="modal" value="Cerrar">
+						<input type="button" class="btn btn-default" name="cerrarqrgestion"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="verqr" id="verqr" class="btn btn-primary" style="width:100px"><i class="fa fa-qrcode"></i> Ver</button>
                         <button type="submit" name="actqr" id="actqr" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
 					</div>
 
 				</form>
-            </div>
-        </div>
+			</div>
+		</div>
 	</div>
       <script>
 
@@ -149,17 +168,8 @@ $.extend( true, $.fn.dataTable.defaults, {
     });
 
        </script>
-                 <script>
-       $('#cerraractqr').click(function() {
-    $('#editqr').modal('hide');
-    sendEvent('#edit', 1);
-    $('#editqr').on('hidden.bs.modal', function(e) {
-        $(this).removeData();
-    }) ;
-});
-</script>
             {% endfor %}
-       {% for message in get_flashed_messages(category_filter=["danger"]) %}
+            {% for message in get_flashed_messages(category_filter=["danger"]) %}
                         <div class="alert alert-danger" role="alert">
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
                             {{ message }}
@@ -178,7 +188,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 
 
     </table>
-    </form>
+    </div>
 </section>
 <section>
 <div class="modal fade" id="ModalQR" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
@@ -191,33 +201,22 @@ $.extend( true, $.fn.dataTable.defaults, {
             <div class="modal-body">
               <form id="IndFormqr" action="/crearqr" class="" method="post">
                   <div class="form-group">
-                    <div id="acordionqr" class="panel-group">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h4 class="panel-title">
-                                    <button class="btn btn-secondary btn-sm" type="button" data-target="#panelbodyone" data-toggle="collapse" data-parent="#acordionqr">
-                                        Información visitante
-                                    </button>
-                                </h4>
-                            </div>
-                            <div id="panelbodyone" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    <label for="nombreqr" class="col-12 col-form-label">Nombre:</label>
-                                        <div class="col-sm-8">
-                                    <input class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
-                                        </div>
-                                     <label for="emailqr" class="col-12 col-form-label">Email:</label>
-                                        <div class="col-sm-8">
-                                    <input class="form-control-sm" type="text" id="emailqr" name="emailqr"/>
-                                        </div>
-                                     <label for="placasqr" class="col-12 col-form-label">Placas:</label>
-                                        <div class="col-sm-8">
-                                    <input class="form-control-sm" type="text" id="placasqr" name="placasqr"/>
-                                        </div>
+                        <div class="panel-body">
+                            <label for="nombreqr" class="col-12 col-form-label">Nombre:</label>
+                                <div class="col-sm-8">
+                            <input required class="form-control-sm" type="text" id="nombreqr" name="nombreqr"/>
                                 </div>
-                            </div>
+                             <label for="emailqr" class="col-12 col-form-label">Email:</label>
+                                <div class="col-sm-8">
+                            <input class="form-control-sm" type="text" id="emailqr" name="emailqr"/>
+                                </div>
+                             <label for="placasqr" class="col-12 col-form-label">Placas:</label>
+                                <div class="col-sm-8">
+                            <input class="form-control-sm" type="text" id="placasqr" name="placasqr"/>
+                                </div>
                         </div>
-                    </div>
+
+                  </div>
                       <br>
                       <div class="form-group">
                           <div id="acordionqr2" class="panel-group">
@@ -275,14 +274,22 @@ $.extend( true, $.fn.dataTable.defaults, {
     </div>
 </div>
 </section>
-
 <script>
- $(document).ready(function() {
-    var messages = "{{ get_flashed_messages() }}";
+        $(document).ready(function() {
+        var messages = "{{ get_flashed_messages() }}";
 
-    if (typeof messages != 'undefined' && messages != '[]') {
-        $("#ModalQR").modal();
-    };
+        if (typeof messages != 'undefined' && messages != '[]') {
+        $("#editqr").modal();
+            };
+        });
+    </script>
+<script>
+       $('#cerrarqrgestion').click(function() {
+    $('#editqr').modal('hide');
+    sendEvent('#edit', 1);
+    $('#editqr').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
 });
 </script>
 <script>
@@ -290,32 +297,8 @@ $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
-<script>
-       $('#cerraruserqr').click(function() {
-    $('#ModalQR').modal('hide');
-    sendEvent('#ModalQR', 1);
-    $('#ModalQR').on('hidden.bs.modal', function(e) {
-        $(this).removeData();
-    }) ;
-});
-</script>
-<script type="text/javascript">
-$(mycheckboxQR).click(function(){
-        var qrid = $(this).prop('name');
-        $.ajax({
-            url: '/actqr',
-            data: {'dataqr':qrid},
-            type: 'POST',
-            timeout: 500,
-            success: function(response) {
-                console.log(response);
-               },
-               error: function(error) {
-                console.log(error);
-               }
-         });
 
-     });
+</body>
 
-</script>
 {% endblock %}
+

@@ -1,8 +1,11 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, send_from_directory, jsonify
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, HiddenField
+from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, \
+    send_from_directory, jsonify
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, \
+    HiddenField
 from authlib.integrations.flask_client import OAuth
-from auth_decorator import is_logged_in, is_user
+from auth_decorator import is_logged_in, is_user, db_execute
 import os
+import json
 import pandas as pd
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, DataRequired
@@ -17,13 +20,12 @@ import io
 import pytz
 import pymysql
 
-
-#../templates', static_folder='../static'
+# ../templates', static_folder='../static'
 application = app = Flask(__name__, template_folder='templates', static_folder='static')
 qrcode = QRcode(app)
 
 # Config MySQL
-#obj = AES.new('This is a key123'.encode("utf8"), AES.MODE_CBC, 'This is an IV456'.encode("utf8"))
+# obj = AES.new('This is a key123'.encode("utf8"), AES.MODE_CBC, 'This is an IV456'.encode("utf8"))
 
 # init MYSQL
 # Session config
@@ -43,15 +45,18 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     authorize_params=None,
     api_base_url='https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint='https://www.googleapis.com/userinfo/v2/me',  # This is only needed if using openId to fetch user info
+    userinfo_endpoint='https://www.googleapis.com/userinfo/v2/me',
+    # This is only needed if using openId to fetch user info
     client_kwargs={'scope': 'openid email profile'},
 )
+
 
 @app.route('/login')
 def login():
     google = oauth.create_client('google')  # create the google oauth client
     redirect_uri = url_for('authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
+
 
 @app.route('/authorize')
 def authorize():
@@ -66,16 +71,20 @@ def authorize():
     session['profile'] = user_info
     session.permanent = True  # make the session permanant so it keeps existing after broweser gets closed
     return redirect(url_for('dashboard'))
+
+
 # Index
 @app.route('/')
 def index():
     return render_template('login.html')
+
 
 @app.route('/ayudabulk', methods=["GET", "POST"])
 def ayudabulk():
     name = session['profile']['name']
     picture = session['profile']['picture']
     return render_template('ayudabulk.html', name=name, picture=picture)
+
 
 @app.route('/dashboard')
 @is_user
@@ -93,6 +102,7 @@ def scannerqr():
     picture = dict(session)['profile']['picture']
     return render_template('scannerqr.html', name=name, picture=picture)
 
+
 @app.route('/scannerqrs')
 def scannerqrs():
     name = dict(session)['profile']['name']
@@ -100,70 +110,67 @@ def scannerqrs():
     picture = dict(session)['profile']['picture']
     return render_template('scannerqrs.html', name=name, picture=picture)
 
+
 @app.route('/logout')
 def logout():
     for key in list(session.keys()):
         session.pop(key)
     return render_template('login.html')
 
+
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
 def peticionqr():
-    name = session['profile']['name']
-    picture = session['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
     now = ct
     now = str(now)
     array_qr = []
-    result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+    qr = db_execute(f"""SELECT * FROM qr WHERE id_qr in (
 SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
 SELECT id_usuario FROM usuarios where email = '{email}'
 ));""")
-    qr = cur.fetchall()
 
     for row in qr:
-        Nombre = (row[4])
-        Entrada = (row[2])
-        Salida = (row[3])
-        email_qr = (row[5])
-        placas = (row[6])
-        entrada_real = (row[7])
-        fin_real = (row[8])
-        estado = (row[9])
-        id_qr = (row[1])
+        Nombre = (row['visitante'])
+        Entrada = (row['inicio'])
+        Salida = (row['fin'])
+        email_qr = (row['correo_visitante'])
+        placas = (row['placas'])
+        entrada_real = (row['inicio_real'])
+        fin_real = (row['fin_real'])
+        estado = (row['estado'])
+        id_qr = (row['id_qr'])
+        codigo_qr = (row['id_qr'])
 
         array_qr.append({'Nombre': Nombre,
-                    'Entrada': Entrada,
-                    'Salida': Salida,
-                    'entrada_real': entrada_real,
-                    'fin_real': fin_real,
-                    'estado': estado,
-                    'email': email_qr,
-                    'placas': placas,
-                    'id_qr': id_qr})
-
-
+                         'Entrada': Entrada,
+                         'Salida': Salida,
+                         'entrada_real': entrada_real,
+                         'fin_real': fin_real,
+                         'estado': estado,
+                         'email_qr': email_qr,
+                         'placas': placas,
+                         'codigo_qr': codigo_qr,
+                         'id_qr': id_qr})
     if request.method == 'POST':
         tzone = ct.strftime("%Y-%m-%dT%H:%M")
         qr_ent = str(request.form['dateE'])
         qr_sal = str(request.form['dateS'])
-        if qr_ent != '' and qr_sal == '' :
-            dateent = datetime.strptime(qr_ent,"%Y-%m-%dT%H:%M")
+        if qr_ent != '' and qr_sal == '':
+            dateent = datetime.strptime(qr_ent, "%Y-%m-%dT%H:%M")
             datesal = datetime.strptime(qr_ent, "%Y-%m-%dT%H:%M") + timedelta(days=1)
         elif qr_ent == '' and qr_sal != '':
-            dateent = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")
+            dateent = datetime.strptime(str(tzone), "%Y-%m-%dT%H:%M")
             datesal = datetime.strptime(qr_sal, "%Y-%m-%dT%H:%M")
         elif qr_ent == '' and qr_sal == '':
-            dateent = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")
-            datesal = datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M") + timedelta(days=1)
+            dateent = datetime.strptime(str(tzone), "%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(str(tzone), "%Y-%m-%dT%H:%M") + timedelta(days=1)
         elif qr_ent != '' and qr_sal != '':
-            dateent = datetime.strptime(qr_ent,"%Y-%m-%dT%H:%M")
-            datesal = datetime.strptime(qr_sal,"%Y-%m-%dT%H:%M") + timedelta(days=1)
-        if dateent > datesal or datesal < datetime.strptime(str(tzone),"%Y-%m-%dT%H:%M")+timedelta(minutes=1):
+            dateent = datetime.strptime(qr_ent, "%Y-%m-%dT%H:%M")
+            datesal = datetime.strptime(qr_sal, "%Y-%m-%dT%H:%M") + timedelta(days=1)
+        if dateent > datesal or datesal < datetime.strptime(str(tzone), "%Y-%m-%dT%H:%M") + timedelta(minutes=1):
             flash('Por favor valida que las fechas sean correctas', 'danger')
         elif datesal - dateent > timedelta(hours=48):
             flash('Recuerda que los accesos se otorgan sólo por 48 horas', 'danger')
@@ -174,30 +181,29 @@ SELECT id_usuario FROM usuarios where email = '{email}'
         nombre = request.form['nombreqr']
         placas = request.form['placasqr']
         emailqr = request.form['emailqr']
+        timestamp = now
         codigo_qr = hex(int(time.time() * 100))
         qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
         try:
-            cur.execute("INSERT INTO qr(codigo_qr, visitante, inicio, fin, placas, correo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-            codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr))
-            mysql.commit()
-            insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr) VALUES 
-    (
-    (SELECT id_usuario FROM usuarios where email = '{email}'),
-    (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}')
-    );"""
-            cur.execute(insert_asoc_qr_usuario)
-            mysql.commit()
-            cur.close()
+            db_execute(
+                "INSERT INTO qr(codigo_qr, visitante, inicio, fin, placas, correo_visitante, timestamp) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+                    codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr, timestamp))
+            id_usuario = db_execute(("SELECT id_usuario FROM usuarios WHERE email = '%s';" % email))[0]['id_usuario']
+            id_qr = db_execute(("SELECT id_qr FROM qr WHERE codigo_qr = '%s';" % codigo_qr))[0]['id_qr']
+
+            db_execute("INSERT INTO asoc_qr_usuario(id_usuario, id_qr) VALUES (\"%s\", \"%s\")" % (id_usuario, id_qr))
+            return redirect(url_for('peticionqr', qr=array_qr))
+
         except:
             flash(f'Codigo no creado correctamente', 'danger')
-            return render_template('crearpeticionqr.html', qr=array_qr, name=name, picture=picture, now=now)
+            return redirect(url_for('peticionqr', qr=array_qr))
         qr_data = send_file(qr, mimetype="image/png")
-        return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
+        return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida, qr=array_qr))
 
-    return render_template('crearpeticionqr.html', qr=array_qr, name=name, now=now)
+    return render_template('crearpeticionqr.html', qr=array_qr, now=now)
 
 
-@app.route('/codigoqr', methods=['GET'] )
+@app.route('/codigoqr', methods=['GET'])
 @is_user
 @is_logged_in
 def codigoqr():
@@ -207,9 +213,10 @@ def codigoqr():
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
         return render_template('codigoqr.html', qr_data=qr_data, mode="raw", start_date=start_date,
-                         end_date=end_date, picture=picture)
+                               end_date=end_date, picture=picture)
 
-@app.route('/crearInd', methods=['GET', 'POST'] )
+
+@app.route('/crearInd', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 def crearInd():
@@ -236,12 +243,13 @@ def crearInd():
             else:
                 try:
                     cur.execute("INSERT INTO usuarios(domicilio, email, telefono) VALUES(\"%s\", \"%s\", \"%s\")" % (
-                    domicilio, email, telefono))
-                    cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+                        domicilio, email, telefono))
+                    cur.execute(
+                        f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
                     flash(f'Usuario {email} agregado correctamente', 'success')
                     mysql.commit()
                 except:
-                    flash(f'Correo {email} ya existe','danger')
+                    flash(f'Correo {email} ya existe', 'danger')
         else:
             flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail', 'danger')
         cur.close()
@@ -250,7 +258,7 @@ def crearInd():
     return redirect(url_for('gestionusuarios', name=name, picture=picture))
 
 
-@app.route('/crearBulk', methods=['GET', 'POST'] )
+@app.route('/crearBulk', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 def upload():
@@ -267,7 +275,8 @@ def upload():
                 telefono = row['Telefono']
                 if '@gmail.com' in email:
                     try:
-                        cur.execute(f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
+                        cur.execute(
+                            f"INSERT INTO usuarios(domicilio, email, telefono) VALUES('{domicilio}','{email}','{telefono}')")
                         cur.execute(
                             f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values (3, (SELECT id_usuario FROM "
                             f"usuarios WHERE email = '{email}'))")
@@ -283,7 +292,8 @@ def upload():
         return render_template('crearbulk.html', name=name, picture=picture)
     return render_template('crearbulk.html', name=name, picture=picture)
 
-@app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'] )
+
+@app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 def gestionusuarios():
@@ -308,8 +318,9 @@ def gestionusuarios():
         return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture)
     else:
         msg = 'No hay usuarios asociados al coto'
-        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture,msg=msg)
+        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture, msg=msg)
     cur.close()
+
 
 @app.route('/actusuario', methods=['POST'])
 @is_user
@@ -321,13 +332,13 @@ def actusuario():
     cur = mysql.cursor()
     ids = None
     if request.method == "POST":
-        ids=request.form['data']
+        ids = request.form['data']
         result = cur.execute("SELECT status FROM usuarios WHERE email = '%s';" % ids)
         result = cur.fetchone()
         if str(result) == "('Activo',)":
             cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestionusuarios.html',  name=name, picture=picture)
+            return render_template('gestionusuarios.html', name=name, picture=picture)
         elif str(result) == "('Inactivo',)":
             cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
             mysql.commit()
@@ -346,13 +357,13 @@ def actdom():
     cur = mysql.cursor()
     ids = None
     if request.method == "POST":
-        ids=request.form['data']
+        ids = request.form['data']
         result = cur.execute("SELECT status FROM usuarios WHERE email = '%s';" % ids)
         result = cur.fetchone()
         if str(result) == "('Activo',)":
             cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestiondimicilios.html',  name=name, picture=picture)
+            return render_template('gestiondimicilios.html', name=name, picture=picture)
         elif str(result) == "('Inactivo',)":
             cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
             mysql.commit()
@@ -360,37 +371,34 @@ def actdom():
     cur.close()
     return render_template('gestiondimicilios.html', name=name, picture=picture)
 
+
 @app.route('/actqr', methods=['POST'])
 @is_user
 @is_logged_in
 def actqr():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
     email = dict(session)['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
     now = ct
     now = str(now)
     array_qr = []
-    result = cur.execute(f"""SELECT * FROM qr WHERE id_qr in (
+    qr = db_execute(f"""SELECT * FROM qr WHERE id_qr in (
     SELECT id_qr FROM asoc_qr_usuario WHERE id_usuario = (
     SELECT id_usuario FROM usuarios where email = '{email}'
     ));""")
-    qr = cur.fetchall()
 
     for row in qr:
-        Nombre = (row[4])
-        Entrada = (row[2])
-        Salida = (row[3])
-        emailvis = (row[5])
-        placas = (row[6])
-        entrada_real = (row[7])
-        fin_real = (row[8])
-        estado = (row[9])
-        id_qr = (row[1])
+        Nombre = (row['visitante'])
+        Entrada = (row['inicio'])
+        Salida = (row['fin'])
+        email_qr = (row['correo_visitante'])
+        placas = (row['placas'])
+        entrada_real = (row['inicio_real'])
+        fin_real = (row['fin_real'])
+        estado = (row['estado'])
+        id_qr = (row['id_qr'])
+        codigo_qr = (row['id_qr'])
 
         array_qr.append({'Nombre': Nombre,
                          'Entrada': Entrada,
@@ -398,26 +406,31 @@ def actqr():
                          'entrada_real': entrada_real,
                          'fin_real': fin_real,
                          'estado': estado,
-                         'emailvis': emailvis,
+                         'email_qr': email_qr,
                          'placas': placas,
+                         'codigo_qr': codigo_qr,
                          'id_qr': id_qr})
 
     if request.method == "POST":
-        qrid = request.form['dataqr']
-        result = cur.execute("SELECT estado FROM qr WHERE codigo_qr = '%s';" % qrid)
-        result = cur.fetchone()
+        qrid = request.form['idqrhidden']
+        estado = request.form['mycheckboxQR']
+        print(estado)
+
+        result = db_execute("SELECT estado FROM qr WHERE id_qr = '%s';" % qrid)
+
         print(qrid)
+
         try:
-            cur.execute("UPDATE qr SET estado = 'Inactivo' WHERE codigo_qr = '%s';" % qrid)
-            mysql.commit()
-            return render_template('gestionusuarios.html', name=name, picture=picture)
+            db_execute(f"UPDATE qr SET estado = '{estado}' WHERE id_qr = '{qrid}'")
+            print(db_execute("SELECT estado FROM qr WHERE id_qr = '{qrid}'"))
+            return redirect(url_for('peticionqr', qr=array_qr))
         except:
             flash(f'No se pudo eliminar el registro', 'danger')
-            return render_template('gestionusuarios.html', name=name, picture=picture)
-    cur.close()
-    return render_template('crearpeticionqr.html', name=name, picture=picture)
+            return redirect(url_for('peticionqr', qr=array_qr))
+    return redirect(url_for('peticionqr', qr=array_qr))
 
-@app.route('/ventas', methods=['GET', 'POST'] )
+
+@app.route('/ventas', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 def ventas():
@@ -433,14 +446,15 @@ def ventas():
         cur = mysql.cursor()
         try:
             cur.execute("INSERT INTO usuarios(domicilio, email) VALUES(\"%s\", \"%s\")" % (
-            domicilio, email))
+                domicilio, email))
             flash('Usuario agregado correctamente', 'success')
             mysql.commit()
 
         except:
             flash('Correo ya existe', 'danger')
         try:
-            cur.execute(f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
+            cur.execute(
+                f"insert into asoc_usuario_grupo (id_grupo, id_usuario) values ({grupo}, (SELECT id_usuario FROM usuarios WHERE email = '{email}'))")
             mysql.commit()
         except:
             flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador', 'danger')
@@ -448,6 +462,7 @@ def ventas():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     return render_template('ventas.html', name=name, picture=picture)
+
 
 @app.route('/crearventa', methods=['GET', 'POST'])
 @is_user
@@ -458,12 +473,13 @@ def crearventa():
     CotoCPpy = request.form['CotoCP']
     correopy = request.form['correo']
     teladminpy = request.form['teladmin']
-    vendedorpy = dict(session)['profile']['email'] #esta variable sirve para saber quien creo el coto y poder mapearlo
+    vendedorpy = dict(session)['profile']['email']  # esta variable sirve para saber quien creo el coto y poder mapearlo
     print(Cotopy, CotoDirpy, CotoCPpy, correopy, teladminpy, vendedorpy)
     return render_template("ventas.html")
     '''db.execute(
         "INSERT INTO events (user_id, title, description, place, start, end) VALUES (:user, :title, :description, :place, :start, :end)",
         user=session["user_id"], title=title, description=description, place=place, start=start, end=end)'''
+
 
 @app.route('/validarqr', methods=['GET', 'POST'])
 @is_user
@@ -494,8 +510,9 @@ def validarqr():
                 if estado == "Activo":
                     print("estado")
                     flash(f'Adelante {nombre}', 'success')
-                    cur.execute("INSERT INTO asoc_qr_registro (id_qr, timestamp, type) VALUES(\"%s\", \"%s\", \"%s\")" % (
-                        qrid, timestamp, tipo))
+                    cur.execute(
+                        "INSERT INTO asoc_qr_registro (id_qr, timestamp, type) VALUES(\"%s\", \"%s\", \"%s\")" % (
+                            qrid, timestamp, tipo))
                     mysql.commit()
                     cur.close()
                     return render_template("aprobado.html", name=name, picture=picture)
@@ -536,7 +553,7 @@ def validarqrs():
         if len(qrinfo[0][1]) > 0:
             flash(f'Hasta Luego {nombre}', 'success')
             cur.execute("INSERT INTO asoc_qr_registro (id_qr, timestamp, type) VALUES(\"%s\", \"%s\", \"%s\")" % (
-                    qrid, timestamp, tipo))
+                qrid, timestamp, tipo))
             mysql.commit()
             cur.close()
             return render_template("aprobado.html", name=name, picture=picture)
@@ -548,28 +565,25 @@ def validarqrs():
 
 @app.route('/calendar-events')
 def calendar_events():
+    arr_terr = db_execute('select * from terrazas')
     picture = session['profile']['picture']
-    mysql = sqlite3.connect('kw.db')
-    cursor = mysql.cursor()
     try:
-        cursor.execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP(end_date)*1000 as end FROM event FROM eventos")
-        rows = cursor.fetchall()
-        resp = jsonify({'success' : 1, 'result' : rows})
+        rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
+                          "end_date)*1000 as end FROM event FROM eventos")
+        resp = jsonify({'success': 1, 'result': rows})
+
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
-    finally:
-        mysql.commit()
-        cursor.close()
-    return render_template('calendar_events.html', rows=rows, picture=picture)
-
+    return render_template('calendar_events.html', rows=rows, picture=picture, terrazas=arr_terr)
 
 
 @app.route('/calendario')
 def calendario():
+    arr_terr = db_execute('select * from terrazas')
     picture = session['profile']['picture']
-    return render_template('calendar_events.html', picture=picture)
+    return render_template('calendar_events.html', picture=picture, terrazas=arr_terr)
 
 
 @app.route('/calendario_ini/remote')
@@ -581,8 +595,8 @@ def calendario_ini():
     if callback in "in mbsc_jsonp_comp_demo-responsive-month-view":
         test_cal = '''try { window['mbsc_jsonp_comp_demo-responsive-month-view']('{"calendar":{},"datetime":{"wheels":[[{"cssClass":"mbsc-dt-whl-d","label":"Día","data":[{"value":1,"display":"1"},{"value":2,"display":"2"},{"value":3,"display":"3"},{"value":4,"display":"4"},{"value":5,"display":"5"},{"value":6,"display":"6"},{"value":7,"display":"7"},{"value":8,"display":"8"},{"value":9,"display":"9"},{"value":10,"display":"10"},{"value":11,"display":"11"},{"value":12,"display":"12"},{"value":13,"display":"13"},{"value":14,"display":"14"},{"value":15,"display":"15"},{"value":16,"display":"16"},{"value":17,"display":"17"},{"value":18,"display":"18"},{"value":19,"display":"19"},{"value":20,"display":"20"},{"value":21,"display":"21"},{"value":22,"display":"22"},{"value":23,"display":"23"},{"value":24,"display":"24"},{"value":25,"display":"25"},{"value":26,"display":"26"},{"value":27,"display":"27"},{"value":28,"display":"28"},{"value":29,"display":"29"},{"value":30,"display":"30"},{"value":31,"display":"31"}]},{"cssClass":"mbsc-dt-whl-m","label":"Mes","data":[{"value":0,"display":"<span class=\\\\"mbsc-dt-month\\\\">Enero</span>"},{"value":1,"display":"<span class=\\\\"mbsc-dt-month\\\\">Febrero</span>"},{"value":2,"display":"<span class=\\\\"mbsc-dt-month\\\\">Marzo</span>"},{"value":3,"display":"<span class=\\\\"mbsc-dt-month\\\\">Abril</span>"},{"value":4,"display":"<span class=\\\\"mbsc-dt-month\\\\">Mayo</span>"},{"value":5,"display":"<span class=\\\\"mbsc-dt-month\\\\">Junio</span>"},{"value":6,"display":"<span class=\\\\"mbsc-dt-month\\\\">Julio</span>"},{"value":7,"display":"<span class=\\\\"mbsc-dt-month\\\\">Agosto</span>"},{"value":8,"display":"<span class=\\\\"mbsc-dt-month\\\\">Septiembre</span>"},{"value":9,"display":"<span class=\\\\"mbsc-dt-month\\\\">Octubre</span>"},{"value":10,"display":"<span class=\\\\"mbsc-dt-month\\\\">Noviembre</span>"},{"value":11,"display":"<span class=\\\\"mbsc-dt-month\\\\">Diciembre</span>"}]},{"cssClass":"mbsc-dt-whl-y","label":"A&ntilde;o","data":"function getYearValue(i, inst) {\\\\r\\\\n    var s = inst.settings;\\\\r\\\\n    return {\\\\r\\\\n      value: i,\\\\r\\\\n      display: (/yy/i.test(s.dateDisplay) ? i : (i + \\'\\').substr(2, 2)) + (s.yearSuffix || \\'\\')\\\\r\\\\n    };\\\\r\\\\n  }","getIndex":"function getYearIndex(v) {\\\\r\\\\n    return v;\\\\r\\\\n  }"}]],"wheelOrder":{"d":0,"m":1,"y":2},"isoParts":{"y":1,"m":1,"d":1}},"html1":"<div lang=\\\\"es\\\\" class=\\\\"mbsc-fr mbsc-no-touch mbsc-ios","html2":" mbsc-fr-nobtn\\\\"><div class=\\\\"mbsc-fr-popup mbsc-ltr","html3":"<div class=\\\\"mbsc-fr-w\\\\"><div aria-live=\\\\"assertive\\\\" class=\\\\"mbsc-fr-aria mbsc-fr-hdn\\\\"></div>","html4":"</div></div></div></div></div>"}'); } catch (ex) {}'''
     elif "mbsc_jsonp_comp_" in callback:
-        id_num_cal = str(callback).replace("mbsc_jsonp_comp_",'')
-        head_cal = ("try { window['mbsc_jsonp_comp_" + id_num_cal +  "']")
+        id_num_cal = str(callback).replace("mbsc_jsonp_comp_", '')
+        head_cal = ("try { window['mbsc_jsonp_comp_" + id_num_cal + "']")
         tail_cal = '''('{"html1":"<div lang=\\\\"es\\\\" class=\\\\"mbsc-fr mbsc-no-touch mbsc-ios","html2":" mbsc-fr-nobtn\\\\"><div class=\\\\"mbsc-fr-persp\\\\"><div role=\\\\"dialog\\\\" class=\\\\"mbsc-fr-scroll\\\\"><div class=\\\\"mbsc-fr-popup mbsc-ltr","html3":"<div class=\\\\"mbsc-fr-focus\\\\" tabindex=\\\\"-1\\\\"></div><div class=\\\\"mbsc-fr-w\\\\"><div aria-live=\\\\"assertive\\\\" class=\\\\"mbsc-fr-aria mbsc-fr-hdn\\\\"></div>","html4":"</div></div></div></div></div></div></div>"}'); } catch (ex) {}'''
         test_cal = head_cal + tail_cal
     return test_cal
@@ -590,48 +604,39 @@ def calendario_ini():
 
 @app.route('/calendario_data')
 def test_calendario():
+    colores = {1: "#fd7e14",
+               2: "#6f42c1",
+               3: "#e83e8c",
+               4: "#e74a3b",
+               5: "#fd7e14",
+               6: "#f6c23e",
+               7: "#1cc88a"}
+    arr_evetos_aprobados = db_execute("select t2.id_terrazas, t2.terraza, e.dia from eventos e, terrazas t2 where "
+                                      "e.estado = 'Aprobado' and t2.terraza = e.terraza")
+    arr_cal = []
+    for event in arr_evetos_aprobados:
+        start = event['dia']
+        text = event['terraza']
+        color = colores[event['id_terrazas']]
+        arr_cal.append({"start": start, "text": text, "color": color})
+    events_json = json.dumps(arr_cal, indent=4)
     if request.method == 'GET':
         coto = request.args.get('coto')
         print(coto)
 
-    test = '''try {
-    mbscjsonp1([{
-                "start": "2020-10-12T07:00:00.000Z",
-                "end": "2020-10-12T08:00:00.000Z",
-                "text": "Area Comun.",
-                "color": "#f67944"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Wifi",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Alberca",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-13T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Area Comun",
-                "color": "#6e7f29"
-            }, {
-                "start": "2020-10-12T07:00:00.000Z",
-                "end": "2020-10-13T07:15:00.000Z",
-                "text": "Terraza Wifi",
-                "color": "#6e7f29"
-            },
-        ]);
-} catch (ex) {}'''
+    test = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
     return test
+
 
 @app.route('/avisodeprivacidad')
 def avisodeprivacidad():
     return render_template('avisodeprivacidad.html')
 
+
 @app.route('/crearevento', methods=['GET', 'POST'])
 @is_logged_in
 def peticionevento():
+    arr_terr = db_execute('select * from terrazas')
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
@@ -654,182 +659,152 @@ def peticionevento():
                 flash('Por favor selecciona una terraza del listado', 'danger')
             else:
                 try:
-                    cur.execute("INSERT INTO eventos(terraza, nombre, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
-                    terraza, name, email, fechaevento))
+                    cur.execute(
+                        "INSERT INTO eventos(terraza, nombre, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
+                            terraza, name, email, fechaevento))
 
                     mysql.commit()
-                    flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe', 'success')
-                    #insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES
-  #  (
-  #  (SELECT id_usuario FROM usuarios where email = '{email}'),
-  # (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
-  #  (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
-  #  );"""
-    #                cur.execute(insert_asoc_qr_usuario)
-    #                mysql.commit()
+                    flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe',
+                          'success')
+                    # insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES
+                    #  (
+                    #  (SELECT id_usuario FROM usuarios where email = '{email}'),
+                    # (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
+                    #  (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
+                    #  );"""
+                    #                cur.execute(insert_asoc_qr_usuario)
+                    #                mysql.commit()
                     cur.close()
                 except:
                     flash(f'Evento no creado correctamente', 'danger')
-                    return render_template('calendar_events.html', name=name, picture=picture, now=now)
-                return render_template('calendar_events.html', name=name, picture=picture, now=now)
+                    return render_template('calendar_events.html', name=name, picture=picture, now=now,
+                                           terrazas=arr_terr)
+                return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
         except:
             flash(f'Revisa todos los campos', 'danger')
-            return render_template('calendar_events.html', name=name, picture=picture, now=now)
+            return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
 
-    return render_template('calendar_events.html', name=name, picture=picture, now=now)
+    return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
 
-@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'] )
+
+@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 def gestioneventos():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
+    email = session['profile']['email']
     now = ct
-    now = datetime.strftime((now),"%Y-%m-%d")
-    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-    eventos = cur.fetchall()
+    now = datetime.strftime((now), "%Y-%m-%d")
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia >= '%s';" % now)
     array_eventos = []
     for row in eventos:
-        estado = (row[5])
-        email = (row[3])
-        nombre = (row[2])
-        terraza = (row[1])
-        dia = (row[4])
-        domicilio = (row[11])
-        telefono = (row[13])
-        id_eventos = (row[0])
+        estado = (row['estado'])
+        email = (row['correo'])
+        nombre = (row['nombre'])
+        terraza = (row['terraza'])
+        dia = (row['dia'])
+        domicilio = (row['domicilio'])
+        telefono = (row['telefono'])
+        id_eventos = (row['id_eventos'])
 
         array_eventos.append({'estado': (estado),
-                      'id_eventos': id_eventos,
-                      'email': email,
-                      'nombre': nombre,
-                      'terraza': terraza,
-                      'domicilio': domicilio,
-                      'telefono' : telefono,
-                      'dia': dia})
+                              'id_eventos': id_eventos,
+                              'email': email,
+                              'nombre': nombre,
+                              'terraza': terraza,
+                              'domicilio': domicilio,
+                              'telefono': telefono,
+                              'dia': dia})
 
-    if int(result.rowcount) > 0:
-        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
+    if len(eventos) > 0:
+        return render_template('gestioneventos.html', eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture,msg=msg)
+        return render_template('gestioneventos.html', eventos=array_eventos, msg=msg)
 
-    cur.close()
 
 @app.route('/acteventos', methods=['POST'])
 @is_user
 @is_logged_in
 def acteventos():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     now = ct
     now = datetime.strftime((now), "%Y-%m-%d")
-    result1 = cur.execute(
-        "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-    eventos = cur.fetchall()
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia >= '%s';" % now)
     array_eventos = []
-    print(now)
-    if request.method == "POST":
+    if request.method == 'POST':
         eventsvalue = request.form['mycheckboxE']
         eventsid = request.form['idhidden']
         terraza = request.form['terrazahidden']
-        cur.execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)
-        dia = cur.fetchone()
+        print(eventsvalue, eventsid, terraza)
+        dia = db_execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)[0]['dia']
         print(eventsvalue)
         print(eventsid)
         print(terraza)
-        print(dia[0])
-        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'")
-        validador = cur.execute(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia[0]}' AND estado = 'Aprobado'").fetchone()
+        print(dia)
+        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
+        validador = db_execute(
+            f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
         print(validador)
-        if validador != None and eventsvalue == 'Aprobado':
-            flash(f'La terraza {terraza} ya esta apartada el dia {dia[0]}, revisa fecha', 'danger')
+        if len(validador) > 0 and eventsvalue == 'Aprobado':
+            flash(f'La terraza {terraza} ya esta apartada el dia {dia}, revisa fecha', 'danger')
             return redirect(url_for('gestioneventos'))
         else:
-            cur.execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
-            mysql.commit()
-            cur.execute(
+            db_execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
+            db_execute(
                 "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-            eventos = cur.fetchall()
-            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia[0]} con éxito', 'success')
-            array_eventos = []
-            cur.close()
+            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia} con éxito', 'success')
+            return redirect(url_for('gestioneventos'))
 
-            for row in eventos:
-                estado = (row[5])
-                email = (row[3])
-                nombre = (row[2])
-                terraza = (row[1])
-                dia = (row[4])
-                domicilio = (row[11])
-                telefono = (row[13])
-                id_eventos = (row[0])
+        return redirect(url_for('gestioneventos'))
 
-                array_eventos.append({'estado': (estado),
-                                      'id_eventos': id_eventos,
-                                      'email': email,
-                                      'nombre': nombre,
-                                      'terraza': terraza,
-                                      'domicilio': domicilio,
-                                      'telefono': telefono,
-                                      'dia': dia})
-            return render_template('gestioneventos.html', eventos=array_eventos, name=name, picture=picture)
-    return render_template('gestioneventoshistoricos.html', eventos=array_eventos, name=name, picture=picture)
+    return redirect(url_for('gestioneventos'))
 
 
-@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'] )
+@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 def gestioneventoshistorico():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
     now = ct
     now = str(now)
-    result = cur.execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia < '%s';" % now)
-    eventos = cur.fetchall()
-    array = []
+    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
+                         "AND eventos.dia < '%s';" % now)
+    array_eventos = []
     for row in eventos:
-        estado = (row[5])
-        email = (row[3])
-        nombre = (row[2])
-        terraza = (row[1])
-        dia = (row[4])
-        domicilio = (row[11])
-        telefono = (row[13])
-        id_eventos = (row[0])
+        estado = (row['estado'])
+        email = (row['correo'])
+        nombre = (row['nombre'])
+        terraza = (row['terraza'])
+        dia = (row['dia'])
+        domicilio = (row['domicilio'])
+        telefono = (row['telefono'])
+        id_eventos = (row['id_eventos'])
 
-        array.append({'estado': (estado),
-                      'id_eventos': id_eventos,
-                      'email': email,
-                      'nombre': nombre,
-                      'terraza': terraza,
-                      'domicilio': domicilio,
-                      'telefono' : telefono,
-                      'dia': dia})
+        array_eventos.append({'estado': (estado),
+                              'id_eventos': id_eventos,
+                              'email': email,
+                              'nombre': nombre,
+                              'terraza': terraza,
+                              'domicilio': domicilio,
+                              'telefono': telefono,
+                              'dia': dia})
 
-    if int(result.rowcount) > 0:
-        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture)
+    if len(eventos) > 0:
+        return render_template('gestioneventoshistorico.html', eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventoshistorico.html', eventos=array, name=name, picture=picture,msg=msg)
+        return render_template('gestioneventoshistorico.html', eventos=array_eventos, msg=msg)
     cur.close()
 
 
@@ -854,7 +829,7 @@ def articles():
     cur.close()
 
 
-#Single Article
+# Single Article
 @app.route('/article/<string:id>/')
 def article(id):
     # Create cursor
@@ -869,11 +844,7 @@ def article(id):
     return render_template('article.html', article=article)
 
 
-
-
-
-
-#unique
+# unique
 
 
 @app.route('/unique', methods=['GET', 'POST'])
@@ -884,23 +855,18 @@ def unique():
     return render_template('unique.html')
 
 
-
-
-
-
 # Dashboard
 @app.route('/dashboardpaborrar')
 @is_logged_in
 @is_user
 def dashboardpaboorar():
-
     mysql = sqlite3.connect('qr.db')
     # Create cursor
     cur = mysql.cursor()
 
     # Get articles
-    #result = cur.execute("SELECT * FROM articles")
-    # Show articles only from the user logged in 
+    # result = cur.execute("SELECT * FROM articles")
+    # Show articles only from the user logged in
     result = cur.execute("SELECT * FROM articles WHERE author = \"%s\"" % session['username'])
 
     articles = cur.fetchall()
@@ -912,10 +878,10 @@ def dashboardpaboorar():
         body = (row[2])
         author = (row[3])
 
-        array.append({'id' : int(id),
-                      'title' : title,
-                      'body' : body,
-                      'author' : author})
+        array.append({'id': int(id),
+                      'title': title,
+                      'body': body,
+                      'author': author})
 
     print(array)
 
@@ -929,14 +895,11 @@ def dashboardpaboorar():
     cur.close()
 
 
-
-
-
-
 # Article Form Class
 class ArticleForm(Form):
     title = StringField('Title', [validators.Length(min=1, max=200)])
     body = TextAreaField('Body', [validators.Length(min=30)])
+
 
 # Add Article
 @app.route('/add_article', methods=['GET', 'POST'])
@@ -952,12 +915,13 @@ def add_article():
         cur = mysql.cursor()
 
         # Execute
-        cur.execute("INSERT INTO articles(title, body, author) VALUES(\"%s\", \"%s\", \"%s\")" % (title, body, session['username']))
+        cur.execute("INSERT INTO articles(title, body, author) VALUES(\"%s\", \"%s\", \"%s\")" % (
+        title, body, session['username']))
 
         # Commit to DB
         mysql.commit()
 
-        #Close connection
+        # Close connection
         cur.close()
 
         flash('Article Created', 'success')
@@ -977,7 +941,6 @@ def edit_article(id):
 
     # Get article by id
 
-
     article = cur.execute("SELECT * FROM articles WHERE article_id = \"%s\"" % id).fetchall()
 
     # Get form
@@ -993,10 +956,10 @@ def edit_article(id):
         body = (row[2])
         author = (row[3])
 
-        art.append({'id' : int(id),
-                      'title' : title,
-                      'body' : body,
-                      'author' : author})
+        art.append({'id': int(id),
+                    'title': title,
+                    'body': body,
+                    'author': author})
 
     cur.close()
     # Populate article form fields
@@ -1011,11 +974,11 @@ def edit_article(id):
         cur = mysql.cursor()
         app.logger.info(title)
         # Execute
-        cur.execute ("UPDATE articles SET title=\"%s\", body=\"%s\" WHERE article_id=\"%s\"" % (title, body, id))
+        cur.execute("UPDATE articles SET title=\"%s\", body=\"%s\" WHERE article_id=\"%s\"" % (title, body, id))
         # Commit to DB
         mysql.commit()
 
-        #Close connection
+        # Close connection
         cur.close()
 
         flash('Article Updated', 'success')
@@ -1023,6 +986,7 @@ def edit_article(id):
         return redirect(url_for('dashboard'))
 
     return render_template('edit_article.html', form=form)
+
 
 # Delete Article
 @app.route('/delete_article/<string:id>', methods=['POST'])
@@ -1038,7 +1002,7 @@ def delete_article(id):
     # Commit to DB
     mysql.commit()
 
-    #Close connection
+    # Close connection
     cur.close()
 
     flash('Article Deleted', 'success')
