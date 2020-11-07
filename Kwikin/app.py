@@ -402,6 +402,16 @@ def gestionqrhistorico():
         id_qr = (row['id_qr'])
         codigo_qr = (row['codigo_qr'])
         print(qrh)
+        array_qrh.append({'Nombre': Nombre,
+                         'Entrada': Entrada,
+                         'Salida': Salida,
+                         'entrada_real': entrada_real,
+                         'fin_real': fin_real,
+                         'estado': estado,
+                         'email_qr': email_qr,
+                         'placas': placas,
+                         'codigo_qr': codigo_qr,
+                         'id_qr': id_qr})
     return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now)
 
 @app.route('/actqr', methods=['POST'])
