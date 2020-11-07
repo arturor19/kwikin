@@ -93,7 +93,7 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for codigoh in qrh %}
              <tr>
-                 <td <a href="#" data-toggle="modal" data-target='#editqrh{{ codigoh.id_qr }}'>{{codigoh.Nombre}}</a></td>
+                 <td><a href=# data-toggle="modal" data-target='#editqrh{{ codigoh.id_qr }}'>{{codigoh.Nombre}}</a></td>
                  <td {% if codigoh.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigoh.Entrada}}</a></td>
                  <td {% if codigoh.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigoh.Salida}}</a></td>
 
@@ -126,13 +126,8 @@ $.extend( true, $.fn.dataTable.defaults, {
                             <input disabled type="Text" class="form-control" value="{{ codigoh.Salida }}" name="codigoSalidah">
                          </div>
                                <div class="form-group">
-                                   <label>Estado</label>
-                                   <Select class="custom-select" id={{codigoh.id_qr}} name="mycheckboxQRH">
-                                       <option Selected value="{{codigoh.estado}}">{{codigoh.estado}}</option>
-                                       <option value="Activo">Activo</option>
-                                       <option value="Inactivo">Inactivo</option>
-                                       <label class="custom-control-label" for={{codigoh.id_qr}}></label>
-                                    </Select>
+                                    <label>Estado</label>
+                                    <input disabled type="Text" class="form-control" value="{{ codigoh.estado }}" name="codigoEstadoh">
                                </div>
 
 
@@ -152,8 +147,6 @@ $.extend( true, $.fn.dataTable.defaults, {
 
 					<div class="modal-footer">
 						<input type="button" class="btn btn-default" name="cerrarqrhgestion"  data-dismiss="modal" value="Cerrar">
-                        <button type="submit" name="actqrh" id="actqrh" value="ver" class="btn btn-outline-primary float-sm-right" style="width:100px"><i class="fa fa-qrcode"></i> Ver</button>
-
                     </div>
 
 
