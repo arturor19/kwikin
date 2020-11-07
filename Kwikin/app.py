@@ -124,23 +124,15 @@ def peticionqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
-    now = ct.strftime("%Y-%m-%d %H:%M:%S")
+    now = ct.strftime("%Y-%m-%d %H:%M")
     array_qr = []
-    print(f"""SELECT * from qr q , asoc_qr_usuario aqu , usuarios u 
-where 
-q.id_qr = aqu.id_qr and
-q.id_qr = u.id_usuario and 
-q.estado = 'Activo' and
-u.email = '{email}' and 
-q.fin >= '{now[0:19]}'""")
     qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
 where 
 aqu.id_qr = q.id_qr AND 
 u.email = '{email}' and
 q.fin >= '{now}' AND 
 q.estado = 'Activo'""")
-    print(now)
-    print(json.dumps(qr, indent=4))
+
     for row in qr:
         Nombre = (row['visitante'])
         Entrada = (row['inicio'])
@@ -163,7 +155,7 @@ q.estado = 'Activo'""")
                          'placas': placas,
                          'codigo_qr': codigo_qr,
                          'id_qr': id_qr})
-        print(json.dumps(array_qr, indent=4))
+
     if request.method == 'POST':
         tzone = ct.strftime("%Y-%m-%dT%H:%M")
         qr_ent = str(request.form['dateE'])
@@ -202,8 +194,6 @@ q.estado = 'Activo'""")
             id_qr = db_execute(("SELECT id_qr FROM qr WHERE codigo_qr = '%s';" % codigo_qr))[0]['id_qr']
 
             db_execute("INSERT INTO asoc_qr_usuario(id_usuario, id_qr) VALUES (\"%s\", \"%s\")" % (id_usuario, id_qr))
-            return redirect(
-                url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida, qr=array_qr))
 
         except:
             flash(f'Codigo no creado correctamente', 'danger')
@@ -394,13 +384,12 @@ def actqr():
     now = ct
     now = str(now)
     array_qr = []
-    qr = db_execute(f"""SELECT * from qr q , asoc_qr_usuario aqu , usuarios u 
+    qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
     where 
-    q.id_qr = aqu.id_qr and
-    q.id_qr = u.id_usuario and 
-    q.estado = 'Activo' and
-    u.email = '{email}' and 
-    q.fin <= CURRENT_TIMESTAMP""")
+    aqu.id_qr = q.id_qr AND 
+    u.email = '{email}' and
+    q.fin >= '{now}' AND 
+    q.estado = 'Activo'""")
 
     for row in qr:
         Nombre = (row['visitante'])
@@ -415,21 +404,28 @@ def actqr():
         codigo_qr = (row['codigo_qr'])
 
     if request.method == "POST":
-        qrid = request.form['idqrhidden']
-        estado = request.form['mycheckboxQR']
-        print(estado)
+        if request.form['actqr'] == 'act':
+            qrid = request.form['idqrhidden']
+            visitante = request.form['codigovisitante']
+            correo_visitante = request.form['codigoemailvisitante']
+            placas_visitante = request.form['codigoplacas']
+            entrada_visitante = request.form['codigoEntrada']
+            salida_visitante = request.form['codigoSalida']
 
-        result = db_execute("SELECT estado FROM qr WHERE id_qr = '%s';" % qrid)
+            try:
+                db_execute(f"UPDATE qr SET estado = '{estado}', visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}' WHERE id_qr = '{qrid}'")
 
-        print(qrid)
-
-        try:
-            db_execute(f"UPDATE qr SET estado = '{estado}' WHERE id_qr = '{qrid}'")
-            print(db_execute("SELECT estado FROM qr WHERE id_qr = '{qrid}'"))
-            return redirect(url_for('peticionqr', qr=array_qr))
-        except:
-            flash(f'No se pudo eliminar el registro', 'danger')
-            return redirect(url_for('peticionqr', qr=array_qr))
+                return redirect(url_for('peticionqr', qr=array_qr))
+            except:
+                flash(f'No se pudo eliminar el registro', 'danger')
+                return redirect(url_for('peticionqr', qr=array_qr))
+        elif request.form['actqr'] == 'ver':
+            if request.method == 'POST':
+                codigo_qr = request.form['qrhidden']
+                fecha_entrada = request.form['starthidden']
+                fecha_salida = request.form['endhidden']
+                return redirect(
+                    url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
     return redirect(url_for('peticionqr', qr=array_qr))
 
 
