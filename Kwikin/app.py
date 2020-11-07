@@ -372,6 +372,37 @@ def actdom():
     cur.close()
     return render_template('gestiondimicilios.html', name=name, picture=picture)
 
+@app.route('/gestionqrhistorico', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def gestionqrhistorico():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    tzone = ct
+    email = dict(session)['profile']['email']
+    now = ct
+    now = str(now)
+    array_qrh = []
+    qrh = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
+    where 
+    aqu.id_qr = q.id_qr AND 
+    u.email = '{email}' and
+    q.fin <= '{now}' AND 
+    q.estado = 'Inactivo'""")
+
+    for row in qrh:
+        Nombre = (row['visitante'])
+        Entrada = (row['inicio'])
+        Salida = (row['fin'])
+        email_qr = (row['correo_visitante'])
+        placas = (row['placas'])
+        entrada_real = (row['inicio_real'])
+        fin_real = (row['fin_real'])
+        estado = (row['estado'])
+        id_qr = (row['id_qr'])
+        codigo_qr = (row['codigo_qr'])
+        print(qrh)
+    return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now)
 
 @app.route('/actqr', methods=['POST'])
 @is_user
@@ -411,6 +442,7 @@ def actqr():
             placas_visitante = request.form['codigoplacas']
             entrada_visitante = request.form['codigoEntrada']
             salida_visitante = request.form['codigoSalida']
+            estado = request.form['mycheckboxQR']
 
             try:
                 db_execute(f"UPDATE qr SET estado = '{estado}', visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}' WHERE id_qr = '{qrid}'")
