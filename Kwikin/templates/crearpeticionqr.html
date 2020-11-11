@@ -127,15 +127,12 @@ $.extend( true, $.fn.dataTable.defaults, {
                             <label>Hasta</label>
                             <input type="Text" class="form-control" value="{{ codigo.Salida }}" name="codigoSalida">
                          </div>
-                               <div class="form-group">
-                                   <label>Estado</label>
-                                   <Select class="custom-select" id={{codigo.id_qr}} name="mycheckboxQR">
-                                       <option Selected value="{{codigo.estado}}">{{codigo.estado}}</option>
-                                       <option value="Activo">Activo</option>
-                                       <option value="Inactivo">Inactivo</option>
-                                       <label class="custom-control-label" for={{codigo.id_qr}}></label>
-                                    </Select>
-                               </div>
+                         <div class="form-group">
+                            <input type="checkbox" name="codigoentro" data-toggle="toggle" data-on="<i class='fa fa-car'></i> Entró" data-off="<i class='fa fa-arrow-right'></i> Salió" data-onstyle="primary" data-offstyle="secondary" data-width="120" {{'checked' if codigo.entro == "Entro" else ''}}>
+                         </div>
+                         <div class="form-group">
+                            <input type="checkbox" name="mycheckboxQR" id={{codigo.id_qr}} data-toggle="toggle" data-on="<i class='fa fa-check'></i> Activo" data-off="<i class='fa fa-times'></i> Inactivo" data-onstyle="primary" data-offstyle="secondary" data-width="120" {{'checked' if codigo.estado == "Activo" else ''}}>
+                         </div>
 
 
                                 <div class="form-group">

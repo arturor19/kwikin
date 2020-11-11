@@ -94,8 +94,8 @@ $.extend( true, $.fn.dataTable.defaults, {
             {% for codigoh in qrh %}
              <tr>
                  <td><a href=# data-toggle="modal" data-target='#editqrh{{ codigoh.id_qr }}'>{{codigoh.Nombre}}</a></td>
-                 <td {% if codigoh.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigoh.Entrada}}</a></td>
-                 <td {% if codigoh.estado == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{codigoh.Salida}}</a></td>
+                 <td><a>{{codigoh.Entrada}}</a></td>
+                 <td><a>{{codigoh.Salida}}</a></td>
 
              </tr>
     <div class="modal fade" id="editqrh{{ codigoh.id_qr }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -128,6 +128,10 @@ $.extend( true, $.fn.dataTable.defaults, {
                                <div class="form-group">
                                     <label>Estado</label>
                                     <input disabled type="Text" class="form-control" value="{{ codigoh.estado }}" name="codigoEstadoh">
+                               </div>
+                                 <div class="form-group">
+                                    <label>Estado Acceso</label>
+                                    <input disabled type="Text" class="form-control" value="{{ codigoh.estado_acceso }}" name="codigoEstadoaccesoh">
                                </div>
 
 

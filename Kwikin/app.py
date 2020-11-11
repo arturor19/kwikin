@@ -124,12 +124,13 @@ def peticionqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
+    usuario_id = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{email}'")[0]['id_usuario']
     now = ct.strftime("%Y-%m-%d %H:%M")
     array_qr = []
-    qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
+    qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu 
 where 
 aqu.id_qr = q.id_qr AND 
-u.email = '{email}' and
+aqu.id_usuario = '{usuario_id}' and
 q.fin >= '{now}' AND 
 q.estado = 'Activo'""")
 
@@ -381,14 +382,17 @@ def gestionqrhistorico():
     tzone = ct
     email = dict(session)['profile']['email']
     now = ct
+    usuario_id = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{email}'")[0]['id_usuario']
     now = str(now)
     array_qrh = []
-    qrh = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
+    qrh = db_execute(f"""SELECT * from qr q , asoc_qr_usuario aqu 
     where 
-    aqu.id_qr = q.id_qr AND 
-    u.email = '{email}' and
-    q.fin <= '{now}' AND 
-    q.estado = 'Inactivo'""")
+    (aqu.id_qr = q.id_qr AND
+    aqu.id_usuario = '{usuario_id}' AND
+    q.fin <= '{now}') or 
+    (aqu.id_qr = q.id_qr AND 
+    aqu.id_usuario = '{usuario_id}' AND
+    q.estado = 'Inactivo')""")
 
     for row in qrh:
         Nombre = (row['visitante'])
@@ -401,7 +405,7 @@ def gestionqrhistorico():
         estado = (row['estado'])
         id_qr = (row['id_qr'])
         codigo_qr = (row['codigo_qr'])
-        print(qrh)
+        estado_acceso = (row['estado_acceso'])
         array_qrh.append({'Nombre': Nombre,
                          'Entrada': Entrada,
                          'Salida': Salida,
@@ -410,6 +414,7 @@ def gestionqrhistorico():
                          'estado': estado,
                          'email_qr': email_qr,
                          'placas': placas,
+                         'estado_acceso': estado_acceso,
                          'codigo_qr': codigo_qr,
                          'id_qr': id_qr})
     return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now)
@@ -443,6 +448,7 @@ def actqr():
         estado = (row['estado'])
         id_qr = (row['id_qr'])
         codigo_qr = (row['codigo_qr'])
+        entro = (row['estado_acceso'])
 
     if request.method == "POST":
         if request.form['actqr'] == 'act':
@@ -452,10 +458,20 @@ def actqr():
             placas_visitante = request.form['codigoplacas']
             entrada_visitante = request.form['codigoEntrada']
             salida_visitante = request.form['codigoSalida']
-            estado = request.form['mycheckboxQR']
+            #estado = request.form['mycheckboxQR']
+            checkestado = request.form.get('mycheckboxQR')
+            checkentro = request.form.get('codigoentro')
+            if checkestado == 'on':
+                estado = "Activo"
+            else:
+                estado = "Inactivo"
+            if checkentro == 'on':
+                estado_acceso = "Entro"
+            else:
+                estado_acceso = "Salio"
 
             try:
-                db_execute(f"UPDATE qr SET estado = '{estado}', visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}' WHERE id_qr = '{qrid}'")
+                db_execute(f"UPDATE qr SET estado = '{estado}', visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}', estado_acceso ='{estado_acceso}' WHERE id_qr = '{qrid}'")
 
                 return redirect(url_for('peticionqr', qr=array_qr))
             except:
