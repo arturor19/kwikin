@@ -186,13 +186,14 @@ q.estado = 'Activo'""")
         nombre = request.form['nombreqr']
         placas = request.form['placasqr']
         emailqr = request.form['emailqr']
+        tipoqr = request.form['tipoqr']
         timestamp = now
         codigo_qr = hex(int(time.time() * 100))
         qr = qrcode(codigo_qr, mode="raw", start_date=fecha_entrada, end_date=fecha_salida)
         try:
             db_execute(
-                "INSERT INTO qr(codigo_qr, visitante, inicio, fin, placas, correo_visitante, timestamp) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-                    codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr, timestamp))
+                "INSERT INTO qr(codigo_qr, visitante, inicio, fin, placas, correo_visitante, timestamp, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+                    codigo_qr, nombre, fecha_entrada, fecha_salida, placas, emailqr, timestamp, tipoqr))
             id_usuario = db_execute(("SELECT id_usuario FROM usuarios WHERE email = '%s';" % email))[0]['id_usuario']
             id_qr = db_execute(("SELECT id_qr FROM qr WHERE codigo_qr = '%s';" % codigo_qr))[0]['id_qr']
 
