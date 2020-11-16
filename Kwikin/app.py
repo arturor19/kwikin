@@ -301,29 +301,54 @@ def upload():
 @is_user
 @is_logged_in
 def gestionusuarios():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
-    result = cur.execute("SELECT * FROM usuarios")
-    usuarios = cur.fetchall()
+    usuarios = db_execute("SELECT * FROM usuarios")
     array = []
     for row in usuarios:
-        status = (row[4])
-        email = (row[3])
-        nombre = (row[1])
-        domicilio = (row[5])
+        id_usuario = (row['id_usuario'])
+        status = (row['status'])
+        email = (row['email'])
+        nombre = (row['nombre'])
+        domicilio = (row['domicilio'])
+        telefono = (row['telefono'])
 
         array.append({'status': (status),
+                      'id_usuario': id_usuario,
                       'email': email,
                       'nombre': nombre,
+                      'telefono': telefono,
                       'domicilio': domicilio})
-    if int(result.rowcount) > 0:
-        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture)
+    if len(usuarios) > 0:
+        return render_template('gestionusuarios.html', usuarios=array)
     else:
-        msg = 'No hay usuarios asociados al coto'
-        return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture, msg=msg)
-    cur.close()
+        flash('No hay usuarios asociados al coto', 'danger')
+        return render_template('gestionusuarios.html', usuarios=array)
+
+
+@app.route('/actusuarioinfo', methods=['POST'])
+@is_user
+@is_logged_in
+def actusuarioinfo():
+    if request.method == "POST":
+        if request.form['actusuarioinfo'] == 'actu':
+            idusuario = request.form['idusuariohidden']
+            domicilio_usuario = request.form['domiciliousuario']
+            telefono_usuario = request.form['telefonousuario']
+            try:
+                db_execute(f"UPDATE usuarios SET  domicilio = '{domicilio_usuario}', telefono = '{telefono_usuario}' WHERE id_usuario = '{idusuario}'")
+                return redirect(url_for('gestionusuarios'))
+            except:
+                flash(f'No se pudo actualizar el registro', 'danger')
+                return redirect(url_for('gestionusuarios'))
+        elif request.form['actusuarioinfo'] == 'elim':
+            if request.method == 'POST':
+                try:
+                    idusuario = request.form['idusuariohidden']
+                    db_execute(f"DELETE FROM usuarios WHERE id_usuario = '{idusuario}' ")
+                    return redirect(url_for('gestionusuarios'))
+                except:
+                    flash(f'No se pudo eliminar el registro', 'danger')
+                    return redirect(url_for('gestionusuarios'))
+    return redirect(url_for('gestionusuarios'))
 
 @app.route('/actestadoqr', methods=['POST'])
 @is_user

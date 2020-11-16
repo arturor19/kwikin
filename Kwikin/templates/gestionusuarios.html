@@ -85,7 +85,6 @@ $.extend( true, $.fn.dataTable.defaults, {
       <thead>
         <tr>
           <th>Activo</th>
-          <th>Correo</th>
           <th>Nombre</th>
           <th>Dirección</th>
         </tr>
@@ -100,17 +99,114 @@ $.extend( true, $.fn.dataTable.defaults, {
                      <div class="custom-control custom-checkbox">
                          <input type="checkbox" class="custom-control-input" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} {{'checked' if usuario.status == "Activo" else ''}}>
                          <label class="custom-control-label" for={{usuario.email}}></label>
-                <td><a name="elcorreo" value={{usuario.email}} href="mailto:{{usuario.email}}">{{usuario.email}}</td>
-                <td><a>{{usuario.nombre}}</a></td>
+                <td><a href="#" data-toggle="modal" data-target='#editusuario{{ usuario.id_usuario }}'>{{usuario.nombre}}</a></td>
                 <td><a>{{usuario.domicilio}}</a></td>
              </tr>
+             <div class="modal fade" id="editusuario{{ usuario.id_usuario }}" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="post" action="/actusuarioinfo">
+					<div class="modal-header">
+						<h4 class="modal-title">Información</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					 <div class="modal-body">
+                         <div class="form-group">
+                            <label>Nombre</label>
+                            <input disabled type="text" class="form-control" value="{{ usuario.nombre }}" name="nombreusuario">
+                         </div>
+                         <div class="form-group">
+                            <label>Email</label>
+                            <input disabled type="email" value="{{ usuario.email }}" name="correousuario" class="form-control">
+                         </div>
+                         <div class="form-group">
+                            <label>Direccion</label>
+                            <input type="Text" class="form-control" value="{{ usuario.domicilio }}" name="domiciliousuario">
+                         </div>
+                         <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="Text" class="form-control" value="{{ usuario.telefono }}" name="telefonousuario">
+                         </div>
+                         <div class="form-group">
+                             <input {% if usuario.grupo == "guardia" %} type="Text" disabled value="usuario.grupo" {% endif %} type="checkbox" id="{{ usuario.email }}" name="mycheckboxusuario" data-toggle="toggle"  data-on="<i class='fa fa-key'></i> Administrador" data-off="<i class='fa fa-home'></i> Residente" data-onstyle="success" data-offstyle="primary" data-width="170" {% if usuario.grupo == "Administrador" %} checked {% endif %}>
+                         </div>
+                         <div class="form-group">
+                            <input hidden type="Text"  value="{{ usuario.id_usuario }}" name="idusuariohidden">
+                         </div>
+
+
+                      </div>
+
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" name="cerrarusuariogestion"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="actusuarioinfo" id="actusuarioinfo" value="elim" class="btn btn-danger" style="width:100px"> Eliminar</button>
+                        <button type="submit" name="actusuarioinfo" id="actusuarioinfo" value="actu" class="btn btn-primary" style="width:100px"> Actualizar</button>
+
+                    </div>
+
+
+
+				</form>
+			</div>
+		</div>
+	</div>
+      <script>
+
+     $(document).ready(function($) {
+        $("#actusuarioinfo").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#editusuario').modal('show');
+
+      });
+    });
+
+       </script>
             {% endfor %}
+      {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+                    {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+            {% endfor %}
+      </tbody>
+<script type="text/javascript">
+$(dtOrderExample).ready(function(){
+    var $mycheckboxusuario = $('input[name="mycheckboxusuario"]');
+    $mycheckboxusuario.change(function() {
+        var ids = $(this).prop('id');
+        $.ajax({
+            url: '/actgrupousuario',
+            data: {'data':ids},
+            type: 'POST',
+            timeout: 500,
+            success: function(response) {
+                console.log(response);
+               },
+               error: function(error) {
+                console.log(error);
+               }
+         });
+       });
+
+     });
+
+</script>
       </tbody>
 
 
 
     </table>
     </form>
+
 </section>
 <section>
 <div class="modal fade" id="Modaluser" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
