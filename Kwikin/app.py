@@ -144,6 +144,7 @@ q.estado = 'Activo'""")
         fin_real = (row['fin_real'])
         estado = (row['estado'])
         id_qr = (row['id_qr'])
+        estado_acceso = (row['estado_acceso'])
         codigo_qr = (row['codigo_qr'])
 
         array_qr.append({'Nombre': Nombre,
@@ -152,6 +153,7 @@ q.estado = 'Activo'""")
                          'entrada_real': entrada_real,
                          'fin_real': fin_real,
                          'estado': estado,
+                         'estado_acceso': estado_acceso,
                          'email_qr': email_qr,
                          'placas': placas,
                          'codigo_qr': codigo_qr,
@@ -323,6 +325,41 @@ def gestionusuarios():
         return render_template('gestionusuarios.html', usuarios=array, name=name, picture=picture, msg=msg)
     cur.close()
 
+@app.route('/actestadoqr', methods=['POST'])
+@is_user
+@is_logged_in
+def actestadoqr():
+    ids = None
+    if request.method == "POST":
+        ids = request.form['data']
+        print(ids)
+        result = db_execute("SELECT estado FROM qr WHERE id_qr = '%s';" % ids)[0]['estado']
+        print(result)
+        if str(result) == "Activo":
+            db_execute("UPDATE qr SET estado = 'Inactivo' WHERE id_qr = '%s';" % ids)
+            return redirect(url_for('peticionqr'))
+        elif str(result) == "Inactivo":
+            db_execute("UPDATE qr SET estado = 'Activo' WHERE id_qr = '%s';" % ids)
+            return redirect(url_for('peticionqr'))
+    return redirect(url_for('peticionqr'))
+
+@app.route('/actestadoaccesoqr', methods=['POST'])
+@is_user
+@is_logged_in
+def actestadoaccesoqr():
+    ids = None
+    if request.method == "POST":
+        ids = request.form['data']
+        print(ids)
+        result = db_execute("SELECT estado_acceso FROM qr WHERE id_qr = '%s';" % ids)[0]['estado_acceso']
+        print(result)
+        if str(result) == "Entro":
+            db_execute("UPDATE qr SET estado_acceso = 'Salio' WHERE id_qr = '%s';" % ids)
+            return redirect(url_for('peticionqr'))
+        elif str(result) == "Salio":
+            db_execute("UPDATE qr SET estado_acceso = 'Entro' WHERE id_qr = '%s';" % ids)
+            return redirect(url_for('peticionqr'))
+    return redirect(url_for('peticionqr'))
 
 @app.route('/actusuario', methods=['POST'])
 @is_user
@@ -419,7 +456,7 @@ def gestionqrhistorico():
                          'id_qr': id_qr})
     return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now)
 
-@app.route('/actqr', methods=['POST'])
+@app.route('/actqr', methods=['POST','GET'])
 @is_user
 @is_logged_in
 def actqr():
@@ -427,17 +464,17 @@ def actqr():
     ct = datetime.now(tz=tz)
     tzone = ct
     email = dict(session)['profile']['email']
+    usuario_id = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{email}'")[0]['id_usuario']
     now = ct
     now = str(now)
-    array_qr = []
-    qr = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu , usuarios u 
+    array_qrh = []
+    qrh = db_execute(f"""SELECT *, CURRENT_TIMESTAMP from qr q , asoc_qr_usuario aqu  
     where 
     aqu.id_qr = q.id_qr AND 
-    u.email = '{email}' and
+    aqu.id_usuario = '{usuario_id}' AND
     q.fin >= '{now}' AND 
     q.estado = 'Activo'""")
-
-    for row in qr:
+    for row in qrh:
         Nombre = (row['visitante'])
         Entrada = (row['inicio'])
         Salida = (row['fin'])
@@ -448,8 +485,19 @@ def actqr():
         estado = (row['estado'])
         id_qr = (row['id_qr'])
         codigo_qr = (row['codigo_qr'])
-        entro = (row['estado_acceso'])
-
+        estado_acceso = (row['estado_acceso'])
+        array_qrh.append({'Nombre': Nombre,
+                         'Entrada': Entrada,
+                         'Salida': Salida,
+                         'entrada_real': entrada_real,
+                         'fin_real': fin_real,
+                         'estado': estado,
+                         'email_qr': email_qr,
+                         'placas': placas,
+                         'estado_acceso': estado_acceso,
+                         'codigo_qr': codigo_qr,
+                         'id_qr': id_qr})
+    print(array_qrh)
     if request.method == "POST":
         if request.form['actqr'] == 'act':
             qrid = request.form['idqrhidden']
@@ -458,25 +506,13 @@ def actqr():
             placas_visitante = request.form['codigoplacas']
             entrada_visitante = request.form['codigoEntrada']
             salida_visitante = request.form['codigoSalida']
-            #estado = request.form['mycheckboxQR']
-            checkestado = request.form.get('mycheckboxQR')
-            checkentro = request.form.get('codigoentro')
-            if checkestado == 'on':
-                estado = "Activo"
-            else:
-                estado = "Inactivo"
-            if checkentro == 'on':
-                estado_acceso = "Entro"
-            else:
-                estado_acceso = "Salio"
 
             try:
-                db_execute(f"UPDATE qr SET estado = '{estado}', visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}', estado_acceso ='{estado_acceso}' WHERE id_qr = '{qrid}'")
-
-                return redirect(url_for('peticionqr', qr=array_qr))
+                db_execute(f"UPDATE qr SET  visitante = '{visitante}', correo_visitante = '{correo_visitante}', placas = '{placas_visitante }', inicio = '{entrada_visitante}', fin = '{salida_visitante}'  WHERE id_qr = '{qrid}'")
+                return redirect(url_for('peticionqr', qr=array_qrh))
             except:
-                flash(f'No se pudo eliminar el registro', 'danger')
-                return redirect(url_for('peticionqr', qr=array_qr))
+                flash(f'No se pudo actualizar el registro', 'danger')
+                return redirect(url_for('peticionqr', qr=array_qrh))
         elif request.form['actqr'] == 'ver':
             if request.method == 'POST':
                 codigo_qr = request.form['qrhidden']
@@ -484,7 +520,7 @@ def actqr():
                 fecha_salida = request.form['endhidden']
                 return redirect(
                     url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida))
-    return redirect(url_for('peticionqr', qr=array_qr))
+    return redirect(url_for('peticionqr', qr=array_qrh))
 
 
 @app.route('/ventas', methods=['GET', 'POST'])

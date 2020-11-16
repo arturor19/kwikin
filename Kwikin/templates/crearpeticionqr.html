@@ -125,13 +125,13 @@ $.extend( true, $.fn.dataTable.defaults, {
                             <label>Valido Desde</label>
                             <input type="Text" class="form-control" value="{{ codigo.Entrada }}" name="codigoEntrada">
                             <label>Hasta</label>
-                            <input type="Text" class="form-control" value="{{ codigo.Salida }}" name="codigoSalida">
+                             <input type="Text" class="form-control" value="{{ codigo.Salida }}" name="codigoSalida">
                          </div>
                          <div class="form-group">
-                            <input type="checkbox" name="codigoentro" data-toggle="toggle" data-on="<i class='fa fa-car'></i> Entró" data-off="<i class='fa fa-arrow-right'></i> Salió" data-onstyle="primary" data-offstyle="secondary" data-width="120" {{'checked' if codigo.entro == "Entro" else ''}}>
+                             <input type="checkbox" id="{{ codigo.id_qr }}" name="mycheckboxQR" data-toggle="toggle"  data-on="<i class='fa fa-check'></i> Activo" data-off="<i class='fa fa-times'></i> Inactivo" data-onstyle="primary" data-offstyle="secondary" data-width="120" {% if codigo.estado == "Activo" %} checked {% endif %}>
                          </div>
                          <div class="form-group">
-                            <input type="checkbox" name="mycheckboxQR" id={{codigo.id_qr}} data-toggle="toggle" data-on="<i class='fa fa-check'></i> Activo" data-off="<i class='fa fa-times'></i> Inactivo" data-onstyle="primary" data-offstyle="secondary" data-width="120" {{'checked' if codigo.estado == "Activo" else ''}}>
+                            <input type="checkbox" id="{{ codigo.id_qr }}" name="codigoentro" data-toggle="toggle" data-on="<i class='fa fa-car'></i> Entró" data-off="<i class='fa fa-arrow-right'></i> Salió" data-onstyle="primary" data-offstyle="secondary" data-width="120" {% if codigo.estado_acceso == "Entro" %} checked {% endif %}>
                          </div>
 
 
@@ -190,8 +190,50 @@ $.extend( true, $.fn.dataTable.defaults, {
                         </div>
             {% endfor %}
       </tbody>
+<script type="text/javascript">
+$(dtOrderQR).ready(function(){
+    var $mycheckboxQR = $('input[name="mycheckboxQR"]');
+    $mycheckboxQR.change(function() {
+        var ids = $(this).prop('id');
+        $.ajax({
+            url: '/actestadoqr',
+            data: {'data':ids},
+            type: 'POST',
+            timeout: 500,
+            success: function(response) {
+                console.log(response);
+               },
+               error: function(error) {
+                console.log(error);
+               }
+         });
+       });
 
+     });
 
+</script>
+<script type="text/javascript">
+$(dtOrderQR).ready(function(){
+    var $codigoentro = $('input[name="codigoentro"]');
+    $codigoentro.change(function() {
+        var ids = $(this).prop('id');
+        $.ajax({
+            url: '/actestadoaccesoqr',
+            data: {'data':ids},
+            type: 'POST',
+            timeout: 500,
+            success: function(response) {
+                console.log(response);
+               },
+               error: function(error) {
+                console.log(error);
+               }
+         });
+       });
+
+     });
+
+</script>
 
     </table>
     </div>
