@@ -926,6 +926,32 @@ def gestioneventoshistorico():
         return render_template('gestioneventoshistorico.html', eventos=array_eventos, msg=msg)
     cur.close()
 
+@app.route('/notificaciones', methods=['GET', 'POST', 'UPDATE'])
+@is_user
+@is_logged_in
+def notificaciones():
+    email = dict(session)['profile']['email']
+    print(email)
+    conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
+    cont = len(conta)
+    print(cont)
+    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}'")
+
+    array_com = []
+    for row in com:
+        id_notificaciones = (row['id_notificaciones'])
+        fecha = (row['fecha'])
+        titulo = (row['titulo'])
+        mensaje = (row['mensaje'])
+        leido = (row['leido'])
+
+        array_com.append({'id_notificaciones': (id_notificaciones),
+                              'fecha': fecha,
+                              'titulo': titulo,
+                              'mensaje': mensaje,
+                              'leido': leido})
+    return render_template('layout.html', cont=cont, com=array_com)
+
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
