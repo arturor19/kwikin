@@ -931,11 +931,9 @@ def gestioneventoshistorico():
 @is_logged_in
 def notificaciones():
     email = dict(session)['profile']['email']
-    print(email)
     conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
     cont = len(conta)
-    print(cont)
-    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}'")
+    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
 
     array_com = []
     for row in com:
@@ -951,6 +949,50 @@ def notificaciones():
                               'mensaje': mensaje,
                               'leido': leido})
     return render_template('layout.html', cont=cont, com=array_com)
+
+@app.route('/comunicados', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def comunicados():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    leidopor = db_execute("SELECT email_usuario_receptor FROM comunicados WHERE leido != 0")
+    contleidopor = len(leidopor)
+    print(contleidopor)
+    noleidopor = db_execute("SELECT email_usuario_receptor FROM comunicados WHERE leido = 0")
+    array_comunica = []
+    comunica = db_execute("SELECT * from comunicados")
+    for row in comunica:
+        id_notificaciones = (row['id_notificaciones'])
+        fecha = (row['fecha'])
+        titulo = (row['titulo'])
+        entregado = (row['leido'])
+        mensaje = (row['mensaje'])
+        email_receptor = (row['email_usuario_receptor'])
+        creador = (row['id_usuario_emisor'])
+        array_comunica.append({'id_notificaciones': id_notificaciones,
+                             'fecha': fecha,
+                             'titulo': titulo,
+                             'mensaje': mensaje,
+                             'entregado' : entregado,
+                             'email_receptor': email_receptor,
+                             'creador': creador})
+        print(array_comunica)
+
+    if request.method == 'POST':
+        timestamp = ct
+        fecha_salida = datesal
+        nombre = request.form['nombreqr']
+        placas = request.form['placasqr']
+        emailqr = request.form['emailqr']
+        tipoqr = request.form['tipoqr']
+        timestamp = now
+        codigo_qr = hex(int(time.time() * 100))
+
+
+        return render_template('comunicados.html', comuni=array_comunica, leidopor=contleidopor)
+    return render_template('comunicados.html', comuni=array_comunica, leidopor=contleidopor)
+
 
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD

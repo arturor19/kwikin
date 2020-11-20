@@ -34,7 +34,7 @@
   <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard">
@@ -97,6 +97,11 @@
         <a class="nav-link" href="/gestiondomicilios">
           <i class="fas fa-fw fa-home"></i>
           <span>Gestión de Domicilios</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/comunicados">
+          <i class="fa fa-envelope"></i>
+          <span>Comunicados</span></a>
       </li>
       </div>
       <br>
@@ -191,11 +196,12 @@
                   Alertas
                 </h6>
                  {% for comunicado in com %}
-                <a class="dropdown-item d-flex align-items-center" href="#">
+                <a class="dropdown-item d-flex align-items-center" href="#" {% if comunicado.leido == 0 %} style="background:#cceeff;" {% endif %}>
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
                   <div class="mr-3">
 
                   </div>
-                  <div {% if comunicado.leido == 0 %} style="color: #e73df; background: #F0D1C6;" {% endif %}>
+                  <div>
                     <input type="hidden" name="idnotihidden" value="{{comunicado.id_notificaciones}}">
                     <div class="small text-gray-500">{{ comunicado.fecha }}</div>
                     <span class="font-weight-bold">{{ comunicado.titulo }}</span>
@@ -203,7 +209,7 @@
                     {{ comunicado.mensaje }}
                   </div>
                 </a>
-                {% endfor %}
+                  {% endfor %}
 
                 <a class="dropdown-item text-center small text-gray-500" href="#">Mostrar todas las alertas</a>
               </div>
