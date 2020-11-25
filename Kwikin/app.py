@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_file, \
+from flask import Flask, Markup, render_template, flash, redirect, url_for, session, request, logging, send_file, \
     send_from_directory, jsonify
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, \
     HiddenField
@@ -997,34 +997,33 @@ def comunicados():
             return redirect(url_for('comunicados'))
 
 
-        return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails)
-    return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails)
+        return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
+    return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
 
-@app.route('/entregadoact', methods=['GET', 'POST'])
+@app.route('/entregadoact/<id_mensaje>', methods=['GET'])
 @is_user
 @is_logged_in
-def entregadoact():
-    if request.method == 'POST':
-        ids = request.form['idmensajehidden']
-        print(ids)
-        leidopor = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{ids}'")
-        print(leidopor)
-        contleidopor = len(leidopor)
-        noleidopor = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{ids}'")
-        print(noleidopor)
-    return redirect(url_for('entregadoact'))
+def entregadoact(id_mensaje):
+    if request.method == 'GET':
+        array_leido = []
+        leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
+        contleidopor = len(leido)
+        array_noleido = []
+        noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{id_mensaje}'")
+        contnoleidopor = len(noleido)
+        labels = ["Leido","No leido"]
+        values = [contleidopor,contnoleidopor]
+        colors = ["#1cc88a", "#e74a3b"]
+        for row in noleido:
+            noleidopor =  (row['email_usuario_receptor'])
+            array_noleido.append({'noleidopor':noleidopor})
+        for rows in leido:
+            leidopor =  (rows['email_usuario_receptor'])
+            array_leido.append({'leidopor':leidopor})
 
-@app.route('/noentregadoact', methods=['GET', 'POST'])
-@is_user
-@is_logged_in
-def noentregadoact():
-    ids = request.form['id_mensaje']
-    print(ids)
-    contleidopor = len(leidopor)
-    noleidopor = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{ids}'")
-    print(noleidopor)
+    return render_template('detallescomunicado.html', leidopor=array_leido, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
 
-    return redirect(url_for('comunicados'), noleidopor=noleidopor)
+
 
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD

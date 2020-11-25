@@ -72,9 +72,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 
     </div>
 
-</section><br>
-
-</div>
+</section>
 <br>
 <section>
     <div style="width:90%; margin:0 auto;">
@@ -82,10 +80,10 @@ $.extend( true, $.fn.dataTable.defaults, {
       <!-- Table head -->
       <thead>
         <tr>
+            <th>Entregado</th>
             <th>Fecha</th>
             <th>titulo</th>
             <th>Mensaje</th>
-            <th>Entregado</th>
             <th>Creado por</th>
         </tr>
       </thead>
@@ -95,151 +93,16 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for comunica in comuni %}
              <tr>
+                 <td><a href="{{ url_for('entregadoact',id_mensaje = comunica.id_mensaje) }}">Detalles</a></td>
                  <td><a>{{comunica.fecha}}</a></td>
                  <td><a>{{comunica.titulo}}</a></td>
                  <td><a>{{comunica.mensaje}}</a></td>
-                 <td><a href="#" data-toggle="modal" data-target='#vercom{{ comunica.id_mensaje }}'>Detalles</a></td>
                  <td><a>{{comunica.creador}}</a></td>
 
              </tr>
 
-    <div class="modal fade" id="vercom{{ comunica.id_mensaje }}" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<form method="POST" action="/entregadoact">
-					<div class="modal-header">
-						<h4 class="modal-title">Información</h4>
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					</div>
-					 <div class="modal-body">
-                         <div class="form-group">
-                          <div id="acordioncom1" class="panel-group">
-                            <form method="post" action="/entregadoact">
-                                <div class="panel-heading">
-                                    <h4 class="panel-title">
-                                        <div class="form-group">
-                                            <input type="hidden" name="idmensajehidden" value="{{comunica.id_mensaje}}">
-                                        </div>
-                                        <button class="btn btn-secondary btn-sm" type="submit" data-target="#panelbodytwo" name="actmensaje" data-toggle="collapse" data-parent="#acordioncom1">
-                                            Entregado a:
-                                        </button>
-                                    </h4>
-                                </div>
-                                <div id="panelbodytwo" class="panel-collapse collapse">
-                                    <div class="panel-body">
-                                        <input class="col-12 form-control-sm" type="textarea" id="leidopor" name="leidopor" value="{{ leidopor }}"/>
-                                    </div>
-                                </div>
-                            </>
-                          </div>
-                             <br>
-                         <div id="acordioncom2" class="panel-group">
-                            <div class="panel panel-primary">
-                                <div class="panel-heading">
-                                    <h4 class="panel-title">
-                                        <a class="btn btn-secondary btn-sm" type="submit" data-target="#panelbodydos" href="/nocomunicadosact" data-toggle="collapse" data-parent="#acordioncom2">
-                                            No entregado a:
-                                        </a>
-                                    </h4>
-                                </div>
-                                <div id="panelbodydos" class="panel-collapse collapse">
-                                    <div class="panel-body">
-                                        <input class="col-12 form-control-sm" type="textarea" id="noleidopor" name="noleidopor" value="{{ noleidopor }}"/>
-                                    </div>
-                                </div>
-                            </div>
-                          </div>
-                      </div>
-                         <div class="form-group">
-                            <input type="hidden" value="{{ comunica.id_mensaje }}" name="id_mensaje">
-                         </div>
-
-					<div class="modal-footer">
-						<input type="button" class="btn btn-default" name="cerrarcomunicainfo"  data-dismiss="modal" value="Cerrar">
-                        <button type="input" name="comunicainfo" id="comunicainfo" value="eliminar" class="btn btn-danger float-sm-right" style="width:100px"> Eliminar</button>
-                        <button type="input" name="comunicainfo" id="comunicainfo" value="actualizar" class="btn btn-primary" style="width:100px"> Actualizar</button>
-
-                    </div>
-
-
-
-				</form>
-			</div>
-		</div>
-	</div>
-      <script>
-
-     $(document).ready(function($) {
-        $("#vercom").on("click", "a", function(event) {
-        event.preventDefault();
-        jQuery.noConflict();
-        $('#vercom').modal('show');
-
-      });
-    });
-
-       </script>
-            {% endfor %}
-            {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                        <div class="alert alert-danger" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                    {% endfor %}
-                    {% for message in get_flashed_messages(category_filter=["success"]) %}
-                        <div class="alert alert-success" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-            {% endfor %}
+             {% endfor %}
       </tbody>
-<script type="text/javascript">
-$(document).ready(function(){
-    var $mycheckboxQR = $('input[name="id_mensaje"]');
-    $mycheckboxQR.click(function() {
-        var ids = $(this).prop('id');
-        $.ajax({
-            url: '/comunicadosact',
-            data: {'data':ids},
-            type: 'POST',
-            timeout: 500,
-            success: function(response) {
-                console.log(response);
-               },
-               error: function(error) {
-                console.log(error);
-               }
-         });
-       });
-
-     });
-
-</script>
-<script type="text/javascript">
-$(dtOrderQR).ready(function(){
-    var $codigoentro = $('input[name="codigoentro"]');
-    $codigoentro.change(function() {
-        var ids = $(this).prop('id');
-        $.ajax({
-            url: '/actestadoaccesoqr',
-            data: {'data':ids},
-            type: 'POST',
-            timeout: 500,
-            success: function(response) {
-                console.log(response);
-               },
-               error: function(error) {
-                console.log(error);
-               }
-         });
-       });
-
-     });
-
-</script>
-
     </table>
     </div>
 </section>
