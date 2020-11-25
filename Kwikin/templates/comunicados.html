@@ -86,6 +86,7 @@ $.extend( true, $.fn.dataTable.defaults, {
             <th>titulo</th>
             <th>Mensaje</th>
             <th>Entregado</th>
+            <th>Creado por</th>
         </tr>
       </thead>
       <!-- Table head -->
@@ -97,32 +98,66 @@ $.extend( true, $.fn.dataTable.defaults, {
                  <td><a>{{comunica.fecha}}</a></td>
                  <td><a>{{comunica.titulo}}</a></td>
                  <td><a>{{comunica.mensaje}}</a></td>
-                 <td><a href="#" data-toggle="modal" data-target='#vercom{{ comunica.id_notificaciones }}'>{% if comunica.entregado !=0 %} Leido {% else %} No Leido {% endif %}</a></td>{
+                 <td><a href="#" data-toggle="modal" data-target='#vercom{{ comunica.id_mensaje }}'>Detalles</a></td>
+                 <td><a>{{comunica.creador}}</a></td>
 
              </tr>
 
-    <div class="modal fade" id="vercom{{ comunica.id_notificaciones }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="vercom{{ comunica.id_mensaje }}" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<form method="post" action="/comunicados">
+				<form method="POST" action="/entregadoact">
 					<div class="modal-header">
 						<h4 class="modal-title">Información</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 					</div>
 					 <div class="modal-body">
                          <div class="form-group">
-                            <label>Entregado</label>
-                            <input  type="text" class="form-control" value="{{ leido }}" name="leidopor">
-                         </div>
+                          <div id="acordioncom1" class="panel-group">
+                            <form method="post" action="/entregadoact">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <div class="form-group">
+                                            <input type="hidden" name="idmensajehidden" value="{{comunica.id_mensaje}}">
+                                        </div>
+                                        <button class="btn btn-secondary btn-sm" type="submit" data-target="#panelbodytwo" name="actmensaje" data-toggle="collapse" data-parent="#acordioncom1">
+                                            Entregado a:
+                                        </button>
+                                    </h4>
+                                </div>
+                                <div id="panelbodytwo" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <input class="col-12 form-control-sm" type="textarea" id="leidopor" name="leidopor" value="{{ leidopor }}"/>
+                                    </div>
+                                </div>
+                            </>
+                          </div>
+                             <br>
+                         <div id="acordioncom2" class="panel-group">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a class="btn btn-secondary btn-sm" type="submit" data-target="#panelbodydos" href="/nocomunicadosact" data-toggle="collapse" data-parent="#acordioncom2">
+                                            No entregado a:
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="panelbodydos" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <input class="col-12 form-control-sm" type="textarea" id="noleidopor" name="noleidopor" value="{{ noleidopor }}"/>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div>
                          <div class="form-group">
-                            <label>No entregado</label>
-                            <input  type="text" class="form-control" value="{{ noleidopor }}" name="noleidopor">
+                            <input type="hidden" value="{{ comunica.id_mensaje }}" name="id_mensaje">
                          </div>
 
 					<div class="modal-footer">
-						<input type="button" class="btn btn-default" name="cerrarcomunicado"  data-dismiss="modal" value="Cerrar">
-                        <button type="submit" name="comunicado" id="comunicado" value="ver" class="btn btn-danger float-sm-right" style="width:100px"><i class="fa fa-qrcode"></i> Eliminar</button>
-                        <button type="submit" name="comunicado" id="comunicado" value="act" class="btn btn-primary" style="width:100px"> Actualizar</button>
+						<input type="button" class="btn btn-default" name="cerrarcomunicainfo"  data-dismiss="modal" value="Cerrar">
+                        <button type="input" name="comunicainfo" id="comunicainfo" value="eliminar" class="btn btn-danger float-sm-right" style="width:100px"> Eliminar</button>
+                        <button type="input" name="comunicainfo" id="comunicainfo" value="actualizar" class="btn btn-primary" style="width:100px"> Actualizar</button>
 
                     </div>
 
@@ -135,7 +170,7 @@ $.extend( true, $.fn.dataTable.defaults, {
       <script>
 
      $(document).ready(function($) {
-        $("#comunicado").on("click", "a", function(event) {
+        $("#vercom").on("click", "a", function(event) {
         event.preventDefault();
         jQuery.noConflict();
         $('#vercom').modal('show');
@@ -161,12 +196,12 @@ $.extend( true, $.fn.dataTable.defaults, {
             {% endfor %}
       </tbody>
 <script type="text/javascript">
-$(dtOrderQR).ready(function(){
-    var $mycheckboxQR = $('input[name="mycheckboxQR"]');
-    $mycheckboxQR.change(function() {
+$(document).ready(function(){
+    var $mycheckboxQR = $('input[name="id_mensaje"]');
+    $mycheckboxQR.click(function() {
         var ids = $(this).prop('id');
         $.ajax({
-            url: '/actestadoqr',
+            url: '/comunicadosact',
             data: {'data':ids},
             type: 'POST',
             timeout: 500,
@@ -217,7 +252,7 @@ $(dtOrderQR).ready(function(){
                 <h1 class="modal-title">Crear comunicado</h1>
             </div>
             <div class="modal-body">
-              <form id="IndFormqr" action="/crearcomunicado" class="" method="post">
+              <form id="IndFormqr" action="/comunicados" class="" method="post">
                   <div class="form-group">
                         <div class="panel-body">
                             <label for="titulocom" class="col-12 col-form-label">Título:</label>
@@ -233,8 +268,8 @@ $(dtOrderQR).ready(function(){
                             <label for="comdirigido" class="col-12 col-form-label">Dirigido a:</label>
                                 <select class="col-sm-6" name="comdirigido" id="comdirigido">
                                   <option value="Todos">Todos</option>
-                                    {% for codigo in qr %}
-                                  <option value="{{comunica.email_receptor}}">{{comunica.email_receptor}}</option>
+                                    {% for allem in allemails %}
+                                  <option value="{{allem.email}}">{{allem.email}}</option>
                                     {% endfor %}
                                 </select>
                                 </div>
