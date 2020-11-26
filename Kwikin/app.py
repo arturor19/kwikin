@@ -1005,6 +1005,8 @@ def comunicados():
 @is_logged_in
 def entregadoact(id_mensaje):
     if request.method == 'GET':
+        titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
+        mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
         array_leido = []
         leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
         contleidopor = len(leido)
@@ -1021,7 +1023,7 @@ def entregadoact(id_mensaje):
             leidopor =  (rows['email_usuario_receptor'])
             array_leido.append({'leidopor':leidopor})
 
-    return render_template('detallescomunicado.html', leidopor=array_leido, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
+    return render_template('detallescomunicado.html', leidopor=array_leido, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
 
 
 

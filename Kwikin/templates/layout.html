@@ -197,21 +197,20 @@
                 </h6>
                  {% for comunicado in com %}
                 <a class="dropdown-item d-flex align-items-center" href="#" {% if comunicado.leido == 0 %} style="background:#cceeff;" {% endif %}>
-                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  <button type="button" value="{{comunicado.id_notificaciones}}" class="close" data-dismiss="alert">&times;</button>
                   <div class="mr-3">
 
                   </div>
                   <div>
-                    <input type="hidden" name="idnotihidden" value="{{comunicado.id_notificaciones}}">
+                    <input type="hidden" name="idnotihidden" ">
                     <div class="small text-gray-500">{{ comunicado.fecha }}</div>
-                    <span class="font-weight-bold">{{ comunicado.titulo }}</span>
-                    <br>
-                    {{ comunicado.mensaje }}
+                    <span class="font-weight-bold">{{ comunicado.titulo }}</span><br>
+                    <span href="{{ url_for('entregadoact',id_mensaje = comunicado.id_mensaje) }}">{{ comunicado.mensaje }}</span>
                   </div>
                 </a>
                   {% endfor %}
 
-                <a class="dropdown-item text-center small text-gray-500" href="#">Mostrar todas las alertas</a>
+
               </div>
             </li>
 

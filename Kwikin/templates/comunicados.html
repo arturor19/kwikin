@@ -76,14 +76,13 @@ $.extend( true, $.fn.dataTable.defaults, {
 <br>
 <section>
     <div style="width:90%; margin:0 auto;">
-    <table id="dtOrdercomunicados" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+    <table id="dtOrdercomunicados" class="table table-striped table-bordered table-sm table-responsive-sm" cellspacing="0" width="100%">
       <!-- Table head -->
       <thead>
         <tr>
-            <th>Entregado</th>
+            <th>Detalles</th>
             <th>Fecha</th>
             <th>titulo</th>
-            <th>Mensaje</th>
             <th>Creado por</th>
         </tr>
       </thead>
@@ -96,7 +95,6 @@ $.extend( true, $.fn.dataTable.defaults, {
                  <td><a href="{{ url_for('entregadoact',id_mensaje = comunica.id_mensaje) }}">Detalles</a></td>
                  <td><a>{{comunica.fecha}}</a></td>
                  <td><a>{{comunica.titulo}}</a></td>
-                 <td><a>{{comunica.mensaje}}</a></td>
                  <td><a>{{comunica.creador}}</a></td>
 
              </tr>
@@ -123,7 +121,7 @@ $.extend( true, $.fn.dataTable.defaults, {
                             <input required class="form-control-sm" type="text" id="titulocom" name="titulocom"/>
                                 </div>
                              <label for="commensaje" class="col-12 col-form-label">Mensaje:</label>
-                                <textarea class="col-sm-8" id="commensaje" name="commensaje">
+                                <textarea class="col-sm-8" maxlength="180" id="commensaje" name="commensaje">
 
                                 </textarea>
 
