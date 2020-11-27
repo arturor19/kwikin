@@ -959,19 +959,21 @@ def comunicados():
     creador = dict(session)['profile']['email']
     id_mensaje = ""
     array_comunica = []
-    comunica = db_execute("SELECT DISTINCT idmultiple_mensaje, fecha, titulo, mensaje, id_usuario_emisor from comunicados")
+    comunica = db_execute("SELECT DISTINCT idmultiple_mensaje, fecha, titulo, mensaje, id_usuario_emisor, tipo from comunicados")
     for row in comunica:
         id_mensaje = (row['idmultiple_mensaje'])
         fecha = (row['fecha'])
         titulo = (row['titulo'])
         mensaje = (row['mensaje'])
         creador = (row['id_usuario_emisor'])
+        tipo = (row['tipo'])
         id_mensaje = (row['idmultiple_mensaje'])
         array_comunica.append({'idmultiple_mensaje' : id_mensaje,
                              'fecha': fecha,
                              'titulo': titulo,
                              'mensaje': mensaje,
                              'id_mensaje': id_mensaje,
+                             'tipo': tipo,
                              'creador': creador})
         print(array_comunica)
     array_allemails = []
@@ -989,12 +991,12 @@ def comunicados():
         email_usuario_receptor = request.form['comdirigido']
         if email_usuario_receptor == "Todos":
             for entry in array_allemails:
-                db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-                timestamp, titulo, mensaje, idmultmensaje, entry['email'], creador, 0))
+                db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+                timestamp, titulo, mensaje, idmultmensaje, entry['email'], creador, 0, "Comunicado"))
             return redirect(url_for('comunicados'))
         else:
-            db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-            timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0))
+            db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+            timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0, "Comunicado"))
             return redirect(url_for('comunicados'))
 
 
@@ -1008,24 +1010,106 @@ def entregadoact(id_mensaje):
     if request.method == 'GET':
         titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
         mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
+        tipo = db_execute(f"SELECT tipo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['tipo']
         array_leido = []
         leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
         contleidopor = len(leido)
         array_noleido = []
         noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{id_mensaje}'")
         contnoleidopor = len(noleido)
-        labels = ["Leido","No leido"]
-        values = [contleidopor,contnoleidopor]
-        colors = ["#1cc88a", "#e74a3b"]
+        try:
+            opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'a'")
+            contopa = len(opcion_a)
+        except:
+            opcion_a = ""
+            contopa = 0
+        try:
+            opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'b'")
+            contopb = len(opcion_b)
+        except:
+            opcion_b = ""
+            contopb = 0
+        try:
+            opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'c'")
+            contopc = len(opcion_c)
+        except:
+            opcion_c = ""
+            contopc = 0
+        try:
+            opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'd'")
+            contopd = len(opcion_d)
+        except:
+            opcion_d = ""
+            contopd = 0
+        if tipo == "Comunicado":
+            labels = ["Leido","No leido"]
+            values = [contleidopor, contnoleidopor]
+            colors = ["#1cc88a", "#e74a3b"]
+        else:
+            labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
+            values = [contopa, contopb, contopc, contopd]
+            colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
+        array_opa = []
+        array_opb = []
+        array_opc = []
+        array_opd = []
         for row in noleido:
             noleidopor =  (row['email_usuario_receptor'])
             array_noleido.append({'noleidopor':noleidopor})
         for rows in leido:
             leidopor =  (rows['email_usuario_receptor'])
             array_leido.append({'leidopor':leidopor})
+        for row in opcion_a:
+            opa = (row['email_usuario_receptor'])
+            array_opa.append({'opa':opa})
+        for row in opcion_b:
+            opb = (row['email_usuario_receptor'])
+            array_opb.append({'opb':opb})
+        for row in opcion_c:
+            opc = (row['email_usuario_receptor'])
+            array_opc.append({'opc':opc})
+        for row in opcion_d:
+            opd = (row['email_usuario_receptor'])
+            array_opd.append({'opd':opd})
 
-    return render_template('detallescomunicado.html', leidopor=array_leido, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
 
+    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc, contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
+
+@app.route('/encuesta', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def encuesta():
+    tz = pytz.timezone('America/Mexico_City')
+    ct = datetime.now(tz=tz)
+    creador = dict(session)['profile']['email']
+    if request.method == 'POST':
+        timestamp = ct.strftime("%Y-%m-%d %H:%M")
+        idmultmensaje = hex(int(time.time()))
+        titulo = request.form['enctitulo']
+        mensaje = request.form['encmensaje']
+        email_usuario_receptor = request.form['encdirigido']
+        opcion_a =  request.form['enca']
+        opcion_b = request.form['encb']
+        opcion_c = request.form['encc']
+        opcion_d = request.form['encd']
+        array_allemails = []
+        allemails = db_execute("SELECT * FROM usuarios ")
+        for row in allemails:
+            email = (row['email'])
+            array_allemails.append({'email': email})
+        if email_usuario_receptor == "Todos":
+            for entry in array_allemails:
+                db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo, opcion_a, opcion_b, opcion_c, opcion_d) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+                timestamp, titulo, mensaje, idmultmensaje, entry['email'], creador, 0, "Encuesta", opcion_a, opcion_b, opcion_c, opcion_d))
+            return redirect(url_for('comunicados'))
+        else:
+            db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo, opcion_a, opcion_b, opcion_c, opcion_d) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
+            timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0, "Encuesta", opcion_a, opcion_b, opcion_c, opcion_d))
+            return redirect(url_for('comunicados'))
+
+
+        return redirect(url_for('comunicados'))
+    return redirect(url_for('comunicados'))
 
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
