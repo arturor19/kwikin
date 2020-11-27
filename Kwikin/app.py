@@ -957,6 +957,7 @@ def comunicados():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     creador = dict(session)['profile']['email']
+    id_mensaje = ""
     array_comunica = []
     comunica = db_execute("SELECT DISTINCT idmultiple_mensaje, fecha, titulo, mensaje, id_usuario_emisor from comunicados")
     for row in comunica:
@@ -1024,7 +1025,6 @@ def entregadoact(id_mensaje):
             array_leido.append({'leidopor':leidopor})
 
     return render_template('detallescomunicado.html', leidopor=array_leido, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
-
 
 
 
