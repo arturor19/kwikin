@@ -10,6 +10,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
 </head>
 
 <body>
@@ -28,15 +33,62 @@
             <div id="panelbodycomunicado" class="panel-collapse collapse">
                 <div class="panel-body">
                     <div class="shadow p-3 mb-3 bg-light rounded">
-                        <span>{{ mensaje }}</span>
+                        <span>{{ mensaje }}</span><br>
+                        {% if tipo == "Encuesta" %}
+                         <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-toggle="tooltip" title={{ resp_a }}> A  {{ contopa }}</button>
+                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                            </button>
+                            <div class="dropdown-menu">
+                                {% for entry in opa %}
+                              <a class="dropdown-item" href="#">{{entry.opa}}</a>
+                                {% endfor %}
+                            </div>
+                          </div>
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" data-toggle="tooltip" title={{ resp_b }}> B  {{ contopb }}</button>
+                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                            </button>
+                            <div class="dropdown-menu">
+                               {% for entry in opb %}
+                              <a class="dropdown-item" href="#">{{entry.opb}}</a>
+                                {% endfor %}
+                            </div>
+                          </div>
+
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-success" data-toggle="tooltip" title={{ resp_c }}> C {{ contopc }}</button>
+                            <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                            </button>
+                            <div class="dropdown-menu">
+                               {% for entry in opc %}
+                              <a class="dropdown-item" href="#">{{entry.opc}}</a>
+                                {% endfor %}
+                            </div>
+                          </div>
+
+                          <div class="btn-group">
+                            <button type="span" class="btn btn-info" data-toggle="tooltip" title={{ resp_d }}>D  {{ contopd }}</button>
+                            <button type="span" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                            </button>
+                            <div class="dropdown-menu">
+                              {% for entry in opd %}
+                              <a class="dropdown-item" href="#">{{entry.opd}}</a>
+                                {% endfor %}
+                            </div>
+                          </div>
+
+                        {% endif %}
+                         </div>
                     </div>
                 </div>
             </div>
         </div>
       </div>
  </div>
+<div class="shadow p-3 mb-3 bg-light rounded">
 <section>
-   <h4>Leidos</h4>
+    <h4> {% if tipo == "Comunicado" %} Leidos {% elif tipo == "Encuesta" %} Resultados {% endif %}</h4>
  <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
     <canvas id="chart" width="300" height="200"></canvas>
     <script>
@@ -59,6 +111,8 @@
       new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
 
     </script>
+
+
 </section>
 <section>
     <div class="form-group">
@@ -115,6 +169,7 @@
             </div>
      </div>
 </section>
+</div>
 </body>
 </html>
 
