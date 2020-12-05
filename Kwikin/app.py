@@ -3,7 +3,7 @@ from flask import Flask, Markup, render_template, flash, redirect, url_for, sess
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, SelectField, IntegerField, \
     HiddenField
 from authlib.integrations.flask_client import OAuth
-from auth_decorator import is_logged_in, is_user, db_execute
+from auth_decorator import is_logged_in, is_user, db_execute, usuario_notificaciones
 import os
 import json
 import pandas as pd
@@ -24,10 +24,6 @@ import pymysql
 application = app = Flask(__name__, template_folder='templates', static_folder='static')
 qrcode = QRcode(app)
 
-# Config MySQL
-# obj = AES.new('This is a key123'.encode("utf8"), AES.MODE_CBC, 'This is an IV456'.encode("utf8"))
-
-# init MYSQL
 # Session config
 app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['SESSION_COOKIE_NAME'] = 'google-login-session'
@@ -89,6 +85,7 @@ def ayudabulk():
 @app.route('/dashboard')
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def dashboard():
     name = session['profile']['name']
     picture = session['profile']['picture']
@@ -96,6 +93,7 @@ def dashboard():
 
 
 @app.route('/scannerqr')
+@usuario_notificaciones
 def scannerqr():
     name = dict(session)['profile']['name']
     email = dict(session)['profile']['email']
@@ -104,6 +102,7 @@ def scannerqr():
 
 
 @app.route('/scannerqrs')
+@usuario_notificaciones
 def scannerqrs():
     name = dict(session)['profile']['name']
     email = dict(session)['profile']['email']
@@ -120,6 +119,7 @@ def logout():
 
 @app.route('/crearqr', methods=['GET', 'POST'])
 @is_logged_in
+@usuario_notificaciones
 def peticionqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -211,6 +211,7 @@ q.estado = 'Activo'""")
 @app.route('/codigoqr', methods=['GET'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def codigoqr():
     picture = session['profile']['picture']
     if request.method == 'GET':
@@ -224,6 +225,7 @@ def codigoqr():
 @app.route('/crearInd', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def crearInd():
     if request.method == 'POST':
         domicilio = request.form['direccion']
@@ -266,6 +268,7 @@ def crearInd():
 @app.route('/crearBulk', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def upload():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -301,6 +304,7 @@ def upload():
 @app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def gestionusuarios():
     usuarios = db_execute("SELECT * FROM usuarios")
     array = []
@@ -328,6 +332,7 @@ def gestionusuarios():
 @app.route('/actusuarioinfo', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actusuarioinfo():
     if request.method == "POST":
         if request.form['actusuarioinfo'] == 'actu':
@@ -354,6 +359,7 @@ def actusuarioinfo():
 @app.route('/actestadoqr', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actestadoqr():
     ids = None
     if request.method == "POST":
@@ -372,6 +378,7 @@ def actestadoqr():
 @app.route('/actestadoaccesoqr', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actestadoaccesoqr():
     ids = None
     if request.method == "POST":
@@ -390,6 +397,7 @@ def actestadoaccesoqr():
 @app.route('/actusuario', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actusuario():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -415,6 +423,7 @@ def actusuario():
 @app.route('/actdom', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actdom():
     name = dict(session)['profile']['name']
     picture = dict(session)['profile']['picture']
@@ -439,6 +448,7 @@ def actdom():
 @app.route('/gestionqrhistorico', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def gestionqrhistorico():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -485,6 +495,7 @@ def gestionqrhistorico():
 @app.route('/actqr', methods=['POST','GET'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def actqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -552,6 +563,7 @@ def actqr():
 @app.route('/ventas', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def ventas():
     if request.method == 'POST':
         domicilio = request.form['direccion']
@@ -586,6 +598,7 @@ def ventas():
 @app.route('/crearventa', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def crearventa():
     Cotopy = request.form['Coto']
     CotoDirpy = request.form['CotoDir']
@@ -603,6 +616,7 @@ def crearventa():
 @app.route('/validarqr', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def validarqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -649,6 +663,7 @@ def validarqr():
 @app.route('/validarqrs', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def validarqrs():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -682,6 +697,10 @@ def validarqrs():
     return render_template("dashboard.html", name=name, picture=picture)
 
 
+
+@is_user
+@is_logged_in
+@usuario_notificaciones
 @app.route('/calendar-events')
 def calendar_events():
     arr_terr = db_execute('select * from terrazas')
@@ -698,13 +717,19 @@ def calendar_events():
     return render_template('calendar_events.html', rows=rows, picture=picture, terrazas=arr_terr)
 
 
+
+@is_user
+@is_logged_in
+@usuario_notificaciones
 @app.route('/calendario')
 def calendario():
     arr_terr = db_execute('select * from terrazas')
     picture = session['profile']['picture']
     return render_template('calendar_events.html', picture=picture, terrazas=arr_terr)
 
-
+@is_user
+@is_logged_in
+@usuario_notificaciones
 @app.route('/calendario_ini/remote')
 def calendario_ini():
     test_cal = ''
@@ -720,7 +745,9 @@ def calendario_ini():
         test_cal = head_cal + tail_cal
     return test_cal
 
-
+@is_user
+@is_logged_in
+@usuario_notificaciones
 @app.route('/calendario_data')
 def test_calendario():
     colores = {1: "#fd7e14",
@@ -746,14 +773,17 @@ def test_calendario():
     test = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
     return test
 
-
+@is_user
+@is_logged_in
+@usuario_notificaciones
 @app.route('/avisodeprivacidad')
 def avisodeprivacidad():
     return render_template('avisodeprivacidad.html')
 
-
-@app.route('/crearevento', methods=['GET', 'POST'])
+@is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/crearevento', methods=['GET', 'POST'])
 def peticionevento():
     arr_terr = db_execute('select * from terrazas')
     name = dict(session)['profile']['name']
@@ -805,10 +835,10 @@ def peticionevento():
 
     return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
 
-
-@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
 def gestioneventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -844,10 +874,10 @@ def gestioneventos():
         msg = 'No hay eventos asociados al coto'
         return render_template('gestioneventos.html', eventos=array_eventos, msg=msg)
 
-
-@app.route('/acteventos', methods=['POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/acteventos', methods=['POST'])
 def acteventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -887,10 +917,10 @@ def acteventos():
 
     return redirect(url_for('gestioneventos'))
 
-
-@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'])
 def gestioneventoshistorico():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -926,9 +956,10 @@ def gestioneventoshistorico():
         return render_template('gestioneventoshistorico.html', eventos=array_eventos, msg=msg)
     cur.close()
 
-@app.route('/notificaciones', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/notificaciones', methods=['GET', 'POST', 'UPDATE'])
 def notificaciones():
     email = dict(session)['profile']['email']
     conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
@@ -950,9 +981,10 @@ def notificaciones():
                               'leido': leido})
     return render_template('layout.html', cont=cont, com=array_com)
 
-@app.route('/comunicados', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/comunicados', methods=['GET', 'POST'])
 def comunicados():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -1003,9 +1035,11 @@ def comunicados():
         return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
     return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
 
-@app.route('/entregadoact/<id_mensaje>', methods=['GET'])
+
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/entregadoact/<id_mensaje>', methods=['GET'])
 def entregadoact(id_mensaje):
     if request.method == 'GET':
         titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
@@ -1075,9 +1109,10 @@ def entregadoact(id_mensaje):
 
     return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc, contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
 
-@app.route('/encuesta', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
+@usuario_notificaciones
+@app.route('/encuesta', methods=['GET', 'POST'])
 def encuesta():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
