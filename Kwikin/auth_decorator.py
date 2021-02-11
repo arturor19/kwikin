@@ -62,6 +62,31 @@ def is_user(f):
     return decorated_function
 
 
+def usuario_notificaciones(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        email = dict(session)['profile']['email']
+        conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
+        cont = len(conta)
+        com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
+
+        array_com = []
+        for row in com:
+            id_notificaciones = (row['id_notificaciones'])
+            fecha = (row['fecha'])
+            titulo = (row['titulo'])
+            mensaje = (row['mensaje'])
+            leido = (row['leido'])
+
+            array_com.append({'id_notificaciones': (id_notificaciones),
+                              'fecha': fecha,
+                              'titulo': titulo,
+                              'mensaje': mensaje,
+                              'leido': leido})
+        return render_template('layout.html', cont=cont, com=array_com)
+    return decorated_function
+
+
 
 #print(db_describe('select * from asoc_usuario_grupo'))
 #print(db_execute('select * from usuarios'))

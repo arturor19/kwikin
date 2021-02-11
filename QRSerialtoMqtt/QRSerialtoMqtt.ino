@@ -30,7 +30,9 @@
 
 const char* ssid = "RAMLOZ2";
 const char* password = "Queonda_123";
-const char* mqtt_server = "li1302-82.members.linode.com";
+const char* mqtt_server = "kwikin.mx";
+const char* mqttUser = "kwikin";
+const char* mqttPassword = "GuiArtMig123!";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -93,7 +95,7 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect("ESP8266Client")) {
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
       client.publish("puertas", "QR Escanner Inicio");
