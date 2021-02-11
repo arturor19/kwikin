@@ -1011,6 +1011,10 @@ def entregadoact(id_mensaje):
         titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
         mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
         tipo = db_execute(f"SELECT tipo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['tipo']
+        resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_a']
+        resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_b']
+        resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_c']
+        resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_d']
         array_leido = []
         leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
         contleidopor = len(leido)
@@ -1073,7 +1077,7 @@ def entregadoact(id_mensaje):
             array_opd.append({'opd':opd})
 
 
-    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc, contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, set=zip(values, labels, colors))
+    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc, contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b, resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors))
 
 @app.route('/encuesta', methods=['GET', 'POST'])
 @is_user
@@ -1111,6 +1115,29 @@ def encuesta():
         return redirect(url_for('comunicados'))
     return redirect(url_for('comunicados'))
 
+@app.route('/comunicadosres', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def comunicadosres():
+    email = dict(session)['profile']['email']
+    conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
+    cont = len(conta)
+    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
+
+    array_com = []
+    for row in com:
+        id_notificaciones = (row['id_notificaciones'])
+        fecha = (row['fecha'])
+        titulo = (row['titulo'])
+        mensaje = (row['mensaje'])
+        leido = (row['leido'])
+
+        array_com.append({'id_notificaciones': (id_notificaciones),
+                          'fecha': fecha,
+                          'titulo': titulo,
+                          'mensaje': mensaje,
+                          'leido': leido})
+    return render_template('comunicadosres.html', cont=cont, com=array_com)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
