@@ -82,10 +82,11 @@ def ayudabulk():
     return render_template('ayudabulk.html', name=name, picture=picture)
 
 
-@app.route('/dashboard')
+
 @is_user
 @is_logged_in
 @usuario_notificaciones
+@app.route('/dashboard')
 def dashboard():
     name = session['profile']['name']
     picture = session['profile']['picture']
