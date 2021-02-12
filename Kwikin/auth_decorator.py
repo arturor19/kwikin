@@ -64,7 +64,7 @@ def is_user(f):
 
 def usuario_notificaciones(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(**kws):
         email = dict(session)['profile']['email']
         conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
         cont = len(conta)
@@ -83,7 +83,10 @@ def usuario_notificaciones(f):
                               'titulo': titulo,
                               'mensaje': mensaje,
                               'leido': leido})
-        return render_template('layout.html', cont=cont, com=array_com)
+        kws['cont'] = cont
+        kws['com'] = array_com
+        return f(**kws)
+        #return render_template('layout.html', cont=cont, com=array_com)
     return decorated_function
 
 
