@@ -761,7 +761,8 @@ def peticionevento(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    email = dict(session)['profile']['email']
+    email = session['profile']['email']
+    name = session['profile']['name']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     now = ct
@@ -778,11 +779,15 @@ def peticionevento(**kws):
                 flash('Por favor selecciona una terraza del listado', 'danger')
             else:
                 try:
-                    cur.execute(
+                    existe_evento = db_execute(f"select * from eventos where terraza='{terraza}' and nombre='{name}' and correo='{email}' and dia='{fechaevento}'")
+                    valor_evento = (len(existe_evento))
+                    if valor_evento == 1:
+                        pass
+                    else:
+                        db_execute(
                         "INSERT INTO eventos(terraza, nombre, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
                             terraza, name, email, fechaevento))
 
-                    mysql.commit()
                     flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe',
                           'success')
                     # insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES
@@ -849,7 +854,6 @@ def gestioneventos(**kws):
 @app.route('/acteventos', methods=['POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
 def acteventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
