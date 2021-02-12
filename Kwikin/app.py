@@ -76,12 +76,13 @@ def index():
 
 
 @app.route('/ayudabulk', methods=["GET", "POST"])
-def ayudabulk():
+@usuario_notificaciones
+@is_user
+@is_logged_in
+def ayudabulk(**kws):
     name = session['profile']['name']
     picture = session['profile']['picture']
-    return render_template('ayudabulk.html', name=name, picture=picture)
-
-
+    return render_template('ayudabulk.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/dashboard')
@@ -89,26 +90,23 @@ def ayudabulk():
 @is_user
 @is_logged_in
 def dashboard(**kws):
-    print(kws)
     return render_template('dashboard.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/scannerqr')
 @usuario_notificaciones
-def scannerqr():
-    name = dict(session)['profile']['name']
-    email = dict(session)['profile']['email']
-    picture = dict(session)['profile']['picture']
-    return render_template('scannerqr.html', name=name, picture=picture)
+@is_user
+@is_logged_in
+def scannerqr(**kws):
+    return render_template('scannerqr.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/scannerqrs')
 @usuario_notificaciones
-def scannerqrs():
-    name = dict(session)['profile']['name']
-    email = dict(session)['profile']['email']
-    picture = dict(session)['profile']['picture']
-    return render_template('scannerqrs.html', name=name, picture=picture)
+@is_user
+@is_logged_in
+def scannerqrs(**kws):
+    return render_template('scannerqrs.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/logout')
@@ -119,9 +117,9 @@ def logout():
 
 
 @app.route('/crearqr', methods=['GET', 'POST'])
-@is_logged_in
 @usuario_notificaciones
-def peticionqr():
+@is_logged_in
+def peticionqr(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     email = session['profile']['email']
@@ -206,28 +204,26 @@ q.estado = 'Activo'""")
         qr_data = send_file(qr, mimetype="image/png")
         return redirect(url_for('codigoqr', qr_data=codigo_qr, start_date=fecha_entrada, end_date=fecha_salida, qr=array_qr))
 
-    return render_template('crearpeticionqr.html', qr=array_qr, now=now)
+    return render_template('crearpeticionqr.html', qr=array_qr, now=now,  cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/codigoqr', methods=['GET'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def codigoqr():
-    picture = session['profile']['picture']
+def codigoqr(**kws):
     if request.method == 'GET':
         qr_data = request.args.get('qr_data')
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
         return render_template('codigoqr.html', qr_data=qr_data, mode="raw", start_date=start_date,
-                               end_date=end_date, picture=picture)
+                               end_date=end_date,  cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/crearInd', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
-def crearInd():
+def crearInd(**kws):
     if request.method == 'POST':
         domicilio = request.form['direccion']
         email = request.form['correo']
@@ -261,18 +257,14 @@ def crearInd():
         else:
             flash(f'El correo {email} es incorrecto, por favor valida que sea Gmail', 'danger')
         cur.close()
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
-    return redirect(url_for('gestionusuarios', name=name, picture=picture))
+    return redirect(url_for('gestionusuarios'))
 
 
 @app.route('/crearBulk', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def upload():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
+def upload(**kws):
     if request.method == 'POST':
         mysql = sqlite3.connect('kw.db')
         cur = mysql.cursor()
@@ -298,15 +290,15 @@ def upload():
             cur.close()
         except:
             flash(f"El formato no es valido o el archivo no existe", "danger")
-        return render_template('crearbulk.html', name=name, picture=picture)
-    return render_template('crearbulk.html', name=name, picture=picture)
+        return render_template('crearbulk.html',  cont=kws['cont'], com=kws['com'])
+    return render_template('crearbulk.html',  cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/gestionusuarios', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def gestionusuarios():
+def gestionusuarios(**kws):
     usuarios = db_execute("SELECT * FROM usuarios")
     array = []
     for row in usuarios:
@@ -324,16 +316,15 @@ def gestionusuarios():
                       'telefono': telefono,
                       'domicilio': domicilio})
     if len(usuarios) > 0:
-        return render_template('gestionusuarios.html', usuarios=array)
+        return render_template('gestionusuarios.html', usuarios=array, cont=kws['cont'], com=kws['com'])
     else:
         flash('No hay usuarios asociados al coto', 'danger')
-        return render_template('gestionusuarios.html', usuarios=array)
+        return render_template('gestionusuarios.html', usuarios=array, cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/actusuarioinfo', methods=['POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
 def actusuarioinfo():
     if request.method == "POST":
         if request.form['actusuarioinfo'] == 'actu':
@@ -360,7 +351,6 @@ def actusuarioinfo():
 @app.route('/actestadoqr', methods=['POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
 def actestadoqr():
     ids = None
     if request.method == "POST":
@@ -379,7 +369,6 @@ def actestadoqr():
 @app.route('/actestadoaccesoqr', methods=['POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
 def actestadoaccesoqr():
     ids = None
     if request.method == "POST":
@@ -399,9 +388,7 @@ def actestadoaccesoqr():
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def actusuario():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
+def actusuario(**kws):
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     ids = None
@@ -412,22 +399,20 @@ def actusuario():
         if str(result) == "('Activo',)":
             cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestionusuarios.html', name=name, picture=picture)
+            return render_template('gestionusuarios.html',  cont=kws['cont'], com=kws['com'])
         elif str(result) == "('Inactivo',)":
             cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestionusuarios.html', name=name, picture=picture)
+            return render_template('gestionusuarios.html',  cont=kws['cont'], com=kws['com'])
     cur.close()
-    return render_template('gestionusuarios.html', name=name, picture=picture)
+    return render_template('gestionusuarios.html',  cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/actdom', methods=['POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def actdom():
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
+def actdom(**kws):
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     ids = None
@@ -438,19 +423,19 @@ def actdom():
         if str(result) == "('Activo',)":
             cur.execute("UPDATE usuarios SET status = 'Inactivo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestiondimicilios.html', name=name, picture=picture)
+            return render_template('gestiondimicilios.html',  cont=kws['cont'], com=kws['com'])
         elif str(result) == "('Inactivo',)":
             cur.execute("UPDATE usuarios SET status = 'Activo' WHERE email = '%s';" % ids)
             mysql.commit()
-            return render_template('gestiondimicilios.html', name=name, picture=picture)
+            return render_template('gestiondimicilios.html', cont=kws['cont'], com=kws['com'])
     cur.close()
-    return render_template('gestiondimicilios.html', name=name, picture=picture)
+    return render_template('gestiondimicilios.html', cont=kws['cont'], com=kws['com'])
 
 @app.route('/gestionqrhistorico', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def gestionqrhistorico():
+def gestionqrhistorico(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -491,12 +476,11 @@ def gestionqrhistorico():
                          'estado_acceso': estado_acceso,
                          'codigo_qr': codigo_qr,
                          'id_qr': id_qr})
-    return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now)
+    return render_template('crearpeticionqrhistorico.html', qrh=array_qrh, now=now, cont=kws['cont'], com=kws['com'])
 
 @app.route('/actqr', methods=['POST','GET'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
 def actqr():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -565,7 +549,7 @@ def actqr():
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def ventas():
+def ventas(**kws):
     if request.method == 'POST':
         domicilio = request.form['direccion']
         email = request.form['correo']
@@ -591,16 +575,14 @@ def ventas():
         except:
             flash(f'El correo {email} no pudo asociar un grupo, contacta un administrador', 'danger')
         cur.close()
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
-    return render_template('ventas.html', name=name, picture=picture)
+    return render_template('ventas.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/crearventa', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def crearventa():
+def crearventa(**kws):
     Cotopy = request.form['Coto']
     CotoDirpy = request.form['CotoDir']
     CotoCPpy = request.form['CotoCP']
@@ -608,7 +590,7 @@ def crearventa():
     teladminpy = request.form['teladmin']
     vendedorpy = dict(session)['profile']['email']  # esta variable sirve para saber quien creo el coto y poder mapearlo
     print(Cotopy, CotoDirpy, CotoCPpy, correopy, teladminpy, vendedorpy)
-    return render_template("ventas.html")
+    return render_template("ventas.html", cont=kws['cont'], com=kws['com'])
     '''db.execute(
         "INSERT INTO events (user_id, title, description, place, start, end) VALUES (:user, :title, :description, :place, :start, :end)",
         user=session["user_id"], title=title, description=description, place=place, start=start, end=end)'''
@@ -618,12 +600,10 @@ def crearventa():
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def validarqr():
+def validarqr(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     if request.method == 'GET':
@@ -649,28 +629,26 @@ def validarqr():
                             qrid, timestamp, tipo))
                     mysql.commit()
                     cur.close()
-                    return render_template("aprobado.html", name=name, picture=picture)
+                    return render_template("aprobado.html",  cont=kws['cont'], com=kws['com'])
                 else:
                     flash(f'el código ha sido cancelado', 'danger')
-                    return render_template("noaprobado.html", name=name, picture=picture)
+                    return render_template("noaprobado.html",  cont=kws['cont'], com=kws['com'])
             else:
                 flash(f'Las fechas no son validas', 'danger')
-                return render_template("noaprobado.html", name=name, picture=picture)
+                return render_template("noaprobado.html",  cont=kws['cont'], com=kws['com'])
         else:
             flash(f'el código no es valido', 'danger')
-            return render_template("noaprobado.html", name=name, picture=picture)
+            return render_template("noaprobado.html",  cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/validarqrs', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-def validarqrs():
+def validarqrs(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     mysql = sqlite3.connect('kw.db')
     cur = mysql.cursor()
     if request.method == 'GET':
@@ -691,21 +669,19 @@ def validarqrs():
                 qrid, timestamp, tipo))
             mysql.commit()
             cur.close()
-            return render_template("aprobado.html", name=name, picture=picture)
+            return render_template("aprobado.html", cont=kws['cont'], com=kws['com'])
         else:
             flash(f'el código no es valido', 'danger')
-            return render_template("noaprobado.html", name=name, picture=picture)
-    return render_template("dashboard.html", name=name, picture=picture)
+            return render_template("noaprobado.html",  cont=kws['cont'], com=kws['com'])
+    return render_template("dashboard.html",  cont=kws['cont'], com=kws['com'])
 
 
-
+@app.route('/calendar-events')
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/calendar-events')
-def calendar_events():
+def calendar_events(**kws):
     arr_terr = db_execute('select * from terrazas')
-    picture = session['profile']['picture']
     try:
         rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
                           "end_date)*1000 as end FROM event FROM eventos")
@@ -715,23 +691,20 @@ def calendar_events():
         return resp
     except Exception as e:
         print(e)
-    return render_template('calendar_events.html', rows=rows, picture=picture, terrazas=arr_terr)
+    return render_template('calendar_events.html', rows=rows, terrazas=arr_terr, cont=kws['cont'], com=kws['com'])
 
 
-
-@is_user
-@is_logged_in
-@usuario_notificaciones
 @app.route('/calendario')
-def calendario():
-    arr_terr = db_execute('select * from terrazas')
-    picture = session['profile']['picture']
-    return render_template('calendar_events.html', picture=picture, terrazas=arr_terr)
-
 @is_user
 @is_logged_in
 @usuario_notificaciones
+def calendario(**kws):
+    arr_terr = db_execute('select * from terrazas')
+    return render_template('calendar_events.html',  cont=kws['cont'], com=kws['com'], terrazas=arr_terr)
+
 @app.route('/calendario_ini/remote')
+@is_user
+@is_logged_in
 def calendario_ini():
     test_cal = ''
     if request.method == 'GET':
@@ -746,10 +719,9 @@ def calendario_ini():
         test_cal = head_cal + tail_cal
     return test_cal
 
+@app.route('/calendario_data')
 @is_user
 @is_logged_in
-@usuario_notificaciones
-@app.route('/calendario_data')
 def test_calendario():
     colores = {1: "#fd7e14",
                2: "#6f42c1",
@@ -774,21 +746,18 @@ def test_calendario():
     test = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
     return test
 
-@is_user
-@is_logged_in
-@usuario_notificaciones
+
 @app.route('/avisodeprivacidad')
 def avisodeprivacidad():
     return render_template('avisodeprivacidad.html')
 
+
+@app.route('/crearevento', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/crearevento', methods=['GET', 'POST'])
-def peticionevento():
+def peticionevento(**kws):
     arr_terr = db_execute('select * from terrazas')
-    name = dict(session)['profile']['name']
-    picture = dict(session)['profile']['picture']
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -827,20 +796,21 @@ def peticionevento():
                     cur.close()
                 except:
                     flash(f'Evento no creado correctamente', 'danger')
-                    return render_template('calendar_events.html', name=name, picture=picture, now=now,
+                    return render_template('calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now,
                                            terrazas=arr_terr)
-                return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
+                return render_template('calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
         except:
             flash(f'Revisa todos los campos', 'danger')
-            return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
+            return render_template('calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
 
-    return render_template('calendar_events.html', name=name, picture=picture, now=now, terrazas=arr_terr)
+    return render_template('calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
 
+
+@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
-def gestioneventos():
+def gestioneventos(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -870,15 +840,16 @@ def gestioneventos():
                               'dia': dia})
 
     if len(eventos) > 0:
-        return render_template('gestioneventos.html', eventos=array_eventos)
+        return render_template('gestioneventos.html', eventos=array_eventos, cont=kws['cont'], com=kws['com'])
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventos.html', eventos=array_eventos, msg=msg)
+        return render_template('gestioneventos.html', eventos=array_eventos, msg=msg, cont=kws['cont'], com=kws['com'])
 
+
+@app.route('/acteventos', methods=['POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/acteventos', methods=['POST'])
 def acteventos():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -918,11 +889,12 @@ def acteventos():
 
     return redirect(url_for('gestioneventos'))
 
+
+@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/gestioneventoshistorico', methods=['GET', 'POST', 'UPDATE'])
-def gestioneventoshistorico():
+def gestioneventoshistorico(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     tzone = ct
@@ -949,44 +921,20 @@ def gestioneventoshistorico():
                               'domicilio': domicilio,
                               'telefono': telefono,
                               'dia': dia})
-
     if len(eventos) > 0:
-        return render_template('gestioneventoshistorico.html', eventos=array_eventos)
+        return render_template('gestioneventoshistorico.html',  cont=kws['cont'], com=kws['com'], eventos=array_eventos)
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('gestioneventoshistorico.html', eventos=array_eventos, msg=msg)
+        return render_template('gestioneventoshistorico.html',  cont=kws['cont'], com=kws['com'],
+                               eventos=array_eventos, msg=msg)
     cur.close()
 
-@is_user
-@is_logged_in
-@usuario_notificaciones
-@app.route('/notificaciones', methods=['GET', 'POST', 'UPDATE'])
-def notificaciones():
-    email = dict(session)['profile']['email']
-    conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
-    cont = len(conta)
-    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
 
-    array_com = []
-    for row in com:
-        id_notificaciones = (row['id_notificaciones'])
-        fecha = (row['fecha'])
-        titulo = (row['titulo'])
-        mensaje = (row['mensaje'])
-        leido = (row['leido'])
-
-        array_com.append({'id_notificaciones': (id_notificaciones),
-                              'fecha': fecha,
-                              'titulo': titulo,
-                              'mensaje': mensaje,
-                              'leido': leido})
-    return render_template('layout.html', cont=cont, com=array_com)
-
-@is_user
-@is_logged_in
-@usuario_notificaciones
 @app.route('/comunicados', methods=['GET', 'POST'])
-def comunicados():
+@is_user
+@is_logged_in
+@usuario_notificaciones
+def comunicados(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
     creador = dict(session)['profile']['email']
@@ -1031,17 +979,17 @@ def comunicados():
             db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
             timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0, "Comunicado"))
             return redirect(url_for('comunicados'))
+        return render_template('comunicados.html', comuni=array_comunica, cont=kws['cont'], com=kws['com'],
+                               allemails=array_allemails, id_mensaje=id_mensaje)
+    return render_template('comunicados.html',  cont=kws['cont'], com=kws['com'], comuni=array_comunica,
+                           allemails=array_allemails, id_mensaje=id_mensaje)
 
 
-        return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
-    return render_template('comunicados.html', comuni=array_comunica, allemails=array_allemails, id_mensaje=id_mensaje)
-
-
+@app.route('/entregadoact/<id_mensaje>', methods=['GET'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
-@app.route('/entregadoact/<id_mensaje>', methods=['GET'])
-def entregadoact(id_mensaje):
+def entregadoact(id_mensaje, **kws):
     if request.method == 'GET':
         titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
         mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
@@ -1110,14 +1058,17 @@ def entregadoact(id_mensaje):
         for row in opcion_d:
             opd = (row['email_usuario_receptor'])
             array_opd.append({'opd':opd})
+    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc,
+                           contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
+                           leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
+                           contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
+                           resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
+                           cont=kws['cont'], com=kws['com'])
 
 
-    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc, contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido, contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b, resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors))
-
+@app.route('/encuesta', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
-@usuario_notificaciones
-@app.route('/encuesta', methods=['GET', 'POST'])
 def encuesta():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -1151,15 +1102,16 @@ def encuesta():
         return redirect(url_for('comunicados'))
     return redirect(url_for('comunicados'))
 
+
 @app.route('/comunicadosres', methods=['GET', 'POST'])
+@usuario_notificaciones
 @is_user
 @is_logged_in
-def comunicadosres():
+def comunicadosres(**kws):
     email = dict(session)['profile']['email']
     conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
     cont = len(conta)
     com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
-
     array_com = []
     for row in com:
         id_notificaciones = (row['id_notificaciones'])
@@ -1167,13 +1119,12 @@ def comunicadosres():
         titulo = (row['titulo'])
         mensaje = (row['mensaje'])
         leido = (row['leido'])
-
         array_com.append({'id_notificaciones': (id_notificaciones),
                           'fecha': fecha,
                           'titulo': titulo,
                           'mensaje': mensaje,
                           'leido': leido})
-    return render_template('comunicadosres.html', cont=cont, com=array_com)
+    return render_template('comunicadosres.html', cont=kws['cont'], com=kws['com'])
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')
