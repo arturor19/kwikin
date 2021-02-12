@@ -83,14 +83,14 @@ def ayudabulk():
 
 
 
+
+@app.route('/dashboard')
+@usuario_notificaciones
 @is_user
 @is_logged_in
-@usuario_notificaciones
-@app.route('/dashboard')
-def dashboard():
-    name = session['profile']['name']
-    picture = session['profile']['picture']
-    return render_template('dashboard.html', name=name, picture=picture)
+def dashboard(**kws):
+    print(kws)
+    return render_template('dashboard.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/scannerqr')
