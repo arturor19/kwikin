@@ -608,10 +608,14 @@ def validarqr(**kws):
     cur = mysql.cursor()
     if request.method == 'GET':
         qrval = request.args.get('qr')
+        print(qrval)
         result = cur.execute("SELECT * FROM qr WHERE codigo_qr = '%s';" % qrval)
         qrinfo = cur.fetchall()
         print(qrinfo[0])
-        qrid = int(qrinfo[0][0])
+        try:
+            qrid = int(qrinfo[0][0])
+        except:
+            return render_template("noaprobado.html", cont=kws['cont'], com=kws['com'])
         fecha_inicio = qrinfo[0][2]
         fecha_fin = qrinfo[0][3]
         nombre = qrinfo[0][4]
@@ -655,8 +659,10 @@ def validarqrs(**kws):
         qrval = request.args.get('qrs')
         result = cur.execute("SELECT * FROM qr WHERE codigo_qr = '%s';" % qrval)
         qrinfo = cur.fetchall()
-        print(qrinfo[0])
-        qrid = int(qrinfo[0][0])
+        try:
+            qrid = int(qrinfo[0][0])
+        except:
+            return render_template("noaprobado.html", cont=kws['cont'], com=kws['com'])
         fecha_inicio = qrinfo[0][2]
         fecha_fin = qrinfo[0][3]
         nombre = qrinfo[0][4]
