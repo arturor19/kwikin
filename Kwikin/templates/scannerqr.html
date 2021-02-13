@@ -1,21 +1,118 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Scanner QR </title>
-    <script type="text/javascript" src="{{ url_for('.static', filename='js/html5-qrcode.min.js') }}"></script>
- 	<form name="scanqr" id="scanqr" action="/validarqr" method="get">
-      <input type="hidden" id="qr" name="qr" value="" />
-    </form>
+{% extends "layout.html" %}
+{% block head %}
+
+<title>Escaner Entrada</title>
+<meta charset="UTF-8">
+
+{% endblock %}
+{%block body %}
+
+<html lang="en"><head><style>
+    .utterances {
+      position: relative;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .utterances-frame {
+      color-scheme: light;
+      position: absolute;
+      left: 0;
+      right: 0;
+      width: 1px;
+      min-width: 100%;
+      max-width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
+ <meta charset="utf-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-300.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-regular.woff') }}" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-300.woff') }}" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-regular.ttf') }}" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-300.ttf') }}" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="{{ url_for('.static', filename='assets/fonts/ibm-plex-sans-v2-latin-300.ttf') }}" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="{{ url_for('.static', filename='css/custom.css') }}">
+<link rel="stylesheet" href="{{ url_for('.static', filename='css/sharebar.css') }}">
+<link rel="alternate" type="application/rss+xml" title="Minhaz's Blog" href="/feed.xml">
+<link rel="shortcut icon" href="/assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.ico">
+    <script src="/static/js/jquery.js"></script>
+<title>Escaner Entrada QR</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="HTML5 QR Code Scanner Demo">
+<meta property="og:locale" content="es_MX">
+<link rel="prefetch"></head>
+ <body data-instant-allow-query-string="" data-instant-allow-external-links="" style="background-color:#f8f9fc;>
+  <header class="site-header">
+ </header>
+   <main class="default-content" aria-label="Content">
+     <div class="wrapper-content">
+       <style>
+#reader {
+    width: 640px;
+}
+@media(max-width: 600px) {
+	#reader {
+		width: 300px;
+	}
+}
+.empty {
+    display: block;
+    width: 100%;
+    height: 20px;
+}
+</style>
+<h1> Escaner Entrada</h1>
 <div class="container">
 	<div class="row">
 		<div class="col-md-12" style="text-align: center;margin-bottom: 20px;">
-			<div id="reader" style="display: inline-block;"></div>
+			<div id="reader" style="display: inline-block; position: relative; padding: 0px; border: 1px solid silver;">
+                <div style="text-align: left; margin: 0px; padding: 5px; font-size: 20px; border-bottom: 1px solid rgba(192, 192, 192, 0.18);">
+                    <span>QR Code Scanner</span>
+                    <span id="reader__status_span" style="float: right; padding: 5px 7px; font-size: 14px; background: rgb(238, 238, 255); border: 1px solid rgba(0, 0, 0, 0); color: rgb(17, 17, 17);">IDLE</span>
+                    <div id="reader__header_message" style="display: none; font-size: 14px; padding: 2px 10px; margin-top: 4px; border-top: 1px solid rgb(246, 246, 246);"></div>
+                </div>
+                <div id="reader__scan_region" style="width: 100%; min-height: 100px; text-align: center;">
+                    <br><img width="64" src="{{ url_for('.static', filename='img/camera-scan.gif') }}" style="opacity: 0.3;">
+                </div>
+                <div id="reader__dashboard" style="width: 100%;">
+                    <div id="reader__dashboard_section" style="width: 100%; padding: 10px; text-align: left;">
+                        <div>
+                            <div id="reader__dashboard_section_csr" style="display: block;">
+                                <div style="text-align: center;">
+                                    <button>Request Camera Permissions</button>
+                                </div>
+                            </div>
+                            <div id="reader__dashboard_section_fsr" style="text-align: center; display: none;">
+                                <input id="reader__filescan_input" accept="image/*" type="file" disabled="" style="width: 200px;">
+                                <span>&nbsp; Select Image</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <a id="reader__dashboard_section_swaplink" href="#scan-using-file" style="text-decoration: underline;">Scan an Image File</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 			<div class="empty"></div>
 			<div id="scanned-result"></div>
 		</div>
 	</div>
 </div>
-    <script>
+ 	<form name="scanqr" id="scanqr" action="/validarqr" method="get">
+      <input type="hidden" id="qr" name="qr" value="" />
+    </form>
+<script src="{{ url_for('.static', filename='js/highlight.min.js') }}"></script>
+<script src="{{ url_for('.static', filename='js/html5-qrcode.min.js') }}"></script>
+
+<script>
 function onScanSuccess(qrMessage) {
 	// handle the scanned code as you like
 	console.log(`QR matched = ${qrMessage}`);
@@ -26,6 +123,9 @@ function onScanSuccess(qrMessage) {
 let html5QrcodeScanner = new Html5QrcodeScanner(
 	"reader", { fps: 10, qrbox: 250 }, /* verbose= */ true);
 html5QrcodeScanner.render(onScanSuccess);
+</script>
+     </div>
+   </main>
 
-    </script>
-</html>
+</body></html>
+{% endblock %}
