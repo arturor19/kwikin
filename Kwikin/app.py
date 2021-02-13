@@ -1070,6 +1070,89 @@ def entregadoact(id_mensaje, **kws):
                            cont=kws['cont'], com=kws['com'])
 
 
+
+@app.route('/entregadoactres/<id_mensajes>', methods=['GET'])
+@is_user
+@is_logged_in
+@usuario_notificaciones
+def entregadoactres(id_mensajes, **kws):
+    if request.method == 'GET':
+        titulo = db_execute(f"SELECT titulo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['titulo']
+        mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['mensaje']
+        tipo = db_execute(f"SELECT tipo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['tipo']
+        resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_a']
+        resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_b']
+        resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_c']
+        resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_d']
+        array_leido = []
+        leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and id_notificaciones = '{id_mensajes}'")
+        contleidopor = len(leido)
+        array_noleido = []
+        noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and id_notificaciones = '{id_mensajes}'")
+        contnoleidopor = len(noleido)
+        try:
+            opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'a'")
+            contopa = len(opcion_a)
+        except:
+            opcion_a = ""
+            contopa = 0
+        try:
+            opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'b'")
+            contopb = len(opcion_b)
+        except:
+            opcion_b = ""
+            contopb = 0
+        try:
+            opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'c'")
+            contopc = len(opcion_c)
+        except:
+            opcion_c = ""
+            contopc = 0
+        try:
+            opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'd'")
+            contopd = len(opcion_d)
+        except:
+            opcion_d = ""
+            contopd = 0
+        if tipo == "Comunicado":
+            labels = ["Leido","No leido"]
+            values = [contleidopor, contnoleidopor]
+            colors = ["#1cc88a", "#e74a3b"]
+        else:
+            labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
+            values = [contopa, contopb, contopc, contopd]
+            colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
+        array_opa = []
+        array_opb = []
+        array_opc = []
+        array_opd = []
+        for row in noleido:
+            noleidopor =  (row['email_usuario_receptor'])
+            array_noleido.append({'noleidopor':noleidopor})
+        for rows in leido:
+            leidopor =  (rows['email_usuario_receptor'])
+            array_leido.append({'leidopor':leidopor})
+        for row in opcion_a:
+            opa = (row['email_usuario_receptor'])
+            array_opa.append({'opa':opa})
+        for row in opcion_b:
+            opb = (row['email_usuario_receptor'])
+            array_opb.append({'opb':opb})
+        for row in opcion_c:
+            opc = (row['email_usuario_receptor'])
+            array_opc.append({'opc':opc})
+        for row in opcion_d:
+            opd = (row['email_usuario_receptor'])
+            array_opd.append({'opd':opd})
+    return render_template('detallescomunicadores.html', contopa=contopa, contopb=contopb, contopc=contopc,
+                           contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
+                           leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
+                           contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
+                           resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
+                           cont=kws['cont'], com=kws['com'])
+
+
+
 @app.route('/encuesta', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
@@ -1114,21 +1197,23 @@ def encuesta():
 def comunicadosres(**kws):
     email = dict(session)['profile']['email']
     conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
-    cont = len(conta)
-    com = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
-    array_com = []
-    for row in com:
+    conti = len(conta)
+    comuni = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
+    array_comuni = []
+    for row in comuni:
         id_notificaciones = (row['id_notificaciones'])
         fecha = (row['fecha'])
         titulo = (row['titulo'])
+        tipo = (row['tipo'])
         mensaje = (row['mensaje'])
         leido = (row['leido'])
-        array_com.append({'id_notificaciones': (id_notificaciones),
+        array_comuni.append({'id_notificaciones': (id_notificaciones),
                           'fecha': fecha,
+                          'tipo': tipo,
                           'titulo': titulo,
                           'mensaje': mensaje,
                           'leido': leido})
-    return render_template('comunicadosres.html', cont=kws['cont'], com=kws['com'])
+    return render_template('comunicadosres.html', cont=kws['cont'], com=kws['com'], comuni=array_comuni)
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')

@@ -66,13 +66,6 @@ $.extend( true, $.fn.dataTable.defaults, {
     }
 } );
 </script>
-<section>
-    <div>
-        <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#Modalcomunicados">Comunicado</button>
-        <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#Modalencuesta">Encuesta</button>
-    </div>
-
-</section>
 <br>
 <section>
     <div style="width:90%; margin:0 auto;">
@@ -83,7 +76,6 @@ $.extend( true, $.fn.dataTable.defaults, {
             <th>Detalles</th>
             <th>Fecha</th>
             <th>titulo</th>
-            <th>Creado por</th>
         </tr>
       </thead>
       <!-- Table head -->
@@ -92,10 +84,9 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for comunica in comuni %}
              <tr>
-                 <td><a href="{{ url_for('entregadoact',id_mensaje = comunica.id_mensaje) }}">{{comunica.tipo}}</a></td>
-                 <td><a>{{comunica.fecha}}</a></td>
-                 <td><a>{{comunica.titulo}}</a></td>
-                 <td><a>{{comunica.creador}}</a></td>
+                 <td {% if comunica.leido == 1 %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}><a href="{{ url_for('entregadoactres',id_mensajes = comunica.id_notificaciones) }}">{{comunica.tipo}}</a></td>
+                 <td {% if comunica.leido == 1 %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}<a>{{comunica.fecha}}</a></td>
+                 <td {% if comunica.leido == 1 %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}td><a>{{comunica.titulo}}</a></td>
 
              </tr>
 
