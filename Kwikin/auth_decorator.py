@@ -4,6 +4,117 @@ import sqlite3
 
 db_sqlite = 'kw.db'
 
+list_create_db = ['''CREATE TABLE "usuarios" (
+	"id_usuario"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"nombre"	TEXT,
+	"imagen"	TEXT,
+	"email"	TEXT UNIQUE,
+	"status"	TEXT DEFAULT "Activo",
+	"domicilio"	TEXT,
+	"id_google"	TEXT,
+	"telefono"	TEXT
+);''',
+
+'''CREATE TABLE "terrazas" (
+	"id_terrazas"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	"terraza"	TEXT NOT NULL,
+	"descripcion" TEXT NULL
+);''',
+
+'''CREATE TABLE "qr" (
+	"id_qr"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"codigo_qr"	TEXT,
+	"inicio"	TEXT,
+	"fin"	TEXT,
+	"visitante"	TEXT,
+	"correo_visitante"	TEXT,
+	"placas"	TEXT,
+	"inicio_real"	TEXT,
+	"fin_real"	TEXT,
+	"estado"	TEXT DEFAULT "Activo"
+, "timestamp" TEXT, tipo TEXT, estado_acceso TEXT, autobloqueo INTEGER DEFAULT 0);''',
+
+'''CREATE TABLE "productos" (
+	"id_producto"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"nombre"	TEXT UNIQUE,
+	"descripcion"	TEXT
+);''',
+
+'''CREATE TABLE "grupos" (
+	"id_grupo"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"nombre"	TEXT,
+	"descripcion"	TEXT
+);''',
+
+'''CREATE TABLE "eventos" (
+	"id_eventos"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	"terraza"	TEXT NOT NULL,
+	"nombre"	TEXT NOT NULL,
+	"correo"	TEXT NOT NULL,
+	"dia"	NUMERIC NOT NULL,
+	"estado"	TEXT DEFAULT "Pendiente"
+);''',
+
+'''CREATE TABLE "domicilios" (
+	"id_dom"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"direccion"	TEXT,
+	"adeudo"	NUMERIC,
+	"coto"	TEXT
+);''',
+
+'''CREATE TABLE "comunicados" (
+	"id_notificaciones"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	"fecha"	TEXT,
+	"titulo"	TEXT,
+	"mensaje"	TEXT,
+	"idmultiple_mensaje"	TEXT,
+	"email_usuario_receptor"	TEXT,
+	"tipo"  TEXT,
+	"opcion_a" TEXT,
+	"opcion_b" TEXT,
+	"opcion_c" TEXT,
+	"opcion_d" TEXT,
+	"resultado"  TEXT,
+	"leido"	INTEGER,
+	"id_usuario_emisor"	INTEGER,
+	FOREIGN KEY("id_usuario_emisor") REFERENCES "usuarios"("id_usuario")
+);''',
+
+'''CREATE TABLE "asoc_usuario_grupo" (
+	"id_grupo"	INTEGER,
+	"id_usuario"	INTEGER,
+	FOREIGN KEY("id_usuario") REFERENCES "usuarios"("id_usuario"),
+	FOREIGN KEY("id_grupo") REFERENCES "grupos"("id_grupo")
+);''',
+
+'''CREATE TABLE "asoc_qr_usuario" (
+	"id_usuario"	INTEGER,
+	"id_qr"	INTEGER,
+	FOREIGN KEY("id_qr") REFERENCES "qr"("id_qr"),
+	FOREIGN KEY("id_usuario") REFERENCES "usuarios"("id_usuario")
+);''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('1', 'superadmin', 'Super administrador');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('2', 'vendedor', 'Vendedor');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('3', 'admin', 'Administrador');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('4', 'residente', 'Residente');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('5', 'guardia', 'Guardia');''']
+
+
+def db_create(db_name):
+    vsm_db = sqlite3.connect("./" + db_name + ".db") # db conn
+    dbh = vsm_db.cursor()  # db cursor
+    # excecute sql statement
+    for query in list_create_db:
+        dbh.execute(query)
+        desc = dbh.description
+    vsm_db.commit()
+    data = vsm_db.total_changes
+    dbh.close()
+    vsm_db.close()
+    return data
+
+
+
 def db_execute(query):
     query_lc = query.lower()
     vsm_db = sqlite3.connect(db_sqlite) # db conn
