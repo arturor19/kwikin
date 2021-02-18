@@ -20,7 +20,8 @@
 <body>
 
 <div class="shadow p-3 mb-3 bg-light rounded">
-    <a class="btn btn-outline-primary btn-sm" href="/comunicados" type="button">< Regresar</a>
+    <a class="btn btn-outline-primary btn-sm" href="/comunicadosres" type="button">< Regresar</a>
+    <a class="btn btn-outline-primary btn-sm float-right" href="/comunicadosres" type="button">< Eliminar</a>
 </div>
  <div class="form-group">
       <div id="acordioncomunicados" class="panel-group">
@@ -34,16 +35,12 @@
                 <div class="panel-body">
                     <div class="shadow p-3 mb-3 bg-light rounded">
                         <span>{{ mensaje }}</span><br>
-                        {% if tipo == "Encuesta" %}
+                        {% if (tipo == "Encuesta") and (leido == 1) %}
                          <div class="btn-group">
                             <button type="button" class="btn btn-primary" data-toggle="tooltip" title={{ resp_a }}> A  {{ contopa }}</button>
                             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                             </button>
-                            <div class="dropdown-menu">
-                                {% for entry in opa %}
-                              <a class="dropdown-item" href="#">{{entry.opa}}</a>
-                                {% endfor %}
-                            </div>
+
                           </div>
                           <div class="btn-group">
                             <button type="button" class="btn btn-secondary" data-toggle="tooltip" title={{ resp_b }}> B  {{ contopb }}</button>
