@@ -193,7 +193,7 @@
               <a class="nav-link dropdown-toggle" href="/comunicadores" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
-                <span class="badge badge-danger badge-counter">{{ cont }}+</span>
+                <span class="badge badge-danger badge-counter">{% if cont > 0 %} {{ cont }}+ {% endif %}</span>
               </a>
               <!-- Dropdown - Alerts -->
               <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
@@ -202,7 +202,7 @@
                 </h6>
                  {% for comunicado in com %}
                 <a class="dropdown-item d-flex align-items-center" href="/entregadoactres/{{comunicado.id_notificaciones}}" {% if comunicado.leido == 0 %} style="background:#cceeff;" {% endif %}>
-                  <button type="button" value="{{comunicado.id_notificaciones}}" class="close" data-dismiss="alert">&times;</button>
+                  <button type="button" value="{{comunicado.id_notificaciones}}" class="close" data-dismiss="alert"></button>
                   <div class="mr-3">
 
                   </div>
@@ -210,7 +210,6 @@
                     <input type="hidden" name="idnotihidden" ">
                     <div class="small text-gray-500">{{ comunicado.fecha }}</div>
                     <span class="font-weight-bold">{{ comunicado.titulo }}</span><br>
-                    <span href="{{ url_for('entregadoact',id_mensaje = comunicado.id_mensaje) }}">{{ comunicado.mensaje }}</span>
                   </div>
                 </a>
                   {% endfor %}
