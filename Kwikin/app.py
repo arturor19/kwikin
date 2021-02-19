@@ -692,7 +692,7 @@ def calendar_events(**kws):
         rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
                           "end_date)*1000 as end FROM event FROM eventos")
         resp = jsonify({'success': 1, 'result': rows})
-
+        print(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
@@ -745,12 +745,8 @@ def test_calendario():
         color = colores[event['id_terrazas']]
         arr_cal.append({"start": start, "text": text, "color": color})
     events_json = json.dumps(arr_cal, indent=4)
-    if request.method == 'GET':
-        coto = request.args.get('coto')
-        print(coto)
-
-    test = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
-    return test
+    info_calendario = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
+    return info_calendario
 
 
 @app.route('/avisodeprivacidad')
