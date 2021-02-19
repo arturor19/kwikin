@@ -996,81 +996,86 @@ def comunicados(**kws):
 @is_logged_in
 @usuario_notificaciones
 def entregadoact(id_mensaje, **kws):
-    if request.method == 'GET':
-        titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
-        mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
-        tipo = db_execute(f"SELECT tipo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['tipo']
-        resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_a']
-        resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_b']
-        resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_c']
-        resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_d']
-        array_leido = []
-        leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
-        contleidopor = len(leido)
-        array_noleido = []
-        noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{id_mensaje}'")
-        contnoleidopor = len(noleido)
-        try:
-            opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'a'")
-            contopa = len(opcion_a)
-        except:
-            opcion_a = ""
-            contopa = 0
-        try:
-            opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'b'")
-            contopb = len(opcion_b)
-        except:
-            opcion_b = ""
-            contopb = 0
-        try:
-            opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'c'")
-            contopc = len(opcion_c)
-        except:
-            opcion_c = ""
-            contopc = 0
-        try:
-            opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'd'")
-            contopd = len(opcion_d)
-        except:
-            opcion_d = ""
-            contopd = 0
-        if tipo == "Comunicado":
-            labels = ["Leido","No leido"]
-            values = [contleidopor, contnoleidopor]
-            colors = ["#1cc88a", "#e74a3b"]
-        else:
-            labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
-            values = [contopa, contopb, contopc, contopd]
-            colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
-        array_opa = []
-        array_opb = []
-        array_opc = []
-        array_opd = []
-        for row in noleido:
-            noleidopor =  (row['email_usuario_receptor'])
-            array_noleido.append({'noleidopor':noleidopor})
-        for rows in leido:
-            leidopor =  (rows['email_usuario_receptor'])
-            array_leido.append({'leidopor':leidopor})
-        for row in opcion_a:
-            opa = (row['email_usuario_receptor'])
-            array_opa.append({'opa':opa})
-        for row in opcion_b:
-            opb = (row['email_usuario_receptor'])
-            array_opb.append({'opb':opb})
-        for row in opcion_c:
-            opc = (row['email_usuario_receptor'])
-            array_opc.append({'opc':opc})
-        for row in opcion_d:
-            opd = (row['email_usuario_receptor'])
-            array_opd.append({'opd':opd})
-    return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc,
-                           contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
-                           leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
-                           contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
-                           resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
-                           cont=kws['cont'], com=kws['com'])
-
+    usuario = dict(session)['profile']['email']
+    id_usuario = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{usuario}'")[0]['id_usuario']
+    valida = db_execute(f"SELECT id_grupo FROM asoc_usuario_grupo WHERE id_usuario = '{id_usuario}'")[0]['id_grupo']
+    if valida == 1 or valida == 2:
+        if request.method == 'GET':
+            titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
+            mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
+            tipo = db_execute(f"SELECT tipo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['tipo']
+            resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_a']
+            resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_b']
+            resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_c']
+            resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_d']
+            array_leido = []
+            leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
+            contleidopor = len(leido)
+            array_noleido = []
+            noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{id_mensaje}'")
+            contnoleidopor = len(noleido)
+            try:
+                opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'a'")
+                contopa = len(opcion_a)
+            except:
+                opcion_a = ""
+                contopa = 0
+            try:
+                opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'b'")
+                contopb = len(opcion_b)
+            except:
+                opcion_b = ""
+                contopb = 0
+            try:
+                opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'c'")
+                contopc = len(opcion_c)
+            except:
+                opcion_c = ""
+                contopc = 0
+            try:
+                opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'd'")
+                contopd = len(opcion_d)
+            except:
+                opcion_d = ""
+                contopd = 0
+            if tipo == "Comunicado":
+                labels = ["Leido","No leido"]
+                values = [contleidopor, contnoleidopor]
+                colors = ["#1cc88a", "#e74a3b"]
+            else:
+                labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
+                values = [contopa, contopb, contopc, contopd]
+                colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
+            array_opa = []
+            array_opb = []
+            array_opc = []
+            array_opd = []
+            for row in noleido:
+                noleidopor =  (row['email_usuario_receptor'])
+                array_noleido.append({'noleidopor':noleidopor})
+            for rows in leido:
+                leidopor =  (rows['email_usuario_receptor'])
+                array_leido.append({'leidopor':leidopor})
+            for row in opcion_a:
+                opa = (row['email_usuario_receptor'])
+                array_opa.append({'opa':opa})
+            for row in opcion_b:
+                opb = (row['email_usuario_receptor'])
+                array_opb.append({'opb':opb})
+            for row in opcion_c:
+                opc = (row['email_usuario_receptor'])
+                array_opc.append({'opc':opc})
+            for row in opcion_d:
+                opd = (row['email_usuario_receptor'])
+                array_opd.append({'opd':opd})
+        return render_template('detallescomunicado.html', contopa=contopa, contopb=contopb, contopc=contopc,
+                               contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
+                               leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
+                               contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
+                               resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
+                               cont=kws['cont'], com=kws['com'])
+    else:
+        return redirect(url_for('dashboard'))
 
 
 @app.route('/entregadoactres/<id_mensajes>', methods=['GET'])
@@ -1078,81 +1083,86 @@ def entregadoact(id_mensaje, **kws):
 @is_logged_in
 @usuario_notificaciones
 def entregadoactres(id_mensajes, **kws):
-    if request.method == 'GET':
-        titulo = db_execute(f"SELECT titulo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['titulo']
-        mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['mensaje']
-        tipo = db_execute(f"SELECT tipo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['tipo']
-        resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_a']
-        resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_b']
-        resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_c']
-        resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_d']
-        array_leido = []
-        leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and id_notificaciones = '{id_mensajes}'")
-        contleidopor = len(leido)
-        array_noleido = []
-        noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and id_notificaciones = '{id_mensajes}'")
-        contnoleidopor = len(noleido)
-        try:
-            opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'a'")
-            contopa = len(opcion_a)
-        except:
-            opcion_a = ""
-            contopa = 0
-        try:
-            opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'b'")
-            contopb = len(opcion_b)
-        except:
-            opcion_b = ""
-            contopb = 0
-        try:
-            opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'c'")
-            contopc = len(opcion_c)
-        except:
-            opcion_c = ""
-            contopc = 0
-        try:
-            opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'd'")
-            contopd = len(opcion_d)
-        except:
-            opcion_d = ""
-            contopd = 0
-        if tipo == "Comunicado":
-            labels = ["Leido","No leido"]
-            values = [contleidopor, contnoleidopor]
-            colors = ["#1cc88a", "#e74a3b"]
-        else:
-            labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
-            values = [contopa, contopb, contopc, contopd]
-            colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
-        array_opa = []
-        array_opb = []
-        array_opc = []
-        array_opd = []
-        for row in noleido:
-            noleidopor =  (row['email_usuario_receptor'])
-            array_noleido.append({'noleidopor':noleidopor})
-        for rows in leido:
-            leidopor =  (rows['email_usuario_receptor'])
-            array_leido.append({'leidopor':leidopor})
-        for row in opcion_a:
-            opa = (row['email_usuario_receptor'])
-            array_opa.append({'opa':opa})
-        for row in opcion_b:
-            opb = (row['email_usuario_receptor'])
-            array_opb.append({'opb':opb})
-        for row in opcion_c:
-            opc = (row['email_usuario_receptor'])
-            array_opc.append({'opc':opc})
-        for row in opcion_d:
-            opd = (row['email_usuario_receptor'])
-            array_opd.append({'opd':opd})
-    return render_template('detallescomunicadores.html', contopa=contopa, contopb=contopb, contopc=contopc,
-                           contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
-                           leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
-                           contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
-                           resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
-                           cont=kws['cont'], com=kws['com'])
-
+    usuario = dict(session)['profile']['email']
+    valida = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['email_usuario_receptor']
+    try:
+        if request.method == 'GET' and usuario == valida:
+            db_execute("UPDATE comunicados SET leido =\"%s\"  WHERE id_notificaciones =\"%s\";" % (1, id_mensajes))
+            titulo = db_execute(f"SELECT titulo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['titulo']
+            mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['mensaje']
+            tipo = db_execute(f"SELECT tipo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['tipo']
+            resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_a']
+            resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_b']
+            resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_c']
+            resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_d']
+            array_leido = []
+            leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and id_notificaciones = '{id_mensajes}'")
+            contleidopor = len(leido)
+            array_noleido = []
+            noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and id_notificaciones = '{id_mensajes}'")
+            contnoleidopor = len(noleido)
+            try:
+                opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'a'")
+                contopa = len(opcion_a)
+            except:
+                opcion_a = ""
+                contopa = 0
+            try:
+                opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'b'")
+                contopb = len(opcion_b)
+            except:
+                opcion_b = ""
+                contopb = 0
+            try:
+                opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'c'")
+                contopc = len(opcion_c)
+            except:
+                opcion_c = ""
+                contopc = 0
+            try:
+                opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'd'")
+                contopd = len(opcion_d)
+            except:
+                opcion_d = ""
+                contopd = 0
+            if tipo == "Comunicado":
+                labels = ["Leido","No leido"]
+                values = [contleidopor, contnoleidopor]
+                colors = ["#1cc88a", "#e74a3b"]
+            else:
+                labels = ["Opcion A", "Opcion B", "Opcion C", "Opcion D"]
+                values = [contopa, contopb, contopc, contopd]
+                colors = ["#4e73df", "#858796", "#1cc88a", "#36b9cc"]
+            array_opa = []
+            array_opb = []
+            array_opc = []
+            array_opd = []
+            for row in noleido:
+                noleidopor =  (row['email_usuario_receptor'])
+                array_noleido.append({'noleidopor':noleidopor})
+            for rows in leido:
+                leidopor =  (rows['email_usuario_receptor'])
+                array_leido.append({'leidopor':leidopor})
+            for row in opcion_a:
+                opa = (row['email_usuario_receptor'])
+                array_opa.append({'opa':opa})
+            for row in opcion_b:
+                opb = (row['email_usuario_receptor'])
+                array_opb.append({'opb':opb})
+            for row in opcion_c:
+                opc = (row['email_usuario_receptor'])
+                array_opc.append({'opc':opc})
+            for row in opcion_d:
+                opd = (row['email_usuario_receptor'])
+                array_opd.append({'opd':opd})
+        return render_template('detallescomunicadores.html', contopa=contopa, contopb=contopb, contopc=contopc,
+                               contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd,
+                               leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
+                               contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
+                               resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),
+                               cont=kws['cont'], com=kws['com'])
+    except:
+        return redirect(url_for('comunicadosres'))
 
 
 @app.route('/encuesta', methods=['GET', 'POST'])
