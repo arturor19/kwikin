@@ -20,61 +20,85 @@
 <body>
 
 <div class="shadow p-3 mb-3 bg-light rounded">
-    <a class="btn btn-outline-primary btn-sm" href="/comunicadosres" type="button">< Regresar</a>
-    <a class="btn btn-outline-primary btn-sm float-right" href="/comunicadosres" type="button">< Eliminar</a>
+    <form method="post" action="/entregadoactres/eliminarres">
+        <a class="btn btn-outline-primary btn-sm" href="/comunicadosres" type="button">< Regresar</a>
+        <button type="submit" id="elim" name="elim" class="btn btn-outline-primary btn-sm float-right" value={{id_mensajes}}>X Eliminar</button>
+    </form>
 </div>
  <div class="form-group">
       <div id="acordioncomunicados" class="panel-group">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <div class="shadow p-3 mb-3 bg-light rounded">
-                    <a class="font-weight-bold " data-target="#panelbodycomunicado" data-toggle="collapse" data-parent="#acordioncomunicados"><u>Comunicado: {{ titulo }} </u> </a>
+                <div class="shadow p-3 mb-3 bg-light rounded" type="button" >
+                    <a class="font-weight-bold " data-target="#panelbodycomunicado" data-toggle="collapse" data-parent="#acordioncomunicados"><u>{% if (tipo == "Encuesta") %} Encuesta: {% else %} Comunicado: {% endif %}{{ titulo }} </u></a>
                 </div>
             </div>
             <div id="panelbodycomunicado" class="panel-collapse collapse">
                 <div class="panel-body">
                     <div class="shadow p-3 mb-3 bg-light rounded">
                         <span>{{ mensaje }}</span><br>
-                        {% if (tipo == "Encuesta") and (leido == 1) %}
+                        {% if (tipo == "Encuesta") and (resultado != None) %}
+                        <span>Tu elección fue: Opción {{ resultado }}</span><br>
                          <div class="btn-group">
-                            <button type="button" class="btn btn-primary" data-toggle="tooltip" title={{ resp_a }}> A  {{ contopa }}</button>
+                            <button type="button" class="btn btn-primary" data-toggle="tooltip" title={{ resp_a }}> A {{ contopa }}</button>
                             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                             </button>
-
+                            {% if contopa > 0 %}
+                            <div class="dropdown-menu">
+                               {% for entry in opa %}
+                              <a class="dropdown-item" href="#">{{entry.opa}}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                           </div>
                           <div class="btn-group">
                             <button type="button" class="btn btn-secondary" data-toggle="tooltip" title={{ resp_b }}> B  {{ contopb }}</button>
                             <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                             </button>
+                            {% if contopb > 0 %}
                             <div class="dropdown-menu">
                                {% for entry in opb %}
                               <a class="dropdown-item" href="#">{{entry.opb}}</a>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                           </div>
 
                           <div class="btn-group">
                             <button type="button" class="btn btn-success" data-toggle="tooltip" title={{ resp_c }}> C {{ contopc }}</button>
                             <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                             </button>
+                            {% if contopc > 0 %}
                             <div class="dropdown-menu">
                                {% for entry in opc %}
                               <a class="dropdown-item" href="#">{{entry.opc}}</a>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                           </div>
 
                           <div class="btn-group">
                             <button type="span" class="btn btn-info" data-toggle="tooltip" title={{ resp_d }}>D  {{ contopd }}</button>
                             <button type="span" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                             </button>
+                            {% if contopd > 0 %}
                             <div class="dropdown-menu">
                               {% for entry in opd %}
                               <a class="dropdown-item" href="#">{{entry.opd}}</a>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                           </div>
-
+                        {% elif (tipo == "Encuesta") and (resultado == None) %}
+                        <form method="post" action="/entregadoactres/contestarenc">
+                          <div class="btn-group-vertical">
+                            <input type="hidden" name="residhidden" value={{ id_mensajes }}>
+                            <button type="submit" id="contestarenc" name="contestarenc" class="btn btn-primary" data-toggle="tooltip" value="A" title={{ resp_a }}> A  {{ resp_a }}</button>
+                            <button type="submit" id="contestarenc" name="contestarenc" class="btn btn-secondary" data-toggle="tooltip" value="B" title={{ resp_b }}> B  {{ resp_b }}</button>
+                            <button type="submit" id="contestarenc" name="contestarenc" class="btn btn-success" data-toggle="tooltip" value="C" title={{ resp_c }}> C {{ resp_c }}</button>
+                            <button type="submit" id="contestarenc" name="contestarenc" class="btn btn-info" data-toggle="tooltip" value="D" title={{ resp_d }}>D  {{ resp_d }}</button>
+                          </div>
+                        </form>
                         {% endif %}
                          </div>
                     </div>

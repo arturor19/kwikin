@@ -1,0 +1,205 @@
+
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Pagos</title>
+
+{% endblock %}
+{%block body %}
+<body>
+<script type="text/javascript" class="init">
+
+$(document).ready(function() {
+	$('#dtOrderCobros').DataTable({
+        "order": [[ 2, "asc" ]]
+    });
+} );
+
+</script>
+<script type="text/javascript" class="init">
+$.extend( true, $.fn.dataTable.defaults, {
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoPostFix": "",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "loadingRecords": "Cargando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "searchPlaceholder": "Término de búsqueda",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "aria": {
+            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        //only works for built-in buttons, not for custom buttons
+        "buttons": {
+            "create": "Nuevo",
+            "edit": "Cambiar",
+            "remove": "Borrar",
+            "copy": "Copiar",
+            "csv": "fichero CSV",
+            "excel": "tabla Excel",
+            "pdf": "documento PDF",
+            "print": "Imprimir",
+            "colvis": "Visibilidad columnas",
+            "collection": "Colección",
+            "upload": "Seleccione fichero....",
+
+        },
+        "select": {
+            "rows": {
+                _: '%d filas seleccionadas',
+                0: 'clic fila para seleccionar',
+                1: 'una fila seleccionada'
+            }
+        }
+    }
+} );
+</script>
+<div>
+    <a class="btn btn-primary btn-sm" href="https://drive.google.com/" target="_blank" type="button">revisar para ver que pongo aqui</a>
+</div>
+<br>
+<section>
+    <table id="dtOrderCobros" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+      <!-- Table head -->
+      <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Cantidad</th>
+            <th>Concepto</th>
+            <th>Comprobante</th>
+        </tr>
+      </thead>
+      <!-- Table head -->
+
+      <!-- Table body -->
+      <tbody>
+            {% for cobro in cobros %}
+             <tr>
+                 <td {% if cobro.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif cobro.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ cobro.id_eventos }}'>{{cobro.nombre}}</a></td>
+                 <td {% if cobro.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif cobro.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{cobro.terraza}}</a></td>
+                 <td {% if cobro.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif cobro.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{cobro.dia}}</a></td>
+
+             </tr>
+    <div class="modal fade" id="edit{{ cobro.id_eventos }}" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="post" action="/acteventos">
+					<div class="modal-header">
+						<h4 class="modal-title">Información</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Domicilio</label>
+							<input disabled type="text" class="form-control" value="{{ cobro.domicilio }}" name="eventosdomicilio">
+						</div>
+						<div class="form-group">
+							<label>Email</label>
+							<input disabled type="email" value="{{ cobro.email }}" name="emaileventos" class="form-control">
+						</div>
+						<div class="form-group">
+							<label>Teléfono</label>
+							<input disabled type="Text" class="form-control" value="{{ cobro.telefono }}" name="telefonoeventos">
+						</div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <Select class="custom-select" id={{cobro.id_eventos}} name="mycheckboxE">
+                                <option Selected value="{{cobro.estado}}">{{cobro.estado}}</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Aprobado">Aprobado</option>
+                                <option value="No Aprobado">No Aprobado</option>
+                                <label class="custom-control-label" for={{cobro.id_eventos}}></label>
+                             </Select>
+                        </div>
+
+
+                        <div class="form-group">
+                            <input type="hidden" name="idhidden" value={{cobro.id_eventos}}>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="terrazahidden" value={{cobro.terraza}}>
+                        </div>
+					</div>
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+					</div>
+
+				</form>
+			</div>
+		</div>
+	</div>
+      <script>
+
+     $(document).ready(function($) {
+        $("#acteventos").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#edit').modal('show');
+
+      });
+    });
+
+       </script>
+            {% endfor %}
+            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+                    {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+            {% endfor %}
+</tbody>
+
+
+
+    </table>
+</section>
+<script>
+        $(document).ready(function() {
+        var messages = "{{ get_flashed_messages() }}";
+
+        if (typeof messages != 'undefined' && messages != '[]') {
+        $("#edit").modal();
+            };
+        });
+    </script>
+<script>
+       $('#cerrareventogestion').click(function() {
+    $('#edit').modal('hide');
+    sendEvent('#edit', 1);
+    $('#edit').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+</body>
+
+{% endblock %}
+
