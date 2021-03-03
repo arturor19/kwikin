@@ -1095,7 +1095,6 @@ def contestarenc():
         id_mensajes = request.form['residhidden']
         resultado =  request.form['contestarenc']
         db_execute("UPDATE comunicados SET resultado =\"%s\"  WHERE id_notificaciones =\"%s\";" % (resultado, id_mensajes))
-        print(id_mensajes,resultado)
         return redirect(url_for('comunicadosres'))
     return redirect(url_for('dashboard'))
 
@@ -1106,9 +1105,8 @@ def contestarenc():
 def entregadoactres(id_mensajes, **kws):
     id_mensajes = id_mensajes
     usuario = dict(session)['profile']['email']
-    resultado = db_execute(f"SELECT resultado FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0][
+    resultado_var = db_execute(f"SELECT resultado FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0][
         'resultado']  # para validar cual es la variable de leido
-    print(resultado)
     valida = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['email_usuario_receptor']
     try:
         if request.method == 'GET' and usuario == valida:
@@ -1122,7 +1120,6 @@ def entregadoactres(id_mensajes, **kws):
             resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_d']
             array_leido = []
             leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and id_notificaciones = '{id_mensajes}'")
-
             contleidopor = len(leido)
             array_noleido = []
             noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and id_notificaciones = '{id_mensajes}'")
@@ -1182,7 +1179,7 @@ def entregadoactres(id_mensajes, **kws):
                 opd = (row['email_usuario_receptor'])
                 array_opd.append({'opd':opd})
         return render_template('detallescomunicadores.html', contopa=contopa, contopb=contopb, contopc=contopc,
-                               contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, resultado=resultado,
+                               contopd=contopd, opa=array_opa, opb=array_opb, opc=array_opc, opd=array_opd, resultado_var=resultado_var,
                                leidopor=array_leido, tipo=tipo, titulo=titulo, mensaje=mensaje, noleidopor=array_noleido,
                                contleidopor=contleidopor, contnoleidopor=contnoleidopor, resp_a=resp_a, resp_b=resp_b,
                                resp_c=resp_c, resp_d=resp_d, set=zip(values, labels, colors),

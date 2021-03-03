@@ -29,16 +29,17 @@
       <div id="acordioncomunicados" class="panel-group">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <div class="shadow p-3 mb-3 bg-light rounded" type="button" >
-                    <a class="font-weight-bold " data-target="#panelbodycomunicado" data-toggle="collapse" data-parent="#acordioncomunicados"><u>{% if (tipo == "Encuesta") %} Encuesta: {% else %} Comunicado: {% endif %}{{ titulo }} </u></a>
+                <div class="shadow p-3 mb-3 bg-light rounded" type="button">
+                    <a class="font-weight-bold" data-target="#panelbodycomunicado" data-toggle="collapse" data-parent="#acordioncomunicados"><u>{% if (tipo == "Encuesta") %} Encuesta: {% else %} Comunicado: {% endif %}{{ titulo }} </u></a>
                 </div>
             </div>
             <div id="panelbodycomunicado" class="panel-collapse collapse">
                 <div class="panel-body">
                     <div class="shadow p-3 mb-3 bg-light rounded">
                         <span>{{ mensaje }}</span><br>
-                        {% if (tipo == "Encuesta") and (resultado != None) %}
-                        <span>Tu elección fue: Opción {{ resultado }}</span><br>
+                        {% if (tipo == "Encuesta") and (resultado_var != None) %}
+                        <span>Tu elección fue: Opción {{ resultado_var }}</span><br>
+                        <div class="btn-group-vertical">
                          <div class="btn-group">
                             <button type="button" class="btn btn-primary" data-toggle="tooltip" title={{ resp_a }}> A {{ contopa }}</button>
                             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
@@ -89,7 +90,8 @@
                             </div>
                             {% endif %}
                           </div>
-                        {% elif (tipo == "Encuesta") and (resultado == None) %}
+                        </div>
+                        {% elif (tipo == "Encuesta") and (resultado_var == None) %}
                         <form method="post" action="/entregadoactres/contestarenc">
                           <div class="btn-group-vertical">
                             <input type="hidden" name="residhidden" value={{ id_mensajes }}>
