@@ -299,7 +299,7 @@ def upload(**kws):
 @is_logged_in
 @usuario_notificaciones
 def gestionusuarios(**kws):
-    usuarios = db_execute("SELECT * FROM usuarios")
+    usuarios = db_execute("SELECT * FROM asoc_usuario_grupo asoc Join usuarios usu ON asoc.id_usuario = usu.id_usuario")
     array = []
     for row in usuarios:
         id_usuario = (row['id_usuario'])
@@ -308,13 +308,16 @@ def gestionusuarios(**kws):
         nombre = (row['nombre'])
         domicilio = (row['domicilio'])
         telefono = (row['telefono'])
+        grupo = (row['id_grupo'])
 
         array.append({'status': (status),
                       'id_usuario': id_usuario,
                       'email': email,
                       'nombre': nombre,
                       'telefono': telefono,
+                      'grupo' : grupo,
                       'domicilio': domicilio})
+        print(usuarios)
     if len(usuarios) > 0:
         return render_template('gestionusuarios.html', usuarios=array, cont=kws['cont'], com=kws['com'])
     else:
@@ -999,7 +1002,7 @@ def entregadoact(id_mensaje, **kws):
     usuario = dict(session)['profile']['email']
     id_usuario = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{usuario}'")[0]['id_usuario']
     valida = db_execute(f"SELECT id_grupo FROM asoc_usuario_grupo WHERE id_usuario = '{id_usuario}'")[0]['id_grupo']
-    if valida == 1 or valida == 2:
+    if valida == 1 or valida == 2 or valida == 3:
         if request.method == 'GET':
             titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
             mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
