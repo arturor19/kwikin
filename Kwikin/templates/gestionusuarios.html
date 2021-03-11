@@ -94,6 +94,7 @@ $.extend( true, $.fn.dataTable.defaults, {
       <!-- Table body -->
       <tbody>
             {% for usuario in usuarios %}
+
              <tr>
                  <td scope="row">
                          <input type="checkbox" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if usuario.status == "Activo" %} checked {% endif %}>
@@ -125,15 +126,21 @@ $.extend( true, $.fn.dataTable.defaults, {
                             <label>Teléfono</label>
                             <input type="Text" class="form-control" value="{{ usuario.telefono }}" name="telefonousuario">
                          </div>
+
                          <div class="form-group">
-                             <input {% if usuario.grupo == "guardia" %} type="Text" disabled value="usuario.grupo" {% endif %} type="checkbox" id="{{ usuario.email }}" name="mycheckboxusuario" data-toggle="toggle"  data-on="<i class='fa fa-key'></i> Administrador" data-off="<i class='fa fa-home'></i> Residente" data-onstyle="success" data-offstyle="primary" data-width="170" {% if usuario.grupo == "Administrador" %} checked {% endif %}>
+
+                             <input {% if "4" in usuario.grupo| string() %} type="Text" disabled value="Guardia" {% endif %} type="checkbox" id="{{ usuario.id_usuario }}" name="mycheckboxusuario" data-toggle="toggle"  data-on="<i class='fa fa-key'></i> Administrador" data-off="<i class='fa fa-home'></i> Residente" data-onstyle="success" data-offstyle="primary" data-width="170" {%  if "2" in usuario.grupo| string() %} value="On" checked {% endif %}>
+
                          </div>
+
                          <div class="form-group">
                             <input hidden type="Text"  value="{{ usuario.id_usuario }}" name="idusuariohidden">
                          </div>
 
 
+
                       </div>
+
 
 					<div class="modal-footer">
 						<input type="button" class="btn btn-default" name="cerrarusuariogestion"  data-dismiss="modal" value="Cerrar">
@@ -141,6 +148,7 @@ $.extend( true, $.fn.dataTable.defaults, {
                         <button type="submit" name="actusuarioinfo" id="actusuarioinfo" value="actu" class="btn btn-primary" style="width:100px"> Actualizar</button>
 
                     </div>
+
 
 
 
@@ -180,10 +188,10 @@ $.extend( true, $.fn.dataTable.defaults, {
 $(dtOrderExample).ready(function(){
     var $mycheckboxusuario = $('input[name="mycheckboxusuario"]');
     $mycheckboxusuario.change(function() {
-        var ids = $(this).prop('id');
+        var idsg = $(this).prop('id');
         $.ajax({
             url: '/actgrupousuario',
-            data: {'data':ids},
+            data: {'data':idsg},
             type: 'POST',
             timeout: 500,
             success: function(response) {

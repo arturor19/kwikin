@@ -299,16 +299,29 @@ def upload(**kws):
 @is_logged_in
 @usuario_notificaciones
 def gestionusuarios(**kws):
-    usuarios = db_execute("SELECT * FROM asoc_usuario_grupo asoc Join usuarios usu ON asoc.id_usuario = usu.id_usuario")
+    lista_usuarios_grupos = (db_execute("select u2.*, g2.nombre_grupo as 'nombre_grupo' from asoc_usuario_grupo aug, usuarios u2, grupos g2 where u2.id_usuario = aug.id_usuario and aug.id_grupo = g2.id_grupo"))
+    dict_usuarios = {}
+    for usuari in lista_usuarios_grupos:
+
+        if usuari["email"] not in dict_usuarios.keys():
+            dict_usuarios.update({usuari["email"]: {"grupos": [usuari["nombre_grupo"]]}})
+        else:
+            dict_usuarios[usuari["email"]]["grupos"].append(usuari["nombre_grupo"])
+
+    print(dict_usuarios)
+    usuarios = db_execute("SELECT * FROM  usuarios")
+    print(usuarios)
     array = []
     for row in usuarios:
         id_usuario = (row['id_usuario'])
         status = (row['status'])
         email = (row['email'])
+        grupo = db_execute(
+            f"SELECT  GROUP_CONCAT(asoc_usuario_grupo.id_grupo) as grupo FROM usuarios JOIN asoc_usuario_grupo ON usuarios.id_usuario = asoc_usuario_grupo.id_usuario WHERE usuarios.email = '{email}'")[0]['grupo']
         nombre = (row['nombre'])
         domicilio = (row['domicilio'])
         telefono = (row['telefono'])
-        grupo = (row['id_grupo'])
+
 
         array.append({'status': (status),
                       'id_usuario': id_usuario,
@@ -317,15 +330,33 @@ def gestionusuarios(**kws):
                       'telefono': telefono,
                       'grupo' : grupo,
                       'domicilio': domicilio})
-        print(usuarios)
+    print(array)
     if len(usuarios) > 0:
-        return render_template('gestionusuarios.html', usuarios=array, cont=kws['cont'], com=kws['com'])
+        return render_template('gestionusuarios.html', usuarios=array, dict_usuarios=dict_usuarios, cont=kws['cont'], com=kws['com'])
     else:
         flash('No hay usuarios asociados al coto', 'danger')
-        return render_template('gestionusuarios.html', usuarios=array, cont=kws['cont'], com=kws['com'])
+        return render_template('gestionusuarios.html', usuarios=array, dict_usuarios=dict_usuarios, cont=kws['cont'], com=kws['com'])
+
+@app.route('/actgrupousuario', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actgrupousuario():
+    idsg = None
+    if request.method == "POST":
+        idsg = request.form['data']
+        valida_admin = db_execute(f"SELECT * FROM asoc_usuario_grupo WHERE id_usuario = '{idsg}' AND id_grupo = 2")
+        if len(valida_admin) > 0:
+            db_execute(f"DELETE FROM asoc_usuario_grupo WHERE id_usuario = '{idsg}' AND id_grupo = 2")
+            flash(f'Usuario configurado como solo residente', 'Success')
+        else:
+            db_execute(f"INSERT INTO asoc_usuario_grupo(id_usuario, id_grupo) VALUES ('{idsg}', 2)")
+            flash(f'Usuario configurado como administrador', 'Success')
+        print(idsg)
+
+    return redirect(url_for('gestionusuarios'))
 
 
-@app.route('/actusuarioinfo', methods=['POST'])
+@app.route('/actusuarioinfo', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 def actusuarioinfo():
@@ -784,13 +815,13 @@ def peticionevento(**kws):
                 flash('Por favor selecciona una terraza del listado', 'danger')
             else:
                 try:
-                    existe_evento = db_execute(f"select * from eventos where terraza='{terraza}' and nombre='{name}' and correo='{email}' and dia='{fechaevento}'")
+                    existe_evento = db_execute(f"select * from eventos where terraza='{terraza}' and nombre_eventos='{name}' and correo='{email}' and dia='{fechaevento}'")
                     valor_evento = (len(existe_evento))
                     if valor_evento == 1:
                         pass
                     else:
                         db_execute(
-                        "INSERT INTO eventos(terraza, nombre, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
+                        "INSERT INTO eventos(terraza, nombre_eventos, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
                             terraza, name, email, fechaevento))
 
                     flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe',
@@ -833,7 +864,7 @@ def gestioneventos(**kws):
     for row in eventos:
         estado = (row['estado'])
         email = (row['correo'])
-        nombre = (row['nombre'])
+        nombre = (row['nombre_eventos'])
         terraza = (row['terraza'])
         dia = (row['dia'])
         domicilio = (row['domicilio'])
@@ -915,7 +946,7 @@ def gestioneventoshistorico(**kws):
     for row in eventos:
         estado = (row['estado'])
         email = (row['correo'])
-        nombre = (row['nombre'])
+        nombre = (row['nombre_eventos'])
         terraza = (row['terraza'])
         dia = (row['dia'])
         domicilio = (row['domicilio'])

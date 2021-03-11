@@ -36,20 +36,20 @@ list_create_db = ['''CREATE TABLE "usuarios" (
 
 '''CREATE TABLE "productos" (
 	"id_producto"	INTEGER PRIMARY KEY AUTOINCREMENT,
-	"nombre"	TEXT UNIQUE,
+	"nombre_producto"	TEXT UNIQUE,
 	"descripcion"	TEXT
 );''',
 
 '''CREATE TABLE "grupos" (
 	"id_grupo"	INTEGER PRIMARY KEY AUTOINCREMENT,
-	"nombre"	TEXT,
+	"nombre_grupo"	TEXT,
 	"descripcion"	TEXT
 );''',
 
 '''CREATE TABLE "eventos" (
 	"id_eventos"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	"terraza"	TEXT NOT NULL,
-	"nombre"	TEXT NOT NULL,
+	"nombre_eventos"	TEXT NOT NULL,
 	"correo"	TEXT NOT NULL,
 	"dia"	NUMERIC NOT NULL,
 	"estado"	TEXT DEFAULT "Pendiente"
@@ -93,11 +93,11 @@ list_create_db = ['''CREATE TABLE "usuarios" (
 	FOREIGN KEY("id_qr") REFERENCES "qr"("id_qr"),
 	FOREIGN KEY("id_usuario") REFERENCES "usuarios"("id_usuario")
 );''',
-'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('1', 'superadmin', 'Super administrador');''',
-'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('2', 'vendedor', 'Vendedor');''',
-'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('3', 'admin', 'Administrador');''',
-'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('4', 'residente', 'Residente');''',
-'''INSERT INTO "main"."grupos" ("id_grupo", "nombre", "descripcion") VALUES ('5', 'guardia', 'Guardia');''']
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('1', 'superadmin', 'Super administrador');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('2', 'vendedor', 'Vendedor');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('3', 'admin', 'Administrador');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('4', 'residente', 'Residente');''',
+'''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('5', 'guardia', 'Guardia');''']
 
 
 def db_create(db_name):
