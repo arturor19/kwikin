@@ -158,9 +158,11 @@ def is_user(f):
             grupo = (db_execute(
                 "select id_grupo from asoc_usuario_grupo where id_usuario = (select id_usuario from usuarios "
                 "where email = '{}')".format(session['profile']['email']))[0]['id_grupo'])
+            email = session['profile']['email']
+            termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
         except:
             grupo = None
-        if grupo is not None:
+        if grupo is not None and termycon == "Acepto":
             email = session['profile']['email']
             name = session['profile']['name']
             id_google = (session['profile']['id'])

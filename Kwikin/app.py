@@ -66,8 +66,37 @@ def authorize():
     print(user_info)
     session['profile'] = user_info
     session.permanent = True  # make the session permanant so it keeps existing after broweser gets closed
-    return redirect(url_for('dashboard'))
+    email = dict(session)['profile']['email']
+    termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
+    print(termycon)
+    if termycon == "Acepto": #Agregado para asegurarnos que solo las personas que acepten nuestros terminos y condiciones junto con y aviso de privacidad puedan usar nuestra herramienta"""
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('terminosycondiciones'))
 
+@app.route('/avisodeprivacidad', methods=['GET', 'POST', 'UPDATE'])
+def avisodeprivacidad():
+    return render_template('avisodeprivacidad.html')
+
+@app.route('/terminosycondiciones', methods=['GET', 'POST', 'UPDATE'])
+@is_logged_in
+def terminosycondiciones():
+    email = dict(session)['profile']['email']
+    termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
+    print(email,termycon)
+    try:
+        if request.method == 'POST':
+            db_execute(f"UPDATE usuarios SET termycon = 'Acepto' WHERE email = '{email}'")
+            print("1",email, termycon)
+            return redirect(url_for('dashboard'))
+        print("2", email, termycon)
+        return render_template('terminosycondiciones.html')
+    except:
+        email = None
+        termycon = None
+        print("3", email, termycon)
+        return render_template('terminosycondiciones.html', email=email, termycon=termycon)
+    print("4", email, termycon)
+    return render_template('terminosycondiciones.html', email=email, termycon=termycon)
 
 # Index
 @app.route('/')
@@ -118,6 +147,7 @@ def logout():
 
 @app.route('/crearqr', methods=['GET', 'POST'])
 @usuario_notificaciones
+@is_user
 @is_logged_in
 def peticionqr(**kws):
     tz = pytz.timezone('America/Mexico_City')
@@ -783,9 +813,9 @@ def test_calendario():
     return info_calendario
 
 
-@app.route('/avisodeprivacidad')
-def avisodeprivacidad():
-    return render_template('avisodeprivacidad.html')
+#@app.route('/avisodeprivacidad')
+#def avisodeprivacidad():
+#    return render_template('avisodeprivacidad.html')
 
 
 @app.route('/crearevento', methods=['GET', 'POST'])
@@ -1284,6 +1314,13 @@ def comunicadosres(**kws):
                           'leido': leido})
     return render_template('comunicadosres.html', cont=kws['cont'], com=kws['com'], comuni=array_comuni)
 
+@app.route('/configuracion', methods=['GET', 'POST', 'UPDATE'])
+@is_user
+@is_logged_in
+@usuario_notificaciones
+def configuracion(**kws):
+
+    return render_template('configuracion.html', cont=kws['cont'], com=kws['com'])
 
 @app.route('/cobros', methods=['GET', 'POST', 'UPDATE'])
 @is_user

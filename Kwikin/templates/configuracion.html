@@ -1,0 +1,362 @@
+
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Configuración</title>
+
+{% endblock %}
+{%block body %}
+
+<script type="text/javascript" class="init">
+
+$(document).ready(function() {
+	$('#dtOrderExample').DataTable({
+        "order": [[ 2, "asc" ]]
+    });
+} );
+
+</script>
+<script type="text/javascript" class="init">
+$.extend( true, $.fn.dataTable.defaults, {
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoPostFix": "",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "loadingRecords": "Cargando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "searchPlaceholder": "Término de búsqueda",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "aria": {
+            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        //only works for built-in buttons, not for custom buttons
+        "buttons": {
+            "create": "Nuevo",
+            "edit": "Cambiar",
+            "remove": "Borrar",
+            "copy": "Copiar",
+            "csv": "fichero CSV",
+            "excel": "tabla Excel",
+            "pdf": "documento PDF",
+            "print": "Imprimir",
+            "colvis": "Visibilidad columnas",
+            "collection": "Colección",
+            "upload": "Seleccione fichero....",
+
+        },
+        "select": {
+            "rows": {
+                _: '%d filas seleccionadas',
+                0: 'clic fila para seleccionar',
+                1: 'una fila seleccionada'
+            }
+        }
+    }
+} );
+</script>
+<section>
+    <div>
+        <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#collapseUsers" aria-expanded="false" aria-controls="collapseExample">Agregar usuarios</button>
+        <div class="collapse" id="collapseUsers">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+                <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#Modaluser" type="button">Individual</button>
+                <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#Modalusuarios" type="button">Multiple</button>
+            </div>
+        </div>
+    </div>
+</section><br>
+<section>
+    <form action="" class="" method="post">
+    <table id="dtOrderExample" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+      <!-- Table head -->
+      <thead>
+        <tr>
+          <th>Activo</th>
+          <th>Nombre</th>
+          <th>Dirección</th>
+        </tr>
+      </thead>
+      <!-- Table head -->
+
+      <!-- Table body -->
+      <tbody>
+            {% for usuario in usuarios %}
+
+             <tr>
+                 <td scope="row">
+                         <input type="checkbox" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if usuario.status == "Activo" %} checked {% endif %}>
+                <td><a href="#" data-toggle="modal" data-target='#editusuario{{ usuario.id_usuario }}'>{{usuario.nombre}}</a></td>
+                <td><a>{{usuario.domicilio}}</a></td>
+             </tr>
+             <div class="modal fade" id="editusuario{{ usuario.id_usuario }}" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="post" action="/actusuarioinfo">
+					<div class="modal-header">
+						<h4 class="modal-title">Información</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					 <div class="modal-body">
+                         <div class="form-group">
+                            <label>Nombre</label>
+                            <input disabled type="text" class="form-control" value="{{ usuario.nombre }}" name="nombreusuario">
+                         </div>
+                         <div class="form-group">
+                            <label>Email</label>
+                            <input disabled type="email" value="{{ usuario.email }}" name="correousuario" class="form-control">
+                         </div>
+                         <div class="form-group">
+                            <label>Direccion</label>
+                            <input type="Text" class="form-control" value="{{ usuario.domicilio }}" name="domiciliousuario">
+                         </div>
+                         <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="Text" class="form-control" value="{{ usuario.telefono }}" name="telefonousuario">
+                         </div>
+
+                         <div class="form-group">
+
+                             <input {% if "4" in usuario.grupo| string() %} type="Text" disabled value="Guardia" {% endif %} type="checkbox" id="{{ usuario.id_usuario }}" name="mycheckboxusuario" data-toggle="toggle"  data-on="<i class='fa fa-key'></i> Administrador" data-off="<i class='fa fa-home'></i> Residente" data-onstyle="success" data-offstyle="primary" data-width="170" {%  if "2" in usuario.grupo| string() %} value="On" checked {% endif %}>
+
+                         </div>
+
+                         <div class="form-group">
+                            <input hidden type="Text"  value="{{ usuario.id_usuario }}" name="idusuariohidden">
+                         </div>
+
+
+
+                      </div>
+
+
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" name="cerrarusuariogestion"  data-dismiss="modal" value="Cerrar">
+                        <button type="submit" name="actusuarioinfo" id="actusuarioinfo" value="elim" class="btn btn-danger" style="width:100px"> Eliminar</button>
+                        <button type="submit" name="actusuarioinfo" id="actusuarioinfo" value="actu" class="btn btn-primary" style="width:100px"> Actualizar</button>
+
+                    </div>
+
+
+
+
+				</form>
+			</div>
+		</div>
+	</div>
+      <script>
+
+     $(document).ready(function($) {
+        $("#actusuarioinfo").on("click", "a", function(event) {
+        event.preventDefault();
+        jQuery.noConflict();
+        $('#editusuario').modal('show');
+
+      });
+    });
+
+       </script>
+            {% endfor %}
+      {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+                    {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+            {% endfor %}
+      </tbody>
+<script type="text/javascript">
+$(dtOrderExample).ready(function(){
+    var $mycheckboxusuario = $('input[name="mycheckboxusuario"]');
+    $mycheckboxusuario.change(function() {
+        var idsg = $(this).prop('id');
+        $.ajax({
+            url: '/actgrupousuario',
+            data: {'data':idsg},
+            type: 'POST',
+            timeout: 500,
+            success: function(response) {
+                console.log(response);
+               },
+               error: function(error) {
+                console.log(error);
+               }
+         });
+       });
+
+     });
+
+</script>
+      </tbody>
+
+
+
+    </table>
+    </form>
+
+</section>
+<section>
+<div class="modal fade" id="Modaluser" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Crear usuario</h1>
+            </div>
+            <div class="modal-body">
+              <form id="IndForm" action="/crearInd" class="" method="post">
+                  <div class="form-group">
+                      <label for="correo" class="col-sm-2 col-form-label">Email:</label>
+                      <div class="col-sm-8">
+                        <input class="form-control-sm" type="email" id="correo" name="correo"/>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="direccion" class="col-sm-2 col-form-label">Dirección:</label>
+                      <div class="col-sm-8">
+                          <input class="form-control-sm" type="text" id="direccion" name="direccion"/>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="telefono" class="col-sm-2 col-form-label">Teléfono:</label>
+                      <div class="col-sm-8">
+                          <input class="form-control-sm" type="text" id="telefono" name="telefono"/>
+                      </div>
+                  </div>
+                  <div style="margin:15px;" class="form-group">
+                      <input style="center" type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
+                      <label class="form-check-label" for="checkguardia">Seguridad</label>
+                  </div>
+                  <div style="margin:15px;" class="form-group">
+                      <input type="checkbox" class="form-check-input" name="checkadmin" id="checkadmin"/>
+                      <label class="form-check-label" for="checkadmin">Administrador</label>
+                  </div>
+                  <div class="modal-footer">
+                      <div style="text-align:center;" class="form-group">
+                          <input type="submit" name="cerraruser" data-dismiss="modal" value="Cancelar"/>
+                          <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
+                      </div>
+                  </div>
+
+                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                       {% endfor %}
+                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+
+
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+</section>
+<section>
+<div class="modal fade" id="Modalusuarios" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Cargar Usuarios</h1>
+                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
+            </div>
+            <div class="modal-body">
+              <form method=post enctype=multipart/form-data action="/crearBulk">
+                  <input class="form-control-sm" type=file name=file><br><br>
+                  <input class="form-control-sm" type=submit data-toggle="tooltip" data-placement="top" alt="Recuerda que el archivo CSV debe contener Email, Dirección, Teléfono"  title="Recuerda que el archivo CSV debe contener Email,	Direccion, Telefono" value="Cargar">
+              </form>
+
+                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                       {% endfor %}
+                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+             </div>
+        </div>
+    </div>
+</div>
+</section>
+<script>
+ $(document).ready(function() {
+    var messages = "{{ get_flashed_messages() }}";
+
+    if (typeof messages != 'undefined' && messages != '[]') {
+        $("#Modaluser").modal();
+    };
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script>
+       $('#closemodal').click(function() {
+    $('#Modaluser').modal('hide');
+    sendEvent('#Modaluser', 1);
+    $('#Modaluser').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+<script type="text/javascript">
+$(dtOrderExample).ready(function(){
+    var $mycheckbox = $('input[name="mycheckbox"]');
+    $mycheckbox.change(function() {
+        var ids = $(this).prop('id');
+        $.ajax({
+            url: '/actusuario',
+            data: {'data':ids},
+            type: 'POST',
+            timeout: 500,
+            success: function(response) {
+                console.log(response);
+               },
+               error: function(error) {
+                console.log(error);
+               }
+         });
+       });
+
+     });
+
+</script>
+{% endblock %}
+

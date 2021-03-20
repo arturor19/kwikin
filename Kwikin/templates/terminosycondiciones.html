@@ -8,9 +8,15 @@
 {%block body %}
 
 <body>
-
+{% if termycon != "Acepto" %}
+<div class="form-group">
+    <form method="post" action="/terminosycondiciones">
+        <button class="btn btn-primary btn-sm" type="submit">Acepto</button>
+    </form>
+</div>
+{% endif %}
 <br>
-<a type="button" class="btn btn-secondary" href="/">< Regresar</a>
+<a type="button" class="btn btn-secondary" href="/logout">< Regresar</a>
 <p>
 <br>
 <tr>
