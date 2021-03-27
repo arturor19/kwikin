@@ -82,20 +82,15 @@ def avisodeprivacidad():
 def terminosycondiciones():
     email = dict(session)['profile']['email']
     termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
-    print(email,termycon)
     try:
         if request.method == 'POST':
             db_execute(f"UPDATE usuarios SET termycon = 'Acepto' WHERE email = '{email}'")
-            print("1",email, termycon)
             return redirect(url_for('dashboard'))
-        print("2", email, termycon)
         return render_template('terminosycondiciones.html')
     except:
         email = None
         termycon = None
-        print("3", email, termycon)
         return render_template('terminosycondiciones.html', email=email, termycon=termycon)
-    print("4", email, termycon)
     return render_template('terminosycondiciones.html', email=email, termycon=termycon)
 
 # Index
@@ -797,7 +792,7 @@ def test_calendario():
                2: "#6f42c1",
                3: "#e83e8c",
                4: "#e74a3b",
-               5: "#fd7e14",
+               5: "#858796",
                6: "#f6c23e",
                7: "#1cc88a"}
     arr_evetos_aprobados = db_execute("select t2.id_terrazas, t2.terraza, e.dia from eventos e, terrazas t2 where "
@@ -1319,7 +1314,41 @@ def comunicadosres(**kws):
 @is_logged_in
 @usuario_notificaciones
 def configuracion(**kws):
+    configuracion = db_execute("SELECT * FROM  terrazas")
+    print(configuracion)
+    mensualidad = int(db_execute("SELECT mensualidad FROM configuracion")[0]['mensualidad'])
+    dia_de_corte = int(db_execute("SELECT dia_de_corte FROM configuracion")[0]['dia_de_corte'])
+    dias_de_gracia = int(db_execute("SELECT dias_de_gracia FROM configuracion")[0]['dias_de_gracia'])
+    max_tpo_qr_unico = int(db_execute("SELECT max_tpo_qr_unico FROM configuracion")[0]['max_tpo_qr_unico'])
+    num_estacionamiento = int(db_execute("SELECT num_estacionamiento FROM configuracion")[0]['num_estacionamiento'])
+    terrazas = int(db_execute("SELECT terrazas FROM configuracion")[0]['terrazas'])
+    activa_cobros = int(db_execute("SELECT activa_cobros FROM configuracion")[0]['activa_cobros'])
+    activa_terraza = int(db_execute("SELECT activa_terraza FROM configuracion")[0]['activa_terraza'])
+    activa_estacionamientos = int(db_execute("SELECT activa_estacionamientos FROM configuracion")[0]['activa_estacionamientos'])
+    print(terrazas)
+    array_conf = []
+    for row in configuracion:
+        id_terrazas = (row['id_terrazas'])
+        colores_terraza = (row['colores_terraza'])
+        terrazas = (row['terrazas'])
 
+        array_conf.append({'id_terrazas': id_terrazas,
+                           'colores_terraza': colores_terraza,
+                           'terrazas': terrazas})
+    print(array_conf)
+    if len(configuracion) > 0:
+        return render_template('configuracion.html', terrazas=terrazas,
+                               num_estacionamiento=num_estacionamiento,
+                               max_tpo_qr_unico=max_tpo_qr_unico,
+                               dias_de_gracia=dias_de_gracia, activa_cobros=activa_cobros,
+                               configuracion=array_conf, activa_terraza=activa_terraza,
+                               activa_estacionamientos=activa_estacionamientos,
+                               dia_de_corte=dia_de_corte, mensualidad=mensualidad,
+                               cont=kws['cont'], com=kws['com'])
+    else:
+        flash('No hay usuarios configuraciones', 'danger')
+        return render_template('configuracion.html', configuracion=array_conf,
+                               cont=kws['cont'], com=kws['com'])
     return render_template('configuracion.html', cont=kws['cont'], com=kws['com'])
 
 @app.route('/cobros', methods=['GET', 'POST', 'UPDATE'])
@@ -1360,6 +1389,85 @@ def cobros(**kws):
     else:
         msg = 'No hay eventos asociados'
         return render_template('cobros.html', cobros=array_cobros, msg=msg, cont=kws['cont'], com=kws['com'])
+
+@app.route('/actconfterraza', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actconfterraza():
+    if request.method == "POST":
+        idterraza = request.form['actterrazas']
+        db_execute(f"DELETE FROM terrazas WHERE id_terrazas = '{idterraza}' ")
+        print("YES", idterraza)
+        print(idterraza)
+        return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
+
+@app.route('/actconfterraza2', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actconfterraza2():
+    if request.method == "POST":
+        agregarterraza = request.form['agregarterraza']
+        colorterraza = request.form['colorselector']
+        db_execute(f"INSERT INTO terrazas (terrazas, colores_terraza) values ('{agregarterraza}', '{colorterraza}')")
+        return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
+
+@app.route('/actconfest', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actconfest():
+    if request.method == "POST":
+        num_estacionamiento = request.form['num_estacionamiento']
+        print(num_estacionamiento)
+        db_execute(f"UPDATE configuracion SET num_estacionamiento = '{num_estacionamiento}' ")
+        return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
+
+@app.route('/actconfduraccionqr', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actconfduraccionqr():
+    if request.method == "POST":
+        max_tpo_qr_unico = request.form['max_tpo_qr_unico']
+        print(max_tpo_qr_unico)
+        db_execute(f"UPDATE configuracion SET max_tpo_qr_unico = '{max_tpo_qr_unico}' ")
+        return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
+
+@app.route('/actconfmens', methods=['GET', 'POST'])
+@is_user
+@is_logged_in
+def actconfmens():
+    if request.method == "POST":
+        mensualidad = request.form['mensualidad']
+        dia_de_corte = request.form['dia_de_corte']
+        dias_de_gracia = request.form['dias_de_gracia']
+        print("yes")
+        print(mensualidad, dia_de_corte, dias_de_gracia)
+        db_execute(
+            f"UPDATE configuracion SET dias_de_gracia = '{dias_de_gracia}', dia_de_corte = '{dia_de_corte}', mensualidad = '{mensualidad}' WHERE id_conf = 1 ")
+        return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
+
+@app.route('/actconfcheckbox', methods=['POST'])
+@is_user
+@is_logged_in
+@usuario_notificaciones
+def actconfcheckbox(**kws):
+    ids = None
+    if request.method == "POST":
+        nombrecolumna = request.form['data']
+        print(nombrecolumna)
+        resultconf = (db_execute(f"SELECT {nombrecolumna} FROM configuracion")[0][nombrecolumna])
+        print(resultconf)
+        if resultconf == 0:
+            db_execute(f"UPDATE configuracion SET '{nombrecolumna}' = 1")
+            return redirect(url_for('configuracion'))
+        elif resultconf == 1:
+            db_execute(f"UPDATE configuracion SET '{nombrecolumna}' = 0")
+            return redirect(url_for('configuracion'))
+    return redirect(url_for('configuracion'))
 
 # De aqui para abajo creo que es basura, pero nos puede servir para ver como insertar en la BD
 @app.route('/articles')

@@ -21,6 +21,7 @@
   <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script> <!--agregue esto para toogle button-->
   <!-- Custom styles for this template-->
   <link href="{{ url_for('.static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('.static', filename='css/bootstrap-colorselector.min.css') }}" rel="stylesheet" type="text/css">
   <link rel="shortcut icon" href="{{ url_for('.static', filename='/img/favicon.ico') }}" type="image/x-icon">
   <!-- Bootstrap data tables-->
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
@@ -160,7 +161,7 @@
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseguardia" aria-expanded="true" aria-controls="collapseguardia">
           <i class="fas fa-user-shield"></i>
-          <span>Guardia</span>termycon
+          <span>Guardia</span>
         </a>
         <div id="collapseguardia" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
@@ -304,11 +305,14 @@
   <!-- Custom scripts for all pages-->
 
   <script src="{{ url_for('.static', filename='js/sb-admin-2.min.js') }}"></script>
+  <script src="{{ url_for('.static', filename='js/bootstrap-colorselector.min.js') }}"></script>
 <script>
      $('#CrearIndividual').click(function() {
     $('#Modaluser').modalService.showModal();
     }) ;
 </script>
-
+<script>
+  $('#colorselector').colorselector();
+</script>
 
 </html>

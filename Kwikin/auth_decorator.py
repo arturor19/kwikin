@@ -98,7 +98,7 @@ list_create_db = ['''CREATE TABLE "usuarios" (
 '''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('3', 'admin', 'Administrador');''',
 '''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('4', 'residente', 'Residente');''',
 '''INSERT INTO "main"."grupos" ("id_grupo", "nombre_grupo", "descripcion") VALUES ('5', 'guardia', 'Guardia');''']
-
+#necesitamos agregar l grupo de convenio y agregar en tabla configuracion que el primer record sea id_conf  = 1
 
 def db_create(db_name):
     vsm_db = sqlite3.connect("./" + db_name + ".db") # db conn
