@@ -3,9 +3,20 @@
 
 {% block head %}
 <title>Configuración</title>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script>
+    {% for category, message in messages %}
+      alert("{{message }}")
+    {% endfor %}
+    </script>
+  {% endif %}
+{% endwith %}
 
 {% endblock %}
 {%block body %}
+
+
 
 <script type="text/javascript" class="init">
 
