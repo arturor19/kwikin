@@ -1393,8 +1393,6 @@ def actconfterraza():
     if request.method == "POST":
         idterraza = request.form['actterrazas']
         db_execute(f"DELETE FROM terrazas WHERE id_terrazas = '{idterraza}' ")
-        print("YES", idterraza)
-        print(idterraza)
         return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
 
@@ -1415,7 +1413,6 @@ def actconfterraza2():
 def actconfest():
     if request.method == "POST":
         num_estacionamiento = request.form['num_estacionamiento']
-        print(num_estacionamiento)
         db_execute(f"UPDATE configuracion SET num_estacionamiento = '{num_estacionamiento}' ")
         return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
@@ -1426,7 +1423,6 @@ def actconfest():
 def actconfduraccionqr():
     if request.method == "POST":
         max_tpo_qr_unico = request.form['max_tpo_qr_unico']
-        print(max_tpo_qr_unico)
         db_execute(f"UPDATE configuracion SET max_tpo_qr_unico = '{max_tpo_qr_unico}' ")
         return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
@@ -1439,8 +1435,6 @@ def actconfmens():
         mensualidad = request.form['mensualidad']
         dia_de_corte = request.form['dia_de_corte']
         dias_de_gracia = request.form['dias_de_gracia']
-        print("yes")
-        print(mensualidad, dia_de_corte, dias_de_gracia)
         db_execute(
             f"UPDATE configuracion SET dias_de_gracia = '{dias_de_gracia}', dia_de_corte = '{dia_de_corte}', mensualidad = '{mensualidad}' WHERE id_conf = 1 ")
         return redirect(url_for('configuracion'))
@@ -1454,9 +1448,7 @@ def actconfcheckbox(**kws):
     ids = None
     if request.method == "POST":
         nombrecolumna = request.form['data']
-        print(nombrecolumna)
         resultconf = (db_execute(f"SELECT {nombrecolumna} FROM configuracion")[0][nombrecolumna])
-        print(resultconf)
         if resultconf == 0:
             db_execute(f"UPDATE configuracion SET '{nombrecolumna}' = 1")
             return redirect(url_for('configuracion'))
@@ -1508,7 +1500,6 @@ def article(id):
 def unique():
     if request.method == 'POST':
         user = request.form['fingerprint']
-        print(user)
     return render_template('unique.html')
 
 
