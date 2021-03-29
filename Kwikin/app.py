@@ -67,8 +67,11 @@ def authorize():
     session['profile'] = user_info
     session.permanent = True  # make the session permanant so it keeps existing after broweser gets closed
     email = dict(session)['profile']['email']
-    termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
-    print(termycon)
+    print(db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'"))
+    try:
+        termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
+    except:
+        termycon = "Nulo"
     if termycon == "Acepto": #Agregado para asegurarnos que solo las personas que acepten nuestros terminos y condiciones junto con y aviso de privacidad puedan usar nuestra herramienta"""
         return redirect(url_for('dashboard'))
     return redirect(url_for('terminosycondiciones'))
@@ -81,7 +84,10 @@ def avisodeprivacidad():
 @is_logged_in
 def terminosycondiciones():
     email = dict(session)['profile']['email']
-    termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
+    try:
+        termycon = db_execute(f"SELECT termycon FROM usuarios WHERE email = '{email}'")[0]['termycon']
+    except:
+        termycon = "Nulo"
     try:
         if request.method == 'POST':
             db_execute(f"UPDATE usuarios SET termycon = 'Acepto' WHERE email = '{email}'")
