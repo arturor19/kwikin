@@ -788,13 +788,9 @@ def calendario_ini():
 @is_user
 @is_logged_in
 def test_calendario():
-    colores = {1: "#fd7e14",
-               2: "#6f42c1",
-               3: "#e83e8c",
-               4: "#e74a3b",
-               5: "#858796",
-               6: "#f6c23e",
-               7: "#1cc88a"}
+    colores = {}
+    for v in (db_execute("select id_terrazas, colores_terraza from terrazas;")):
+        colores.update({v["id_terrazas"]: v["colores_terraza"]})
     arr_evetos_aprobados = db_execute("select t2.id_terrazas, t2.terraza, e.dia from eventos e, terrazas t2 where "
                                       "e.estado = 'Aprobado' and t2.terraza = e.terraza")
     arr_cal = []
