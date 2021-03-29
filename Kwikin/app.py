@@ -1409,11 +1409,11 @@ select * from terrazas where terrazas == '{agregarterraza}'
 """))
         if terraza_disponible == 0:
             db_execute(f"INSERT INTO terrazas (terrazas, colores_terraza) values ('{agregarterraza}', '{colorterraza}')")
+            flash(f'Cambio efectuado correctamente', 'success')
             return redirect(url_for('configuracion'))
         else:
-            flash(f'La terraza o color ya fue asignado', 'danger')
+            flash(f'La terraza o color ya ha sido usado anteriormente', 'danger')
             return redirect(url_for('configuracion'))
-    flash(f'La terraza o color ya fue asignado', 'danger')
     return redirect(url_for('configuracion'))
 
 @app.route('/actconfest', methods=['GET', 'POST'])

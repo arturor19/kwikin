@@ -3,15 +3,7 @@
 
 {% block head %}
 <title>Configuración</title>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <script>
-    {% for category, message in messages %}
-      alert("{{message }}")
-    {% endfor %}
-    </script>
-  {% endif %}
-{% endwith %}
+
 
 {% endblock %}
 {%block body %}
@@ -268,6 +260,20 @@ $.extend( true, $.fn.dataTable.defaults, {
     });
 
        </script>
+      {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                    {% endfor %}
+      {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+            {% endfor %}
       </tbody>
 <script type="text/javascript">
 $(dtOrderConfiguracion).ready(function(){
