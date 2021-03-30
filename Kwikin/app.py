@@ -106,9 +106,9 @@ def index():
 
 
 @app.route('/ayudabulk', methods=["GET", "POST"])
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def ayudabulk(**kws):
     name = session['profile']['name']
     picture = session['profile']['picture']
@@ -116,25 +116,25 @@ def ayudabulk(**kws):
 
 
 @app.route('/dashboard')
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def dashboard(**kws):
     return render_template('dashboard.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/scannerqr')
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def scannerqr(**kws):
     return render_template('scannerqr.html', cont=kws['cont'], com=kws['com'])
 
 
 @app.route('/scannerqrs')
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def scannerqrs(**kws):
     return render_template('scannerqrs.html', cont=kws['cont'], com=kws['com'])
 
@@ -147,9 +147,9 @@ def logout():
 
 
 @app.route('/crearqr', methods=['GET', 'POST'])
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def peticionqr(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
@@ -1287,9 +1287,9 @@ def encuesta():
 
 
 @app.route('/comunicadosres', methods=['GET', 'POST'])
-@usuario_notificaciones
 @is_user
 @is_logged_in
+@usuario_notificaciones
 def comunicadosres(**kws):
     email = dict(session)['profile']['email']
     conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
