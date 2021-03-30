@@ -1397,9 +1397,14 @@ def cobros(**kws):
 @is_logged_in
 def actconfterraza():
     if request.method == "POST":
-        idterraza = request.form['actterrazas']
-        db_execute(f"DELETE FROM terrazas WHERE id_terrazas = '{idterraza}' ")
-        return redirect(url_for('configuracion'))
+        try:
+            idterraza = request.form['actterrazas']
+            db_execute(f"DELETE FROM terrazas WHERE id_terrazas = '{idterraza}' ")
+            flash(f'Cambio efectuado correctamente', 'success')
+            return redirect(url_for('configuracion'))
+        except:
+            flash(f'Cambio No efectuado correctamente', 'Danger')
+            return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
 
 @app.route('/actconfterraza2', methods=['GET', 'POST'])
@@ -1427,9 +1432,14 @@ select * from terrazas where terrazas == '{agregarterraza}'
 @is_logged_in
 def actconfest():
     if request.method == "POST":
-        num_estacionamiento = request.form['num_estacionamiento']
-        db_execute(f"UPDATE configuracion SET num_estacionamiento = '{num_estacionamiento}' ")
-        return redirect(url_for('configuracion'))
+        try:
+            num_estacionamiento = request.form['num_estacionamiento']
+            db_execute(f"UPDATE configuracion SET num_estacionamiento = '{num_estacionamiento}' ")
+            flash(f'Cambio efectuado correctamente', 'success')
+            return redirect(url_for('configuracion'))
+        except:
+            flash(f'Cambio No efectuado correctamente', 'Danger')
+            return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
 
 @app.route('/actconfduraccionqr', methods=['GET', 'POST'])
@@ -1437,9 +1447,14 @@ def actconfest():
 @is_logged_in
 def actconfduraccionqr():
     if request.method == "POST":
-        max_tpo_qr_unico = request.form['max_tpo_qr_unico']
-        db_execute(f"UPDATE configuracion SET max_tpo_qr_unico = '{max_tpo_qr_unico}' ")
-        return redirect(url_for('configuracion'))
+        try:
+            max_tpo_qr_unico = request.form['max_tpo_qr_unico']
+            db_execute(f"UPDATE configuracion SET max_tpo_qr_unico = '{max_tpo_qr_unico}' ")
+            flash(f'Cambio efectuado correctamente', 'success')
+            return redirect(url_for('configuracion'))
+        except:
+            flash(f'Cambio No efectuado correctamente', 'Danger')
+            return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
 
 @app.route('/actconfmens', methods=['GET', 'POST'])
@@ -1447,12 +1462,17 @@ def actconfduraccionqr():
 @is_logged_in
 def actconfmens():
     if request.method == "POST":
-        mensualidad = request.form['mensualidad']
-        dia_de_corte = request.form['dia_de_corte']
-        dias_de_gracia = request.form['dias_de_gracia']
-        db_execute(
-            f"UPDATE configuracion SET dias_de_gracia = '{dias_de_gracia}', dia_de_corte = '{dia_de_corte}', mensualidad = '{mensualidad}' WHERE id_conf = 1 ")
-        return redirect(url_for('configuracion'))
+        try:
+            mensualidad = request.form['mensualidad']
+            dia_de_corte = request.form['dia_de_corte']
+            dias_de_gracia = request.form['dias_de_gracia']
+            db_execute(
+                f"UPDATE configuracion SET dias_de_gracia = '{dias_de_gracia}', dia_de_corte = '{dia_de_corte}', mensualidad = '{mensualidad}' WHERE id_conf = 1 ")
+            flash(f'Cambio efectuado correctamente', 'success')
+            return redirect(url_for('configuracion'))
+        except:
+            flash(f'Cambio No efectuado correctamente', 'Danger')
+            return redirect(url_for('configuracion'))
     return redirect(url_for('configuracion'))
 
 @app.route('/actconfcheckbox', methods=['POST'])
