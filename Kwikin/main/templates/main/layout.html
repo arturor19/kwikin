@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  {% block head %}
+  <title>Layout</title>
+  {% endblock %}
+  <!-- Custom fonts for this template-->
+
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+  <link href="{{ url_for('.static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet"> <!--agregue esto para toogle button-->
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script> <!--agregue esto para toogle button-->
+  <!-- Custom styles for this template-->
+  <link href="{{ url_for('.static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('.static', filename='css/bootstrap-colorselector.min.css') }}" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="{{ url_for('.static', filename='/img/favicon.ico') }}" type="image/x-icon">
+  <!-- Bootstrap data tables-->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+</head>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <img src="{{ url_for('.static', filename='img/favicon-57.png') }}">
+        </div>
+        <div class="sidebar-brand-text mx-3">Kwikin<sup>(r)</sup></div>
+      </a>
+
+       <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+      <br>
+
+      <!-- Heading -->
+      <a class="sidebar-heading" data-toggle="collapse" href="#collapseresidente" aria-expanded="false" aria-controls="collapseresidente">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+           Residente
+      </a>
+      </a>
+
+      <!-- Nav Item - Dashboard -->
+      <div class="collapse" id="collapseresidente">
+      <li class="nav-item">
+        <a class="nav-link" href="/crearqr">
+          <i class="fas fa-qrcode"></i>
+          <span>QR</span></a>
+        <a class="nav-link" href="/calendario">
+          <i class="fa fa-calendar"></i>
+          <span>Terrazas</span></a>
+      </li>
+        <li class="nav-item">
+        <a class="nav-link" href="/comunicadosres">
+          <i class="fa fa-envelope"></i>
+          <span>Comunicados</span></a>
+        </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/cobros">
+          <i class="fa fa-dollar-sign"></i>
+          <span>Pagos</span></a>
+      </li>
+      </div>
+
+      <br>
+
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+
+      <a class="sidebar-heading" data-toggle="collapse" href="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+           Admin
+      </a>
+
+
+      <!-- Nav Item - Tables -->
+      <div class="collapse" id="collapseAdmin">
+      <li class="nav-item">
+        <a class="nav-link" href="/configuracion">
+          <i class="fas fa-tools"></i>
+          <span>Configuración</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/gestionusuarios">
+          <i class="fas fa-fw fa-users"></i>
+          <span>Gestión de Usuarios</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/gestioneventos">
+          <i class="fa fa-calendar"></i>
+          <span>Gestión eventos</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/gestiondomicilios">
+          <i class="fas fa-fw fa-home"></i>
+          <span>Gestión de Domicilios</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/comunicados">
+          <i class="fa fa-envelope"></i>
+          <span>Comunicados</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/gestioncobros">
+          <i class="fa fa-dollar-sign"></i>
+          <span>Gestión de cobros</span></a>
+      </li>
+      </div>
+      <br>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+      <div class="sidebar-heading">
+        Ventas
+      </div>
+
+
+      <!-- Nav Item - ventas -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseventas" aria-expanded="true" aria-controls="collapseventas">
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Ventas</span>
+        </a>
+        <div id="collapseventas" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Crear Usuarios:</h6>
+            <a class="collapse-item" href="/ventas">Crear coto</a>
+            <a class="collapse-item" href="/crearBulk">Masiva</a>
+          </div>
+        </div>
+      </li>
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+      <div class="sidebar-heading">
+        Guardia
+      </div>
+       <!-- Nav Item - guardia -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseguardia" aria-expanded="true" aria-controls="collapseguardia">
+          <i class="fas fa-user-shield"></i>
+          <span>Guardia</span>
+        </a>
+        <div id="collapseguardia" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Guardia:</h6>
+            <a class="collapse-item" href="/scannerqr">Leer código Entrada</a>
+            <a class="collapse-item" href="/scannerqrs">Leer código Salida</a>
+          </div>
+        </div>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+
+
+          <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+
+
+
+            <!-- Nav Item - Alerts -->
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="/comunicadores" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw"></i>
+                <!-- Counter - Alerts -->
+                <span class="badge badge-danger badge-counter">{% if cont > 0 %} {{ cont }}+ {% endif %}</span>
+              </a>
+              <!-- Dropdown - Alerts -->
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                <h6 class="dropdown-header">
+                  Alertas
+                </h6>
+                 {% for comunicado in com %}
+                <a class="dropdown-item d-flex align-items-center" href="/entregadoactres/{{comunicado.id_notificaciones}}" {% if comunicado.leido == 0 %} style="background:#cceeff;" {% endif %}>
+                  <button type="button" value="{{comunicado.id_notificaciones}}" class="close" data-dismiss="alert"></button>
+                  <div class="mr-3">
+
+                  </div>
+                  <div>
+                    <input type="hidden" name="idnotihidden" ">
+                    <div class="small text-gray-500">{{ comunicado.fecha }}</div>
+                    <span class="font-weight-bold">{{ comunicado.titulo }}</span><br>
+                  </div>
+                </a>
+                  {% endfor %}
+
+
+              </div>
+            </li>
+
+
+
+            <div class="topbar-divider d-none d-sm-block"></div>
+
+            <!-- Nav Item - User Information -->
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ nombre }}</span>
+                <img class="img-profile rounded-circle" src="{{ foto }}">
+              </a>
+              <!-- Dropdown - User Information -->
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/logout">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Logout
+                </a>
+                <a class="dropdown-item" href="/bienvenida">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Cambiar coto
+                </a>
+              </div>
+            </li>
+
+          </ul>
+
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+          {% block body %}
+          <!-- Page Heading -->
+          <h1 class="h3 mb-4 text-gray-800">Blank Page</h1>
+
+        </div>
+        <!-- /.container-fluid -->
+          {% endblock %}
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Kwikin 2020</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+</body>
+
+  <!-- Bootstrap core JavaScript-->
+
+
+  <script src="{{ url_for('.static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Core plugin JavaScript-->
+  <!--script src="{{ url_for('.static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script-- #Comentado por datatable issue>
+  <!-- Custom scripts for all pages-->
+
+  <script src="{{ url_for('.static', filename='js/sb-admin-2.min.js') }}"></script>
+  <script src="{{ url_for('.static', filename='js/bootstrap-colorselector.min.js') }}"></script>
+<script>
+     $('#CrearIndividual').click(function() {
+    $('#Modaluser').modalService.showModal();
+    }) ;
+</script>
+<script>
+  $('#colorselector').colorselector();
+</script>
+
+</html>

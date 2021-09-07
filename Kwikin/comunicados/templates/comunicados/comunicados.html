@@ -1,0 +1,253 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Comunicados</title>
+
+{% endblock %}
+{%block body %}
+<body>
+<script type="text/javascript" class="init">
+
+$(document).ready(function() {
+	$('#dtOrdercomunicados').DataTable({
+        "order": [[ 0, "desc" ]]
+    });
+} );
+
+</script>
+<script type="text/javascript" class="init">
+$.extend( true, $.fn.dataTable.defaults, {
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoPostFix": "",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "loadingRecords": "Cargando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "searchPlaceholder": "Término de búsqueda",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "aria": {
+            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        //only works for built-in buttons, not for custom buttons
+        "buttons": {
+            "create": "Nuevo",
+            "edit": "Cambiar",
+            "remove": "Borrar",
+            "copy": "Copiar",
+            "csv": "fichero CSV",
+            "excel": "tabla Excel",
+            "pdf": "documento PDF",
+            "print": "Imprimir",
+            "colvis": "Visibilidad columnas",
+            "collection": "Colección",
+            "upload": "Seleccione fichero....",
+
+        },
+        "select": {
+            "rows": {
+                _: '%d filas seleccionadas',
+                0: 'clic fila para seleccionar',
+                1: 'una fila seleccionada'
+            }
+        }
+    }
+} );
+</script>
+<section>
+    <div>
+        <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#Modalcomunicados">Comunicado</button>
+        <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal" data-target="#Modalencuesta">Encuesta</button>
+    </div>
+
+</section>
+<br>
+<section>
+    <div style="width:90%; margin:0 auto;">
+    <table id="dtOrdercomunicados" class="table table-striped table-bordered table-sm table-responsive-sm" cellspacing="0" width="100%">
+      <!-- Table head -->
+      <thead>
+        <tr>
+            <th>Detalles</th>
+            <th>Fecha</th>
+            <th>titulo</th>
+            <th>Creado por</th>
+        </tr>
+      </thead>
+      <!-- Table head -->
+
+      <!-- Table body -->
+      <tbody>
+            {% for comunica in comuni %}
+             <tr>
+                 <td><a href="{{ url_for('entregadoact',id_mensaje = comunica.id_mensaje) }}">{{comunica.tipo}}</a></td>
+                 <td><a>{{comunica.fecha}}</a></td>
+                 <td><a>{{comunica.titulo}}</a></td>
+                 <td><a>{{comunica.creador}}</a></td>
+
+             </tr>
+
+             {% endfor %}
+      </tbody>
+    </table>
+    </div>
+</section>
+<section>
+<div class="modal fade" id="Modalcomunicados" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Comunicado</h1>
+            </div>
+            <div class="modal-body">
+              <form id="IndFormcom" action="/comunicados" class="" method="post">
+                  <div class="form-group">
+                        <div class="panel-body">
+                            <label for="titulocom" class="col-12 col-form-label">Título:</label>
+                                <div class="col-sm-8">
+                                    <input required class="form-control-sm" type="text" id="titulocom" name="titulocom"/>
+                                </div>
+                                <label for="commensaje" class="col-12 col-form-label">Mensaje:</label>
+                                    <textarea class="col-sm-8" maxlength="380" id="commensaje" name="commensaje"></textarea>
+                                <label for="comdirigido" class="col-12 col-form-label">Dirigido a:</label>
+                                    <select class="col-sm-6" name="comdirigido" id="comdirigido">
+                                      <option value="Todos">Todos</option>
+                                        {% for allem in allemails %}
+                                      <option value="{{allem.email}}">{{allem.email}}</option>
+                                        {% endfor %}
+                                    </select>
+                        </div>
+                  </div>
+
+                  <div class="modal-footer">
+                      <div style="text-align:center;" class="form-group">
+                          <input type="button" name="cerrarcomunicado" data-dismiss="modal" value="Cancelar"/>
+                          <input type="submit" id="comunicado" name="comunicado" value="Crear comunicado"/>
+                      </div>
+                  </div>
+
+                        {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+                        {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+
+
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+</section>
+<section>
+<div class="modal fade" id="Modalencuesta" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Encuesta</h1>
+            </div>
+            <div class="modal-body">
+              <form id="IndFormenc" action="/encuesta" class="" method="post">
+                  <div class="form-group">
+                    <label for="enctitulo" class="col-12 col-form-label">Título:</label>
+                      <div class="col-sm-8"><input required class="form-control-sm" type="text" id="enctitulo" name="enctitulo"/></div>
+                    <label for="encmensaje" class="col-12 col-form-label">Mensaje:</label>
+                        <textarea class="col-sm-8" maxlength="380" id="encmensaje" name="encmensaje"></textarea>
+                      <label for="enca" class="col-12 col-form-label">Opción A:</label>
+                      <div class="col-sm-8"><input required class="form-control-sm" type="text" id="enca" name="enca"/></div>
+                        <label for="encb" class="col-12 col-form-label">Opción B:</label>
+                      <div class="col-sm-8"><input required class="form-control-sm" type="text" id="encb" name="encb"/></div>
+                        <label for="encc" class="col-12 col-form-label">Opción C:</label>
+                      <div class="col-sm-8"><input required class="form-control-sm" type="text" id="encc" name="encc"/></div>
+                        <label for="encd" class="col-12 col-form-label">Opción D:</label>
+                      <div class="col-sm-8"><input required class="form-control-sm" type="text" id="encd" name="encd"/></div>
+
+
+                    <label for="encdirigido" class="col-12 col-form-label">Dirigido a:</label>
+                        <select class="col-sm-6" name="encdirigido" id="encdirigido">
+                          <option value="Todos">Todos</option>
+                            {% for allem in allemails %}
+                          <option value="{{allem.email}}">{{allem.email}}</option>
+                            {% endfor %}
+                        </select>
+                  </div>
+                  <div class="modal-footer">
+                      <div style="text-align:center;" class="form-group">
+                          <input type="button" name="cerrarcomunicado" data-dismiss="modal" value="Cancelar"/>
+                          <input type="submit" id="comunicado" name="comunicado" value="Crear encuesta"/>
+                      </div>
+                  </div>
+
+                        {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+                        {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+
+
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+</section>
+<script>
+        $(document).ready(function() {
+        var messages = "{{ get_flashed_messages() }}";
+
+        if (typeof messages != 'undefined' && messages != '[]') {
+        $("#vercom").modal();
+            };
+        });
+    </script>
+<script>
+       $('#cerrarqrgestion').click(function() {
+    $('#vercom').modal('hide');
+    sendEvent('#edit', 1);
+    $('#vercom').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+</body>
+
+{% endblock %}
+

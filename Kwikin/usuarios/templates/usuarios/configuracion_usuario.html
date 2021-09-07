@@ -1,0 +1,64 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Configuración Usuario</title>
+
+
+{% endblock %}
+{% block body %}
+<body>
+<container>
+<div class="embed-responsive-item" style="height:0;width:25%;padding-bottom:25%;background-color:#fff">
+    <div>
+    {% for info in usuarios %}
+      <form class="user" action="/act_usuario"  method="post">
+        <div class="panel-body">
+
+            <label for="act_nombre" class="col-12 col-form-label">Nombre:</label>
+                <div class="col-sm-8">
+            <input required class="form-control-sm" type="text" value="{{info.nombre}}" id="act_nombre" name="act_nombre"/>
+                </div>
+            <label for="act_apellido" class="col-12 col-form-label">Apellido:</label>
+                <div class="col-sm-8">
+            <input required class="form-control-sm" type="text" value="{{info.apellido}}" id="act_apellido" name="act_apellido"/>
+                </div>
+             <label for="act_password" class="col-12 col-form-label" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">Contraseña:</label>
+                <div class="col-sm-8">
+            <input required class="form-control-sm" type="password" id="act_password" name="act_password"/>
+                </div>
+            <label for="act_password2" class="col-12 col-form-label">Confirmar:</label>
+                <div class="col-sm-8">
+            <input required class="form-control-sm" type="password" id="act_password2" name="act_password2"/>
+                </div>
+            <br>
+             {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+                        {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+
+
+        </div>
+        <div class="modal-footer">
+          <div style="text-align:center;" class="form-group">
+              <input type="submit"  value="Actualizar"/>
+          </div>
+        </div>
+      </form>
+         {% endfor %}
+    </div>
+</div>
+
+</container>
+
+</body>
+{% endblock %}

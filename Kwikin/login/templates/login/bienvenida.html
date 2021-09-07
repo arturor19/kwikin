@@ -1,0 +1,55 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Bienvenida</title>
+
+
+{% endblock %}
+{% block body %}
+<body>
+<container>
+<div class="modal hide fade" data-backdrop="static" data-keyboard="false" id="Modalbienvenida" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Kwikin</h1>
+            </div>
+            <div class="modal-body">
+              <form id="IndForm" action="/bienvenida" class="" method="post">
+                  Te damos la bienvenida {{ nombre }},
+
+                    {% for grupo in grupos %}
+                  <br>
+                  <br>
+                    Por favor selecciona tu Coto
+                  <br>
+                  <br>
+                  <select name="coto" class="selectpicker form-control">
+                     {% for key, value in grupos[grupo].items() %}
+                      <option  value="{{key}}">{{key}}</option>
+                    {% endfor %}
+                  </select>
+                  <br>
+                  {% endfor %}
+
+                  <div class="modal-footer">
+                      <div style="text-align:center;" class="form-group">
+                          <input type="submit" id="send-signup" name="selectcoto" value="Continuar"/>
+                      </div>
+                  </div>
+
+
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(window).on('load', function() {
+        $('#Modalbienvenida').modal('show');
+    });
+</script>
+
+</container>
+</body>
+{% endblock %}

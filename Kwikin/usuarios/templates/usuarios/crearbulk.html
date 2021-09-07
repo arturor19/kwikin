@@ -1,0 +1,33 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Cargar Masivo</title>
+{% endblock %}
+{%block body %}
+
+<body>
+<form method=post enctype=multipart/form-data>
+    <input class="form-control-sm" type=file name=file><br><br>
+    <input class="form-control-sm" type=submit value=Cargar>
+</form><br>
+<a class="btn btn-secondary btn-sm" href="/gestionusuarios">Continuar</a><br><br>
+
+                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                       {% endfor %}
+                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+</body>
+
+
+{% endblock %}
+

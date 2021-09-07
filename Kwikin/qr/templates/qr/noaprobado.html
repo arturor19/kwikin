@@ -1,0 +1,25 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Dashboard</title>
+
+
+{% endblock %}
+{%block body %}
+<button type="button" class="btn btn-secondary">Puerta 2</button>
+
+   {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                        <div class="alert alert-danger" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                       {% endfor %}
+                            {% for message in get_flashed_messages(category_filter=["success"]) %}
+                        <div class="alert alert-success" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+
+                        </div>
+                        {% endfor %}
+{% endblock %}
