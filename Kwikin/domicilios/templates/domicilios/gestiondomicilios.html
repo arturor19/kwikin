@@ -1,5 +1,5 @@
 
-{% extends "layout.html" %}
+{% extends "main/layout.html" %}
 
 {% block head %}
 <title>Gestión de domicilios</title>
@@ -69,7 +69,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 </script>
 <section>
     <div>
-        <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#collapseUsers" aria-expanded="false" aria-controls="collapseExample">Agregar usuarios</button>
+        <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#collapseUsers" aria-expanded="false" aria-controls="collapseExample">Agregar domicilios</button>
         <div class="collapse" id="collapseUsers">
             <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
                 <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#Modaluser" type="button">Individual</button>
@@ -79,35 +79,82 @@ $.extend( true, $.fn.dataTable.defaults, {
     </div>
 </section><br>
 <section>
-    <form action="" class="" method="post">
-    <table id="dtOrderExample" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+    <table id="dtOrderExample4" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
       <!-- Table head -->
       <thead>
         <tr>
           <th>Activo</th>
-          <th>Correo</th>
-          <th>Nombre</th>
           <th>Dirección</th>
+          <th>Saldo Mensualidad</th>
+          <th>Saldo Extraordinario</th>
         </tr>
       </thead>
       <!-- Table head -->
 
       <!-- Table body -->
       <tbody>
-            {% for usuario in usuarios %}
+            {% for usuario in domicilios %}
              <tr>
                  <td scope="row">
-                     <div class="custom-control custom-checkbox">
-                         <input type="checkbox" class="custom-control-input" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} {{'checked' if usuario.status == "Activo" else ''}}>
-                         <label class="custom-control-label" for={{usuario.email}}></label>
-                <td><a name="elcorreo" value={{usuario.email}} href="mailto:{{usuario.email}}">{{usuario.email}}</td>
-                <td><a>{{usuario.nombre}}</a></td>
-                <td><a>{{usuario.domicilio}}</a></td>
+                     <input type="checkbox" id={{usuario.id_dom}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if usuario.status == "Activo" %} checked {% endif %}>
+                <td><a href="#" data-toggle="modal" data-target='#editdomicilio{{ usuario.id_dom }}'>{{usuario.direccion}}</a></td>
+                <td><a>{{usuario.mensualidad}}</a></td>
+                <td><a>{{usuario.extra}}</a></td>
              </tr>
-            {% endfor %}
+                 <div class="modal fade" id="editdomicilio{{ usuario.id_dom }}" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="post" action="/actdomicilio">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Actualizar</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                     <div class="form-group">
+                                        <label>Dirección</label>
+                                        <input  type="text" class="form-control" value="{{ usuario.direccion }}" name="direccioncasa">
+                                     </div>
+                                     <div class="form-group">
+                                        <input hidden type="Text"  value="{{ usuario.id_dom }}" name="idusuariohidden">
+                                     </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <input type="button" class="btn btn-default" name="cerrarusuariogestion"  data-dismiss="modal" value="Cerrar">
+                                    <button type="submit" name="actdomicilio" id="actdomicilio" class="btn btn-primary" style="width:100px"> Actualizar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                 </div>
+                  <script>
+
+                 $(document).ready(function($) {
+                    $("#actdomicilio").on("click", "a", function(event) {
+                    event.preventDefault();
+                    jQuery.noConflict();
+                    $('#editdomicilio').modal('show');
+
+                  });
+                });
+
+                   </script>
+                {% endfor %}
+
+                        {% for message in get_flashed_messages(category_filter=["danger"]) %}
+                            <div class="alert alert-danger" role="alert">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
+                        {% for message in get_flashed_messages(category_filter=["success"]) %}
+                            <div class="alert alert-success" role="alert">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                {{ message }}
+
+                            </div>
+                        {% endfor %}
       </tbody>
-
-
 
     </table>
     </form>
@@ -118,57 +165,23 @@ $.extend( true, $.fn.dataTable.defaults, {
 
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title">Crear usuario</h1>
+                <h1 class="modal-title">Crear domicilio</h1>
             </div>
             <div class="modal-body">
-              <form id="IndForm" action="/crearInd" class="" method="post">
-                  <div class="form-group">
-                      <label for="correo" class="col-sm-2 col-form-label">Email:</label>
-                      <div class="col-sm-8">
-                        <input class="form-control-sm" type="email" id="correo" name="correo"/>
-                      </div>
-                  </div>
+              <form id="IndForm" action="/creardomInd" class="" method="post">
                   <div class="form-group">
                       <label for="direccion" class="col-sm-2 col-form-label">Dirección:</label>
                       <div class="col-sm-8">
                           <input class="form-control-sm" type="text" id="direccion" name="direccion"/>
                       </div>
                   </div>
-                  <div class="form-group">
-                      <label for="telefono" class="col-sm-2 col-form-label">Teléfono:</label>
-                      <div class="col-sm-8">
-                          <input class="form-control-sm" type="text" id="telefono" name="telefono"/>
-                      </div>
-                  </div>
-                  <div style="margin:15px;" class="form-group">
-                      <input style="center" type="checkbox" class="form-check-input" name="checkguardia" id="checkguardia"/>
-                      <label class="form-check-label" for="checkguardia">Seguridad</label>
-                  </div>
-                  <div style="margin:15px;" class="form-group">
-                      <input type="checkbox" class="form-check-input" name="checkadmin" id="checkadmin"/>
-                      <label class="form-check-label" for="checkadmin">Administrador</label>
-                  </div>
+
                   <div class="modal-footer">
                       <div style="text-align:center;" class="form-group">
                           <input type="submit" name="cerraruser" data-dismiss="modal" value="Cancelar"/>
-                          <input type="submit" id="send-signup" name="crearusuarioindividual" value="Crear Usuario"/>
+                          <input type="submit" id="send-signup" name="creardomindividual" value="Crear domicilio"/>
                       </div>
                   </div>
-
-                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                        <div class="alert alert-danger" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                       {% endfor %}
-                            {% for message in get_flashed_messages(category_filter=["success"]) %}
-                        <div class="alert alert-success" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                        {% endfor %}
 
 
                 </form>
@@ -184,7 +197,7 @@ $.extend( true, $.fn.dataTable.defaults, {
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">Cargar Usuarios</h1>
-                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
+                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('usuarios.ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
             </div>
             <div class="modal-body">
               <form method=post enctype=multipart/form-data action="/crearBulk">
@@ -192,34 +205,13 @@ $.extend( true, $.fn.dataTable.defaults, {
                   <input class="form-control-sm" type=submit data-toggle="tooltip" data-placement="top" alt="Recuerda que el archivo CSV debe contener Email, Dirección, Teléfono"  title="Recuerda que el archivo CSV debe contener Email,	Direccion, Telefono" value="Cargar">
               </form>
 
-                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                        <div class="alert alert-danger" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
 
-                        </div>
-                       {% endfor %}
-                            {% for message in get_flashed_messages(category_filter=["success"]) %}
-                        <div class="alert alert-success" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                        {% endfor %}
              </div>
         </div>
     </div>
 </div>
 </section>
-<script>
- $(document).ready(function() {
-    var messages = "{{ get_flashed_messages() }}";
 
-    if (typeof messages != 'undefined' && messages != '[]') {
-        $("#Modaluser").modal();
-    };
-});
-</script>
 <script>
 $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip();

@@ -96,9 +96,9 @@ $.extend( true, $.fn.dataTable.defaults, {
                 {% for usuario in usuarios %}
                  <tr>
                      <td scope="row">
-                             <input type="checkbox" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if "Activo" in usuario.status|string() %} checked {% endif %}>
+                             <input type="checkbox" id={{usuario.email}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if usuario.status == "Activo" %} checked {% endif %}>
                     <td><a href="#" data-toggle="modal" data-target='#editusuario{{ usuario.id_usuario }}'>{{usuario.nombre}}</a></td>
-                    <td><a>{{usuario.domicilio[coto_it]}}</a></td>
+                    <td><a>{{usuario.domicilio}}</a></td>
                  </tr>
                  <div class="modal fade" id="editusuario{{ usuario.id_usuario }}" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog">
@@ -119,7 +119,7 @@ $.extend( true, $.fn.dataTable.defaults, {
                                      </div>
                                      <div class="form-group">
                                         <label>Direccion</label>
-                                        <input type="Text" class="form-control" value="{{usuario.domicilio[coto_it]}}" name="domiciliousuario">
+                                        <input disabled type="Text" class="form-control" value="{{usuario.domicilio}}" name="domiciliousuario">
                                      </div>
                                      <div class="form-group">
                                         <label>Teléfono</label>
@@ -266,20 +266,6 @@ $.extend( true, $.fn.dataTable.defaults, {
                       </div>
                   </div>
 
-                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                        <div class="alert alert-danger" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                       {% endfor %}
-                            {% for message in get_flashed_messages(category_filter=["success"]) %}
-                        <div class="alert alert-success" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                        {% endfor %}
 
 
                 </form>
@@ -295,7 +281,7 @@ $.extend( true, $.fn.dataTable.defaults, {
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">Cargar Usuarios</h1>
-                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
+                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('usuarios.ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
             </div>
             <div class="modal-body">
               <form method=post enctype=multipart/form-data action="/crearBulk">
@@ -303,20 +289,7 @@ $.extend( true, $.fn.dataTable.defaults, {
                   <input class="form-control-sm" type=submit data-toggle="tooltip" data-placement="top" alt="Recuerda que el archivo CSV debe contener Email, Dirección, Teléfono"  title="Recuerda que el archivo CSV debe contener Email,	Direccion, Telefono" value="Cargar">
               </form>
 
-                            {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                        <div class="alert alert-danger" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
 
-                        </div>
-                       {% endfor %}
-                            {% for message in get_flashed_messages(category_filter=["success"]) %}
-                        <div class="alert alert-success" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            {{ message }}
-
-                        </div>
-                        {% endfor %}
              </div>
         </div>
     </div>

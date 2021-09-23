@@ -1,5 +1,6 @@
-from flask import render_template, flash, redirect, url_for, session, request, Blueprint
+from flask import render_template, flash, redirect, url_for, session, request, Blueprint, jsonify
 from auth_decorator import is_logged_in, is_user, usuario_notificaciones
+from config import db
 import json
 
 eventos = Blueprint('eventos', __name__, template_folder='templates', static_folder='Kwikin/static')
@@ -7,11 +8,14 @@ eventos = Blueprint('eventos', __name__, template_folder='templates', static_fol
 
 
 @eventos.route('/calendar-events')
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def calendar_events(**kws):
-    arr_terr = db_execute('select * from terrazas')
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    cotos = db.cotos
+    arr_terr = cotos.find_one({"coto_nombre": coto}, {"_id":0,"terrazas":1})['terrazas']
     try:
         rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
                           "end_date)*1000 as end FROM event FROM eventos")
@@ -25,11 +29,15 @@ def calendar_events(**kws):
 
 
 @eventos.route('/calendario')
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def calendario(**kws):
-    arr_terr = db_execute('select * from terrazas')
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    cotos = db.cotos
+    arr_terr = cotos.find_one({"coto_nombre": coto}, {"_id":0,"terrazas":1})['terrazas']
+    print(arr_terr)
     return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], terrazas=arr_terr, foto=kws['foto'], nombre=kws['nombre'])
 
 @eventos.route('/calendario_ini/remote')

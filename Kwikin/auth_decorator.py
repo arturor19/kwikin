@@ -5,40 +5,10 @@ import sqlite3
 import json
 import os
 
-db_sqlite = 'kw.db'
-
-
-def db_create(db_name):
-    vsm_db = sqlite3.connect("./" + db_name + ".db") # db conn
-    dbh = vsm_db.cursor()  # db cursor
-    # excecute sql statement
-    for query in list_create_db:
-        dbh.execute(query)
-        desc = dbh.description
-    vsm_db.commit()
-    data = vsm_db.total_changes
-    dbh.close()
-    vsm_db.close()
-    return data
 
 
 
-def db_execute(query):
-    query_lc = query.lower()
-    vsm_db = sqlite3.connect(db_sqlite) # db conn
-    dbh = vsm_db.cursor()  # db cursor
-    # excecute sql statement
-    dbh.execute(query)
-    desc = dbh.description
-    if "select" in query_lc:
-        column_names = [col[0] for col in desc]
-        data = [dict(zip(column_names, row)) for row in dbh.fetchall()]  # store query in dictionary
-    else:
-        vsm_db.commit()
-        data = vsm_db.total_changes
-    dbh.close()
-    vsm_db.close()
-    return data
+
 
 
 def is_logged_in(f):
@@ -80,6 +50,7 @@ def usuario_notificaciones(f):
     def decorated_function(**kws):
         resp = json.loads(session['profile'])
         correo = (resp['correo'])
+        coto = (resp['coto'])
         usuario = db.usuarios
         comunic = db.comunicados
         usuario_bd = usuario.find_one({'correo': correo})
@@ -87,8 +58,8 @@ def usuario_notificaciones(f):
         info_bd = json.loads(usuario_login)
         foto = (info_bd['picture'])
         nombre = (info_bd['nombre'])
-        cont = comunic.find({"$and": [{"leido": 0}, {"email_usuario_receptor": correo}]}).count()
-        com = comunic.find({"$and": [{"leido": {"$ne": 2}}, {"email_usuario_receptor": correo}]},
+        cont = comunic.find({"$and": [{"leido": 0}, {"email_usuario_receptor": correo}, {"coto": coto}]}).count()
+        com = comunic.find({"$and": [{"leido": {"$ne": 2}}, {"email_usuario_receptor": correo}, {"coto": coto}]},
                            {"_id": 1, "fecha": 1, "titulo": 1, "mensaje": 1, "leido": 1})
         array_com = []
         for row in com:

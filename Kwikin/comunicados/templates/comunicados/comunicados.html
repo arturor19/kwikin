@@ -83,19 +83,19 @@ $.extend( true, $.fn.dataTable.defaults, {
             <th>Detalles</th>
             <th>Fecha</th>
             <th>titulo</th>
-            <th>Creado por</th>
+            <th>Coto</th>
         </tr>
       </thead>
       <!-- Table head -->
 
       <!-- Table body -->
       <tbody>
-            {% for comunica in comuni %}
+            {% for comunica  in comuni %}
              <tr>
-                 <td><a href="{{ url_for('entregadoact',id_mensaje = comunica.id_mensaje) }}">{{comunica.tipo}}</a></td>
+                 <td><a href="{{ url_for('comunicados.entregadoact',id_mensaje = comunica.id_mensaje) }}">{{comunica.tipo}}</a></td>
                  <td><a>{{comunica.fecha}}</a></td>
                  <td><a>{{comunica.titulo}}</a></td>
-                 <td><a>{{comunica.creador}}</a></td>
+                 <td><a>{{comunica.coto}}</a></td>
 
              </tr>
 
@@ -124,9 +124,11 @@ $.extend( true, $.fn.dataTable.defaults, {
                                     <textarea class="col-sm-8" maxlength="380" id="commensaje" name="commensaje"></textarea>
                                 <label for="comdirigido" class="col-12 col-form-label">Dirigido a:</label>
                                     <select class="col-sm-6" name="comdirigido" id="comdirigido">
-                                      <option value="Todos">Todos</option>
+                                        <option value="Todos">Todos</option>
+                                        <option value="Administradores">Administradores</option>
+                                        <option value="Morosos">Morosos</option>
                                         {% for allem in allemails %}
-                                      <option value="{{allem.email}}">{{allem.email}}</option>
+                                        <option value="{{allem.email}}">{{allem.email}}</option>
                                         {% endfor %}
                                     </select>
                         </div>
@@ -188,9 +190,11 @@ $.extend( true, $.fn.dataTable.defaults, {
 
                     <label for="encdirigido" class="col-12 col-form-label">Dirigido a:</label>
                         <select class="col-sm-6" name="encdirigido" id="encdirigido">
-                          <option value="Todos">Todos</option>
+                            <option value="Todos">Todos</option>
+                            <option value="Administradores">Administradores</option>
+                            <option value="Morosos">Morosos</option>
                             {% for allem in allemails %}
-                          <option value="{{allem.email}}">{{allem.email}}</option>
+                            <option value="{{allem.email}}">{{allem.email}}</option>
                             {% endfor %}
                         </select>
                   </div>

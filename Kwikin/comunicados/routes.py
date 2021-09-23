@@ -13,58 +13,111 @@ comunicados = Blueprint('comunicados', __name__, template_folder='templates', st
 
 
 @comunicados.route('/comunicados', methods=['GET', 'POST'])
-
+@is_user
+@is_logged_in
+@usuario_notificaciones
 def comunicado(**kws):
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
+    comunic = db.comunicados
     usuario = db.usuarios
     resp = json.loads(session['profile'])
+    print(resp)
     creador = (resp['correo'])
-    id_mensaje = ""
+    coto = (resp['coto'])
     array_comunica = []
-    comunica = db_execute("SELECT DISTINCT idmultiple_mensaje, fecha, titulo, mensaje, id_usuario_emisor, tipo from comunicados")
-    for row in comunica:
+    comunica = comunic.find({"coto":coto}, {"idmultiple_mensaje": 1, "coto":1, "grupo": 1, "fecha": 1, "titulo": 1, "mensaje": 1,
+                                 "id_usuario_emisor": 1, "tipo": 1}).distinct("idmultiple_mensaje")
+    for ro in comunica:
+        row = comunic.find_one({"idmultiple_mensaje": ro},
+                               {"idmultiple_mensaje": 1, "grupo": 1, "fecha": 1, "titulo": 1, "mensaje": 1,
+                                "id_usuario_emisor": 1, "tipo": 1, "coto":1})
         id_mensaje = (row['idmultiple_mensaje'])
         fecha = (row['fecha'])
         titulo = (row['titulo'])
         mensaje = (row['mensaje'])
         creador = (row['id_usuario_emisor'])
         tipo = (row['tipo'])
-        id_mensaje = (row['idmultiple_mensaje'])
-        array_comunica.append({'idmultiple_mensaje' : id_mensaje,
-                             'fecha': fecha,
-                             'titulo': titulo,
-                             'mensaje': mensaje,
-                             'id_mensaje': id_mensaje,
-                             'tipo': tipo,
-                             'creador': creador})
-        print(array_comunica)
-    array_allemails = []
-    allemails = db_execute("SELECT * FROM usuarios ")
-    for row in allemails:
-        email = (row['email'])
-        array_allemails.append({'email': email})
-    print(array_allemails)
+        coto_m = (row['coto'])
 
+
+        array_comunica.append({'idmultiple_mensaje': id_mensaje,
+                               'fecha': fecha,
+                               'titulo': titulo,
+                               'mensaje': mensaje,
+                               'id_mensaje': id_mensaje,
+                               'tipo': tipo,
+                                'coto': coto_m,
+                               'creador': creador})
+    array_allemails = []
+    x = "grupos." + coto
+    allemails = usuario.find({x: {"$exists": True}}, {"_id": 0, "correo": 1})
+    for row in allemails:
+        email = (row['correo'])
+        array_allemails.append({'email': email})
     if request.method == 'POST':
         timestamp = ct.strftime("%Y-%m-%d %H:%M")
-        idmultmensaje = hex(int(time.time()))
+        idmultmensaje = secrets.token_urlsafe(10)
         titulo = request.form['titulocom']
         mensaje = request.form['commensaje']
         email_usuario_receptor = request.form['comdirigido']
+        tipo = "Comunicado"
         if email_usuario_receptor == "Todos":
+            array_allemails = []
+            print(coto)
+            allemails = usuario.find({x:{"$exists": True}}, {"_id": 0, "correo": 1})
+            print(allemails, 1)
+            for row in allemails:
+                email = (row['correo'])
+                print(email)
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
             for entry in array_allemails:
-                db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-                timestamp, titulo, mensaje, idmultmensaje, entry['email'], creador, 0, "Comunicado"))
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0,
+                     "opcion_a": "", "opcion_b": "", "opcion_c": "", "opcion_d": "", "resultado": "", "tipo": tipo, "coto":coto})
+            return redirect(url_for('comunicados.comunicado'))
+        elif email_usuario_receptor == "Administradores":
+            array_allemails = []
+            allemails = usuario.find({x: "admin"}, {"_id": 0, "correo": 1})
+            for row in allemails:
+                email = (row['correo'])
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
+            for entry in array_allemails:
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0,
+                     "opcion_a": "", "opcion_b": "", "opcion_c": "", "opcion_d": "", "resultado": "",
+                     "tipo": "Comunicado", "coto":coto})
+            return redirect(url_for('comunicados.comunicado'))
+        elif email_usuario_receptor == "Morosos":
+            array_allemails = []
+            allemails = usuario.find({x: "morosos"}, {"_id": 0,
+                                                            "correo": 1})  # revisar como insertamos el dato de cliente o ventas con empresa
+            for row in allemails:
+                email = (row['correo'])
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
+            for entry in array_allemails:
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0,
+                     "opcion_a": "", "opcion_b": "", "opcion_c": "", "opcion_d": "", "resultado": "", "tipo": tipo, "coto":coto})
             return redirect(url_for('comunicados.comunicado'))
         else:
-            db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-            timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0, "Comunicado"))
+            comunic.insert_one(
+                {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                 "email_usuario_receptor": email_usuario_receptor, "id_usuario_emisor": creador, "leido": 0,
+                 "tipo": tipo, "coto":coto})
+
             return redirect(url_for('comunicados.comunicado'))
-        return render_template('comunicados/comunicados.html', comuni=array_comunica, cont=kws['cont'], com=kws['com'],
-                               allemails=array_allemails, id_mensaje=id_mensaje)
-    return render_template('comunicados/comunicados.html',  cont=kws['cont'], com=kws['com'], comuni=array_comunica,
-                           allemails=array_allemails, id_mensaje=id_mensaje)
+        return render_template('comunicados/comunicados.html', comuni=array_comunica, foto=kws['foto'], coto=coto,
+                               nombre=kws['nombre'], cont=kws['cont'], com=kws['com'], allemails=array_allemails,
+                               id_mensaje=id_mensaje)
+    return render_template('comunicados/comunicados.html', cont=kws['cont'], com=kws['com'], foto=kws['foto'],
+                           nombre=kws['nombre'], comuni=array_comunica, allemails=array_allemails, coto=coto)
 
 
 @comunicados.route('/entregadoact/<id_mensaje>', methods=['GET'])
@@ -72,45 +125,56 @@ def comunicado(**kws):
 @is_logged_in
 @usuario_notificaciones
 def entregadoact(id_mensaje, **kws):
-    usuario = dict(session)['profile']['email']
-    id_usuario = db_execute(f"SELECT id_usuario FROM usuarios WHERE email = '{usuario}'")[0]['id_usuario']
-    valida = db_execute(f"SELECT id_grupo FROM asoc_usuario_grupo WHERE id_usuario = '{id_usuario}'")[0]['id_grupo']
-    if valida == 1 or valida == 2 or valida == 3:
+    comunic = db.comunicados
+    resp = json.loads(session['profile'])
+    grupo = (resp['grupo'])
+    if grupo == "admin":
         if request.method == 'GET':
-            titulo = db_execute(f"SELECT titulo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['titulo']
-            mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['mensaje']
-            tipo = db_execute(f"SELECT tipo FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['tipo']
-            resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_a']
-            resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_b']
-            resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_c']
-            resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}'")[0]['opcion_d']
+            detallescom = comunic.find_one({"idmultiple_mensaje": id_mensaje})
+            titulo = (detallescom['titulo'])
+            mensaje = (detallescom['mensaje'])
+            tipo = (detallescom['tipo'])
+            resp_a = (detallescom['opcion_a'])
+            resp_b = (detallescom['opcion_b'])
+            resp_c = (detallescom['opcion_c'])
+            resp_d = (detallescom['opcion_d'])
             array_leido = []
-            leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and idmultiple_mensaje = '{id_mensaje}'")
-            contleidopor = len(leido)
+            leido = comunic.find({"$and": [{"leido": {"$ne": 0}}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+            contleidopor = comunic.find({"$and": [{"leido": {"$ne": 0}}, {"idmultiple_mensaje": id_mensaje}]}).count()
             array_noleido = []
-            noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and idmultiple_mensaje = '{id_mensaje}'")
-            contnoleidopor = len(noleido)
+            noleido = comunic.find({"$and": [{"leido": 0}, {"idmultiple_mensaje": id_mensaje}]},
+                                   {"_id": 0, "email_usuario_receptor": 1})
+            contnoleidopor = comunic.find({"$and": [{"leido": 0}, {"idmultiple_mensaje": id_mensaje}]}).count()
             try:
-                opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'A'")
-                contopa = len(opcion_a)
+                opcion_a = comunic.find({"$and": [{"resultado": "A"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+                contopa = comunic.find({"$and": [{"resultado": "A"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_a = ""
                 contopa = 0
             try:
-                opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'B'")
-                contopb = len(opcion_b)
+                opcion_b = comunic.find({"$and": [{"resultado": "B"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+                contopb = comunic.find({"$and": [{"resultado": "B"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_b = ""
                 contopb = 0
             try:
-                opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'C'")
-                contopc = len(opcion_c)
+                opcion_c = comunic.find({"$and": [{"resultado": "C"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+                contopc = comunic.find({"$and": [{"resultado": "C"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_c = ""
                 contopc = 0
             try:
-                opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE idmultiple_mensaje = '{id_mensaje}' AND resultado = 'D'")
-                contopd = len(opcion_d)
+                opcion_d = comunic.find({"$and": [{"resultado": "D"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+                contopd = comunic.find({"$and": [{"resultado": "D"}, {"idmultiple_mensaje": id_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_d = ""
                 contopd = 0
@@ -157,22 +221,24 @@ def entregadoact(id_mensaje, **kws):
 @is_user
 @is_logged_in
 def eliminarres():
+    comunic = db.comunicados
     if request.method == 'POST':
         id_mensajes =  request.form['elim']
-        db_execute("UPDATE comunicados SET leido =\"%s\"  WHERE id_notificaciones =\"%s\";" % (2, id_mensajes))
+        comunic.find_one_and_update({"_id": ObjectId(id_mensajes)}, {"$set": {"leido": 2}})
         return redirect(url_for('comunicados.comunicadosres'))
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('comunicados.comunicadosres'))
 
 @comunicados.route('/entregadoactres/contestarenc', methods=['GET','POST'])
 @is_user
 @is_logged_in
 def contestarenc():
+    comunic = db.comunicados
     if request.method == 'POST':
         id_mensajes = request.form['residhidden']
         resultado =  request.form['contestarenc']
-        db_execute("UPDATE comunicados SET resultado =\"%s\"  WHERE id_notificaciones =\"%s\";" % (resultado, id_mensajes))
+        comunic.find_one_and_update({"_id": ObjectId(id_mensajes)},{"$set":{"resultado":resultado}})
         return redirect(url_for('comunicados.comunicadosres'))
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('comunicados.comunicadosres'))
 
 @comunicados.route('/entregadoactres/<id_mensajes>', methods=['GET'])
 @is_user
@@ -180,47 +246,66 @@ def contestarenc():
 @usuario_notificaciones
 def entregadoactres(id_mensajes, **kws):
     id_mensajes = id_mensajes
-    usuario = dict(session)['profile']['email']
-    resultado_var = db_execute(f"SELECT resultado FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0][
-        'resultado']  # para validar cual es la variable de leido
-    valida = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['email_usuario_receptor']
+    comunic = db.comunicados
+    resp = json.loads(session['profile'])
+    usuario = (resp['correo'])
+    resultado_var = comunic.find_one({"_id":ObjectId(id_mensajes)},{"_id":0,"resultado":1})['resultado']
+    if resultado_var != "":
+        resultado_var = resultado_var
+    else:
+        resultado_var = "None"
+    print(resultado_var)
+    valida = comunic.find_one({"_id":ObjectId(id_mensajes)},{"_id":0,"email_usuario_receptor":1})['email_usuario_receptor']
+    print(valida)
     try:
         if request.method == 'GET' and usuario == valida:
-            db_execute("UPDATE comunicados SET leido =\"%s\"  WHERE id_notificaciones =\"%s\";" % (1, id_mensajes))
-            titulo = db_execute(f"SELECT titulo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['titulo']
-            mensaje = db_execute(f"SELECT mensaje FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['mensaje']
-            tipo = db_execute(f"SELECT tipo FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['tipo']
-            resp_a = db_execute(f"SELECT opcion_a FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_a']
-            resp_b = db_execute(f"SELECT opcion_b FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_b']
-            resp_c = db_execute(f"SELECT opcion_c FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_c']
-            resp_d = db_execute(f"SELECT opcion_d FROM comunicados WHERE id_notificaciones = '{id_mensajes}'")[0]['opcion_d']
+            comunic.find_one_and_update({"_id":ObjectId(id_mensajes)},{"$set":{"leido":1}})
+            detallescom = comunic.find_one({"_id": ObjectId(id_mensajes)})
+            titulo = (detallescom['titulo'])
+            mensaje = (detallescom['mensaje'])
+            tipo = (detallescom['tipo'])
+            resp_a = (detallescom['opcion_a'])
+            resp_b = (detallescom['opcion_b'])
+            resp_c = (detallescom['opcion_c'])
+            resp_d = (detallescom['opcion_d'])
+            id_Multiple_mensaje = (detallescom['idmultiple_mensaje'])
             array_leido = []
-            leido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido != 0 and id_notificaciones = '{id_mensajes}'")
-            contleidopor = len(leido)
+            leido = comunic.find({"$and": [{"leido": {"$ne": 0}}, {"idmultiple_mensaje": id_Multiple_mensaje}]},
+                                 {"_id": 0, "email_usuario_receptor": 1})
+            contleidopor = comunic.find({"$and": [{"leido": {"$ne": 0}}, {"idmultiple_mensaje": id_Multiple_mensaje}]}).count()
             array_noleido = []
-            noleido = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE leido = 0 and id_notificaciones = '{id_mensajes}'")
-            contnoleidopor = len(noleido)
+            noleido = comunic.find({"$and": [{"leido": 0}, {"idmultiple_mensaje": id_Multiple_mensaje}]},
+                                   {"_id": 0, "email_usuario_receptor": 1})
+            contnoleidopor = comunic.find({"$and": [{"leido": 0}, {"idmultiple_mensaje": id_Multiple_mensaje}]}).count()
             try:
-                opcion_a = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'A'")
-                contopa = len(opcion_a)
+                opcion_a = comunic.find({"$and": [{"resultado": "A"}, {"_id": ObjectId(id_mensajes)}]},
+                                        {"_id": 0, "email_usuario_receptor": 1})
+                contopa = comunic.find({"$and": [{"resultado": "A"}, {"_id": ObjectId(id_mensajes)}]},
+                                       {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_a = ""
                 contopa = 0
             try:
-                opcion_b = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'B'")
-                contopb = len(opcion_b)
+                opcion_b = comunic.find({"$and": [{"resultado": "B"}, {"_id": ObjectId(id_mensajes)}]},
+                                        {"_id": 0, "email_usuario_receptor": 1})
+                contopb = comunic.find({"$and": [{"resultado": "B"}, {"_id": ObjectId(id_mensajes)}]},
+                                       {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_b = ""
                 contopb = 0
             try:
-                opcion_c = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'C'")
-                contopc = len(opcion_c)
+                opcion_c = comunic.find({"$and": [{"resultado": "C"}, {"_id": ObjectId(id_mensajes)}]},
+                                        {"_id": 0, "email_usuario_receptor": 1})
+                contopc = comunic.find({"$and": [{"resultado": "C"}, {"_id": ObjectId(id_mensajes)}]},
+                                       {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_c = ""
                 contopc = 0
             try:
-                opcion_d = db_execute(f"SELECT email_usuario_receptor FROM comunicados WHERE id_notificaciones = '{id_mensajes}' AND resultado = 'D'")
-                contopd = len(opcion_d)
+                opcion_d = comunic.find({"$and": [{"resultado": "D"}, {"_id": ObjectId(id_mensajes)}]},
+                                        {"_id": 0, "email_usuario_receptor": 1})
+                contopd = comunic.find({"$and": [{"resultado": "D"}, {"_id": ObjectId(id_mensajes)}]},
+                                       {"_id": 0, "email_usuario_receptor": 1}).count()
             except:
                 opcion_d = ""
                 contopd = 0
@@ -270,10 +355,21 @@ def entregadoactres(id_mensajes, **kws):
 def encuesta():
     tz = pytz.timezone('America/Mexico_City')
     ct = datetime.now(tz=tz)
-    creador = dict(session)['profile']['email']
+    comunic = db.comunicados
+    usuario = db.usuarios
+    resp = json.loads(session['profile'])
+    creador = (resp['correo'])
+    coto = (resp['coto'])
+    array_allemails = []
+    array_comunica = []
+    x = "grupos." + coto
+    allemails = usuario.find({x: {"$exists": True}}, {"_id": 0, "correo": 1})
+    for row in allemails:
+        email = (row['correo'])
+        array_allemails.append({'email': email})
     if request.method == 'POST':
         timestamp = ct.strftime("%Y-%m-%d %H:%M")
-        idmultmensaje = hex(int(time.time()))
+        idmultmensaje = secrets.token_urlsafe(10)
         titulo = request.form['enctitulo']
         mensaje = request.form['encmensaje']
         email_usuario_receptor = request.form['encdirigido']
@@ -281,38 +377,78 @@ def encuesta():
         opcion_b = request.form['encb']
         opcion_c = request.form['encc']
         opcion_d = request.form['encd']
-        array_allemails = []
-        allemails = db_execute("SELECT * FROM usuarios ")
-        for row in allemails:
-            email = (row['email'])
-            array_allemails.append({'email': email})
+        tipo = "Encuesta"
         if email_usuario_receptor == "Todos":
+            array_allemails = []
+            allemails = usuario.find({x:{"$exists": True}}, {"_id": 0, "correo": 1})
+            for row in allemails:
+                email = (row['correo'])
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
             for entry in array_allemails:
-                db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo, opcion_a, opcion_b, opcion_c, opcion_d) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-                timestamp, titulo, mensaje, idmultmensaje, entry['email'], creador, 0, "Encuesta", opcion_a, opcion_b, opcion_c, opcion_d))
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0, "coto":coto,
+                     "opcion_a": opcion_a, "opcion_b": opcion_b, "opcion_c": opcion_c, "opcion_d": opcion_d, "resultado": "", "tipo": tipo})
+            return redirect(url_for('comunicados.comunicado'))
+        elif email_usuario_receptor == "Administradores":
+            array_allemails = []
+            allemails = usuario.find({x: "admin"}, {"_id": 0, "correo": 1})
+            for row in allemails:
+                email = (row['correo'])
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
+            for entry in array_allemails:
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0, "coto":coto,
+                     "opcion_a": opcion_a, "opcion_b": opcion_b, "opcion_c": opcion_c, "opcion_d": opcion_d,
+                     "resultado": "", "tipo": tipo})
+            return redirect(url_for('comunicados.comunicado'))
+        elif email_usuario_receptor == "Morosos":
+            array_allemails = []
+            allemails = usuario.find({x: "morosos"}, {"_id": 0,
+                                                             "correo": 1})  # revisar como insertamos el dato de cliente o ventas con empresa
+            for row in allemails:
+                email = (row['correo'])
+                # Aqui puedo agregar opcion de enviar correo automaticamente con comunicado
+                array_allemails.append({'email': email})
+            for entry in array_allemails:
+                comunic.insert_one(
+                    {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                     "email_usuario_receptor": entry['email'], "id_usuario_emisor": creador, "leido": 0, "coto":coto,
+                     "opcion_a": opcion_a, "opcion_b": opcion_b, "opcion_c": opcion_c, "opcion_d": opcion_d,
+                     "resultado": "", "tipo": tipo})
             return redirect(url_for('comunicados.comunicado'))
         else:
-            db_execute("INSERT INTO comunicados (fecha, titulo, mensaje, idmultiple_mensaje, email_usuario_receptor, id_usuario_emisor, leido, tipo, opcion_a, opcion_b, opcion_c, opcion_d) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")" % (
-            timestamp, titulo, mensaje, idmultmensaje, email_usuario_receptor, creador, 0, "Encuesta", opcion_a, opcion_b, opcion_c, opcion_d))
+            comunic.insert_one(
+                {"fecha": timestamp, "titulo": titulo, "mensaje": mensaje, "idmultiple_mensaje": idmultmensaje,
+                 "email_usuario_receptor": email_usuario_receptor, "id_usuario_emisor": creador, "leido": 0,
+                 "opcion_a": opcion_a, "opcion_b": opcion_b, "opcion_c": opcion_c, "opcion_d": opcion_d, "coto":coto,
+                 "resultado": "", "tipo": tipo})
+
             return redirect(url_for('comunicados.comunicado'))
-
-
-        return redirect(url_for('comunicados.comunicado'))
-    return redirect(url_for('comunicados.comunicado'))
-
+        return render_template('comunicados/comunicados.html', comuni=array_comunica, foto=kws['foto'],
+                               nombre=kws['nombre'], cont=kws['cont'], com=kws['com'], allemails=array_allemails,
+                               id_mensaje=id_mensaje)
+    return render_template('comunicados/comunicados.html', cont=kws['cont'], com=kws['com'], foto=kws['foto'],
+                           nombre=kws['nombre'], comuni=array_comunica, allemails=array_allemails)
 
 @comunicados.route('/comunicadosres', methods=['GET', 'POST'])
 @is_user
 @is_logged_in
 @usuario_notificaciones
 def comunicadosres(**kws):
-    email = dict(session)['profile']['email']
-    conta = db_execute(f"SELECT * FROM comunicados WHERE leido = 0 AND email_usuario_receptor = '{email}'")
-    conti = len(conta)
-    comuni = db_execute(f"SELECT * FROM comunicados WHERE email_usuario_receptor = '{email}' AND (leido != 2) ")
+    comunic = db.comunicados
+    resp = json.loads(session['profile'])
+    email = (resp['correo'])
+    coto = (resp['coto'])
+    comuni = comunic.find({"$and": [{"leido": {"$ne": 2}}, {"email_usuario_receptor": email}, {"coto":coto}]},
+                                 {"_id": 1, "email_usuario_receptor": 1, "fecha":1,
+                                  "titulo":1, "tipo":1, "mensaje":1, "leido":1})
     array_comuni = []
     for row in comuni:
-        id_notificaciones = (row['id_notificaciones'])
+        id_notificaciones = (row['_id'])
         fecha = (row['fecha'])
         titulo = (row['titulo'])
         tipo = (row['tipo'])

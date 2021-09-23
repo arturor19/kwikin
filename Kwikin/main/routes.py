@@ -49,7 +49,7 @@ def dashboard(**kws):
 
 
 @main.route('/configuracion', methods=['GET', 'POST', 'UPDATE'])
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def configuracion(**kws):
