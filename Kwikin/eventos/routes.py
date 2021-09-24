@@ -158,7 +158,7 @@ def gestioneventos(**kws):
     if eventos:
         return render_template('eventos/gestioneventos.html', eventos=array_eventos, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:
-        msg = 'No hay eventos asociados al coto'
+        flash(f'No hay eventos asociados al coto', 'danger')
         return render_template('eventos/gestioneventos.html', eventos=array_eventos, msg=msg, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
 
@@ -193,7 +193,7 @@ def acteventos():
         mensajen = terraza + "No fue aprobada para el dia " + dia
         validador = eventos.find_one({"coto": coto, "terraza": terraza, "dia": dia, "estado": "Aprobado"}, {"_id": 1})
         print(eventsvalue)
-        if validador:
+        if validador and eventsvalue != "No Aprobado":
             flash(f'La terraza {terraza} ya esta apartada el dia {dia}, revisa fecha', 'danger')
             return redirect(url_for('eventos.gestioneventos'))
         else:
@@ -223,6 +223,11 @@ def acteventos():
                                         "id_usuario_emisor": correo, "leido": 0, "opcion_a": "", "opcion_c": "",
                                         "opcion_b": "", "opcion_d": "", "resultado": "", "tipo": "Comunicado",
                                         "coto": coto})
+                ex = "extra." + terraza + "_" + dia
+                try:
+                    casas.find_one_and_update({"_id": ObjectId(id_casa)}, {"$unset": {ex:1}})
+                except:
+                    pass
                 return redirect(url_for('eventos.gestioneventos'))
             else:
                 return redirect(url_for('eventos.gestioneventos'))

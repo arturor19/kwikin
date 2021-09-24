@@ -9,6 +9,7 @@ from eventos.routes import eventos
 from comunicados.routes import comunicados
 from qr.routes import qr
 from domicilios.routes import domicilios
+from cobros.routes import cobros
 
 
 application = app = Flask(__name__, template_folder='templates')
@@ -29,6 +30,7 @@ app.register_blueprint(comunicados)
 app.register_blueprint(eventos)
 app.register_blueprint(qr)
 app.register_blueprint(domicilios)
+app.register_blueprint(cobros)
 
 
 
