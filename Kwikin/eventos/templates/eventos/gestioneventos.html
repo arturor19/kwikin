@@ -87,7 +87,7 @@ $.extend( true, $.fn.dataTable.defaults, {
       <tbody>
             {% for evento in eventos %}
              <tr>
-                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.nombre}}</a></td>
+                 <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a href="#" data-toggle="modal" data-target='#edit{{ evento.id_eventos }}'>{{evento.direccion}}</a></td>
                  <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{evento.terraza}}</a></td>
                  <td {% if evento.estado == "Aprobado" %} style="color: #e73df; background: #C0EBBE;" {% elif evento.estado == "No Aprobado" %} style="color: #e73df; background: #F0D1C6;" {% endif %}><a>{{evento.dia}}</a></td>
 
@@ -102,22 +102,32 @@ $.extend( true, $.fn.dataTable.defaults, {
 					</div>
 					<div class="modal-body">
 						<div class="form-group">
-							<label>Domicilio</label>
-							<input disabled type="text" class="form-control" value="{{ evento.domicilio }}" name="eventosdomicilio">
+							<label>Estado domicilio:</label>
+							<input disabled type="text" {% if evento.status_casa == "Inactivo" %} style="color: #e73df; background: #F0D1C6;" {% endif %} class="form-control" value="{{ evento.status_casa }}" name="eventosdomicilio">
 						</div>
 						<div class="form-group">
 							<label>Email</label>
-							<input disabled type="email" value="{{ evento.email }}" name="emaileventos" class="form-control">
+							<input disabled type="email" value="{{ evento.email_1 }}" name="emaileventos" class="form-control">
 						</div>
 						<div class="form-group">
 							<label>Teléfono</label>
-							<input disabled type="Text" class="form-control" value="{{ evento.telefono }}" name="telefonoeventos">
+							<input disabled type="Text" class="form-control" value="{{ evento.telefono_1 }}" name="telefonoeventos">
 						</div>
                         <div class="form-group">
+							<label>Nombre</label>
+							<input disabled type="Text" class="form-control" value="{{ evento.nombre_1 }}" name="nombreeventos">
+						</div>
+                        <div class="form-group">
+							<label>Tarifa</label>
+							<input  type="Text" class="form-control"  name="tarifaeventos">
+						</div>
+
+                        <div class="form-group" data-toggle="tooltip" data-placement="top" title="Pre-aprobado enviará tarifa a cobrar">
                             <label>Estado</label>
                             <Select class="custom-select" id={{evento.id_eventos}} name="mycheckboxE">
                                 <option Selected value="{{evento.estado}}">{{evento.estado}}</option>
                                 <option value="Pendiente">Pendiente</option>
+                                <option value="Pre-aprobado">Pre-aprobado</option>
                                 <option value="Aprobado">Aprobado</option>
                                 <option value="No Aprobado">No Aprobado</option>
                                 <label class="custom-control-label" for={{evento.id_eventos}}></label>
@@ -130,6 +140,15 @@ $.extend( true, $.fn.dataTable.defaults, {
                         </div>
                         <div class="form-group">
                             <input type="hidden" name="terrazahidden" value={{evento.terraza}}>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="casa_req" value={{evento.casa_req}}>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="diaevento" value={{evento.dia}}>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="emailhidden" value={{evento.email_1}}>
                         </div>
 					</div>
 					<div class="modal-footer">

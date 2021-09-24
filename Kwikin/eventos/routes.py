@@ -1,31 +1,12 @@
 from flask import render_template, flash, redirect, url_for, session, request, Blueprint, jsonify
 from auth_decorator import is_logged_in, is_user, usuario_notificaciones
 from config import db
-import json
+from datetime import timedelta, datetime
+import json, pytz, secrets
+from bson import ObjectId
 
 eventos = Blueprint('eventos', __name__, template_folder='templates', static_folder='Kwikin/static')
 
-
-
-@eventos.route('/calendar-events')
-
-@is_logged_in
-@usuario_notificaciones
-def calendar_events(**kws):
-    res = json.loads(session['profile'])
-    coto = (res['coto'])
-    cotos = db.cotos
-    arr_terr = cotos.find_one({"coto_nombre": coto}, {"_id":0,"terrazas":1})['terrazas']
-    try:
-        rows = db_execute("SELECT id, titulo, casa, UNIX_TIMESTAMP(start_date)*1000 as start, UNIX_TIMESTAMP("
-                          "end_date)*1000 as end FROM event FROM eventos")
-        resp = jsonify({'success': 1, 'result': rows})
-        print(rows)
-        resp.status_code = 200
-        return resp
-    except Exception as e:
-        print(e)
-    return render_template('eventos/calendar_events.html', rows=rows, terrazas=arr_terr, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
 
 @eventos.route('/calendario')
@@ -36,12 +17,16 @@ def calendario(**kws):
     res = json.loads(session['profile'])
     coto = (res['coto'])
     cotos = db.cotos
+    arr_terraza = []
     arr_terr = cotos.find_one({"coto_nombre": coto}, {"_id":0,"terrazas":1})['terrazas']
-    print(arr_terr)
-    return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], terrazas=arr_terr, foto=kws['foto'], nombre=kws['nombre'])
+    for k, v in arr_terr.items():
+        terraza = k
+        color = v
+        arr_terraza.append({"terraza":terraza,"color":color})
+    return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], terrazas=arr_terraza, foto=kws['foto'], nombre=kws['nombre'])
 
 @eventos.route('/calendario_ini/remote')
-@is_user
+
 @is_logged_in
 def calendario_ini():
     test_cal = ''
@@ -58,19 +43,27 @@ def calendario_ini():
     return test_cal
 
 @eventos.route('/calendario_data')
-@is_user
+
 @is_logged_in
 def test_calendario():
+    cotos = db.cotos
+    eventos = db.eventos
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    col = (cotos.find({"coto_nombre": coto},{"_id":0,"terrazas":1}))
     colores = {}
-    for v in (db_execute("select id_terrazas, colores_terraza from terrazas;")):
-        colores.update({v["id_terrazas"]: v["colores_terraza"]})
-    arr_evetos_aprobados = db_execute("select t2.id_terrazas, t2.terraza, e.dia from eventos e, terrazas t2 where "
-                                      "e.estado = 'Aprobado' and t2.terraza = e.terraza")
+    for x in col:
+        for k,v in x.items():
+            colores.update({k: v})
+    colores = colores['terrazas']
+    print(colores)
+    arr_evetos_aprobados = eventos.find({"coto":coto,"estado":"Aprobado"},{"_id":0,"terraza":1,"dia":1})
     arr_cal = []
     for event in arr_evetos_aprobados:
         start = event['dia']
         text = event['terraza']
-        color = colores[event['id_terrazas']]
+        color = colores[text]
+        print(color, text, start)
         arr_cal.append({"start": start, "text": text, "color": color})
     events_json = json.dumps(arr_cal, indent=4)
     info_calendario = 'try {mbscjsonp1(' + events_json + ');' + '} catch (ex) {}'
@@ -80,23 +73,21 @@ def test_calendario():
 
 
 @eventos.route('/crearevento', methods=['GET', 'POST'])
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def peticionevento(**kws):
-    arr_terr = db_execute('select * from terrazas')
     tz = pytz.timezone('America/Mexico_City')
-    ct = datetime.now(tz=tz)
-    tzone = ct
-    email = session['profile']['email']
-    name = session['profile']['name']
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
-    now = ct
-    now = str(now)
-
+    casas = db.casas
+    eventos = db.eventos
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    correo = (res['correo'])
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
+    casareq = casas.find_one({"coto": coto, "residentes": correo},{"_id":1})["_id"]
+    print(casareq)
     if request.method == 'POST':
-        try:
+
             fechaevento = request.form['fechaevento']
             terraza = request.form['terraza']
 
@@ -106,72 +97,65 @@ def peticionevento(**kws):
                 flash('Por favor selecciona una terraza del listado', 'danger')
             else:
                 try:
-                    existe_evento = db_execute(f"select * from eventos where terraza='{terraza}' and nombre_eventos='{name}' and correo='{email}' and dia='{fechaevento}'")
-                    valor_evento = (len(existe_evento))
-                    if valor_evento == 1:
+                    existe_evento = eventos.find_one({"coto":coto, "terraza":terraza, "dia":fechaevento})
+                    if existe_evento:
                         pass
                     else:
-                        db_execute(
-                        "INSERT INTO eventos(terraza, nombre_eventos, correo, dia) VALUES(\"%s\", \"%s\", \"%s\", \"%s\")" % (
-                            terraza, name, email, fechaevento))
-
+                        eventos.insert_one({"coto":coto, "terraza":terraza, "dia":fechaevento, "casa_req":ObjectId(casareq), "estado":"Pendiente"})
                     flash(f'Evento guardado correctamente, recibiras un correo cuando el administrador lo apruebe',
                           'success')
-                    # insert_asoc_qr_usuario = f"""INSERT INTO asoc_qr_usuario(id_usuario, id_qr, id_coto) VALUES
-                    #  (
-                    #  (SELECT id_usuario FROM usuarios where email = '{email}'),
-                    # (SELECT id_qr FROM qr where codigo_qr = '{codigo_qr}'),
-                    #  (SELECT id_coto FROM asoc_usuario_coto where id_usuario = (SELECT id_usuario FROM usuarios where email = '{email}'))
-                    #  );"""
-                    #                cur.execute(insert_asoc_qr_usuario)
-                    #                mysql.commit()
-                    cur.close()
+                    return redirect(url_for('eventos.calendario'))
                 except:
                     flash(f'Evento no creado correctamente', 'danger')
-                    return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now,
-                                           terrazas=arr_terr)
-                return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
-        except:
-            flash(f'Revisa todos los campos', 'danger')
-            return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
+                    return redirect(url_for('eventos.calendario'))
+            return redirect(url_for('eventos.calendario'))
 
-    return render_template('eventos/calendar_events.html',  cont=kws['cont'], com=kws['com'], now=now, terrazas=arr_terr)
+    return redirect(url_for('eventos.calendario'))
 
 
 @eventos.route('/gestioneventos', methods=['GET', 'POST', 'UPDATE'])
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def gestioneventos(**kws):
     tz = pytz.timezone('America/Mexico_City')
-    ct = datetime.now(tz=tz)
-    tzone = ct
-    email = session['profile']['email']
-    now = ct
-    now = datetime.strftime((now), "%Y-%m-%d")
-    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
-                         "AND eventos.dia >= '%s';" % now)
+    casas = db.casas
+    eventos = db.eventos
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    correo = (res['correo'])
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
+    eventos = eventos.find({"coto":coto,"dia":{"$gte":now}})
+    print(eventos)
     array_eventos = []
     for row in eventos:
         estado = (row['estado'])
-        email = (row['correo'])
-        nombre = (row['nombre_eventos'])
         terraza = (row['terraza'])
         dia = (row['dia'])
-        domicilio = (row['domicilio'])
-        telefono = (row['telefono'])
-        id_eventos = (row['id_eventos'])
-
+        casa_req = (row['casa_req'])
+        direccion = casas.find_one({"_id":ObjectId(row['casa_req'])},{"_id":0,"direccion":1})['direccion']
+        status_casa = casas.find_one({"_id":ObjectId(row['casa_req'])},{"_id":0,"status":1})['status']
+        try:
+            email_1 = casas.find_one({"_id": ObjectId(row['casa_req'])},{"_id":0,"residentes":1})['residentes'][0]
+            telefono_1 = db.usuarios.find_one({"correo":email_1},{"_id":0,"telefono":1})["telefono"]
+            nombre_1 = db.usuarios.find_one({"correo":email_1},{"_id":0,"nombre":1})["nombre"] + " " + db.usuarios.find_one({"correo":email_1},{"_id":0,"apellido":1})["apellido"]
+        except:
+            email_1 = "No registrado"
+            telefono_1 = "No registrado"
+            nombre_1 = "No registrado"
+        id_eventos = (row['_id'])
         array_eventos.append({'estado': (estado),
                               'id_eventos': id_eventos,
-                              'email': email,
-                              'nombre': nombre,
+                              'telefono_1': telefono_1,
+                              'status_casa':status_casa,
+                              'email_1':email_1,
+                              'casa_req':casa_req,
+                              'nombre_1':nombre_1,
+                              'direccion': direccion,
                               'terraza': terraza,
-                              'domicilio': domicilio,
-                              'telefono': telefono,
                               'dia': dia})
 
-    if len(eventos) > 0:
+    if eventos:
         return render_template('eventos/gestioneventos.html', eventos=array_eventos, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:
         msg = 'No hay eventos asociados al coto'
@@ -179,45 +163,70 @@ def gestioneventos(**kws):
 
 
 @eventos.route('/acteventos', methods=['POST'])
-@is_user
+
 @is_logged_in
 def acteventos():
     tz = pytz.timezone('America/Mexico_City')
-    ct = datetime.now(tz=tz)
-    tzone = ct
-    mysql = sqlite3.connect('kw.db')
-    cur = mysql.cursor()
-    now = ct
-    now = datetime.strftime((now), "%Y-%m-%d")
-    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
-                         "AND eventos.dia >= '%s';" % now)
-    array_eventos = []
+    casas = db.casas
+    eventos = db.eventos
+    comunicados = db.comunicados
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    correo = (res['correo'])
+    nowt = datetime.now(tz=tz).strftime("%Y-%m-%dT%H:%M")
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
+    sec = secrets.token_urlsafe(10)
     if request.method == 'POST':
         eventsvalue = request.form['mycheckboxE']
         eventsid = request.form['idhidden']
         terraza = request.form['terrazahidden']
-        print(eventsvalue, eventsid, terraza)
-        dia = db_execute("SELECT dia FROM eventos WHERE id_eventos = '%s';" % eventsid)[0]['dia']
+        tarifa = request.form['tarifaeventos']
+        if tarifa:
+            pass
+        else:
+            tarifa = 0
+        id_casa = request.form['casa_req']
+        email_res = request.form['emailhidden']
+        dia = request.form['diaevento']
+        titulo = terraza + " " + eventsvalue
+        mensaje = terraza + " fue " + eventsvalue + " para el dia " + dia + " con una tarifa de $" + str(tarifa)
+        mensajen = terraza + "No fue aprobada para el dia " + dia
+        validador = eventos.find_one({"coto": coto, "terraza": terraza, "dia": dia, "estado": "Aprobado"}, {"_id": 1})
         print(eventsvalue)
-        print(eventsid)
-        print(terraza)
-        print(dia)
-        print(f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
-        validador = db_execute(
-            f"SELECT correo FROM eventos WHERE terraza = {terraza} AND dia = '{dia}' AND estado = 'Aprobado'")
-        print(validador)
-        if len(validador) > 0 and eventsvalue == 'Aprobado':
+        if validador:
             flash(f'La terraza {terraza} ya esta apartada el dia {dia}, revisa fecha', 'danger')
             return redirect(url_for('eventos.gestioneventos'))
         else:
-            db_execute("UPDATE eventos SET estado =\"%s\"  WHERE id_eventos =\"%s\";" % (eventsvalue, eventsid))
-            db_execute(
-                "SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email AND eventos.dia >= '%s';" % now)
-            flash(f'La terraza {terraza} fue  cambiada a {eventsvalue} el dia {dia} con éxito', 'success')
-            return redirect(url_for('eventos.gestioneventos'))
-
+            if eventsvalue == "Aprobado":
+                eventos.find_one_and_update({"_id":ObjectId(eventsid)},{"$set":{"estado":eventsvalue,"tarifa":tarifa}})
+                comunicados.insert_one({"fecha":nowt,"titulo":titulo,"mensaje":mensaje,
+                                        "idmultiple_mensaje":sec,"email_usuario_receptor":email_res,
+                                        "id_usuario_emisor":correo,"leido":0,"opcion_a":"", "opcion_c":"",
+                                        "opcion_b":"","opcion_d":"","resultado":"","tipo":"Comunicado","coto":coto})
+                #enviar correo aqui
+                return redirect(url_for('eventos.gestioneventos'))
+            elif eventsvalue == "Pre-aprobado":
+                eventos.find_one_and_update({"_id": ObjectId(eventsid)}, {"$set": {"estado": eventsvalue, "tarifa": tarifa}})
+                comunicados.insert_one({"fecha": nowt, "titulo": titulo, "mensaje": mensaje,
+                                        "idmultiple_mensaje": sec, "email_usuario_receptor": email_res,
+                                        "id_usuario_emisor": correo, "leido": 0, "opcion_a": "", "opcion_c": "",
+                                        "opcion_b": "", "opcion_d": "", "resultado": "", "tipo": "Comunicado",
+                                        "coto": coto})
+                #enviar correo aqui
+                ex = "extra."+ terraza + "_" + dia
+                casas.find_one_and_update({"_id":ObjectId(id_casa)},{"$set":{ex:tarifa}})
+                return redirect(url_for('eventos.gestioneventos'))
+            elif eventsvalue == "No Aprobado":
+                eventos.find_one_and_update({"_id": ObjectId(eventsid)}, {"$set": {"estado": eventsvalue, "tarifa": tarifa}})
+                comunicados.insert_one({"fecha": nowt, "titulo": titulo, "mensaje": mensajen,
+                                        "idmultiple_mensaje": sec, "email_usuario_receptor": email_res,
+                                        "id_usuario_emisor": correo, "leido": 0, "opcion_a": "", "opcion_c": "",
+                                        "opcion_b": "", "opcion_d": "", "resultado": "", "tipo": "Comunicado",
+                                        "coto": coto})
+                return redirect(url_for('eventos.gestioneventos'))
+            else:
+                return redirect(url_for('eventos.gestioneventos'))
         return redirect(url_for('eventos.gestioneventos'))
-
     return redirect(url_for('eventos.gestioneventos'))
 
 
@@ -227,36 +236,48 @@ def acteventos():
 @usuario_notificaciones
 def gestioneventoshistorico(**kws):
     tz = pytz.timezone('America/Mexico_City')
-    ct = datetime.now(tz=tz)
-    tzone = ct
-    now = ct
-    now = str(now)
-    eventos = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
-                         "AND eventos.dia < '%s';" % now)
+    casas = db.casas
+    eventos = db.eventos
+    res = json.loads(session['profile'])
+    coto = (res['coto'])
+    correo = (res['correo'])
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
+    eventos = eventos.find({"coto": coto, "dia": {"$lt": now}})
+    print(eventos)
     array_eventos = []
     for row in eventos:
         estado = (row['estado'])
-        email = (row['correo'])
-        nombre = (row['nombre_eventos'])
         terraza = (row['terraza'])
         dia = (row['dia'])
-        domicilio = (row['domicilio'])
-        telefono = (row['telefono'])
-        id_eventos = (row['id_eventos'])
-
+        casa_req = (row['casa_req'])
+        direccion = casas.find_one({"_id": ObjectId(row['casa_req'])}, {"_id": 0, "direccion": 1})['direccion']
+        status_casa = casas.find_one({"_id": ObjectId(row['casa_req'])}, {"_id": 0, "status": 1})['status']
+        try:
+            email_1 = casas.find_one({"_id": ObjectId(row['casa_req'])}, {"_id": 0, "residentes": 1})['residentes'][0]
+            telefono_1 = db.usuarios.find_one({"correo": email_1}, {"_id": 0, "telefono": 1})["telefono"]
+            nombre_1 = db.usuarios.find_one({"correo": email_1}, {"_id": 0, "nombre": 1})["nombre"] + " " + \
+                       db.usuarios.find_one({"correo": email_1}, {"_id": 0, "apellido": 1})["apellido"]
+        except:
+            email_1 = "No registrado"
+            telefono_1 = "No registrado"
+            nombre_1 = "No registrado"
+        id_eventos = (row['_id'])
         array_eventos.append({'estado': (estado),
                               'id_eventos': id_eventos,
-                              'email': email,
-                              'nombre': nombre,
+                              'telefono_1': telefono_1,
+                              'status_casa': status_casa,
+                              'email_1': email_1,
+                              'casa_req': casa_req,
+                              'nombre_1': nombre_1,
+                              'direccion': direccion,
                               'terraza': terraza,
-                              'domicilio': domicilio,
-                              'telefono': telefono,
                               'dia': dia})
-    if len(eventos) > 0:
-        return render_template('gestioneventoshistorico.html',  cont=kws['cont'], com=kws['com'], eventos=array_eventos)
+
+    if eventos:
+        return render_template('eventos/gestioneventoshistorico.html', eventos=array_eventos, cont=kws['cont'], foto=kws['foto'],
+                               nombre=kws['nombre'], com=kws['com'])
     else:
         msg = 'No hay eventos asociados al coto'
-        return render_template('eventos/gestioneventoshistorico.html',  cont=kws['cont'], com=kws['com'],
-                               eventos=array_eventos, msg=msg)
-    cur.close()
+        return render_template('eventos/gestioneventoshistorico.html', eventos=array_eventos, msg=msg, cont=kws['cont'],
+                               foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
