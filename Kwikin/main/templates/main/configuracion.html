@@ -233,7 +233,11 @@ $.extend( true, $.fn.dataTable.defaults, {
                          </div>
                          <div class="form-group">
                             <label>Día de corte</label>
-                            <input type="text" disabled value="Primero del més" name="dia_de_corte" class="form-control" tooltip="Kwikin registra el día primero para corte.">
+                            <input type="text" disabled value="Primero del mes" name="dia_de_corte" class="form-control" tooltip="Kwikin registra el día primero para corte.">
+                         </div>
+                        <div class="form-group">
+                            <label>Validador de cobros</label>
+                            <input type="email" value="{{correo_cobros}}" name="correo_cobros" class="form-control" tooltip="Registra el correo que aprobará los pagos.">
                          </div>
                          <div class="form-group">
                             <label>Días de gracia</label>

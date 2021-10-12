@@ -195,10 +195,11 @@ def pagoshistoricos(**kws):
 @cobros.route('/cargarpago', methods=['GET', 'POST'])
 def cargarpago():
     casas = db.casas
+    cotos = db.cotos
     resp = json.loads(session['profile'])
     coto = (resp['coto'])
     correo = (resp['correo'])
-    correo_admin = "guibenumo@gmail.com"
+    correo_admin = cotos.find_one({"coto_nombre":coto},{"correo_cobros":1,"_id":0})['correo_cobros']
     casa = casas.find_one({"$and":[{"coto": coto}, {"residentes": correo}]}, {"_id":0, "direccion":1})['direccion']
     if request.method == 'POST':
         concepto = request.form['nombreconcepto']

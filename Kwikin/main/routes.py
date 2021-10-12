@@ -69,6 +69,7 @@ def configuracion(**kws):
     activa_cobros = (db.cotos.find_one({"coto_nombre":coto},{"_id":0,"activa_cobros":1})['activa_cobros'])
     activa_terraza = (db.cotos.find_one({"coto_nombre":coto},{"_id":0,"activa_terraza":1})['activa_terraza'])
     activa_estacionamientos = (db.cotos.find_one({"coto_nombre":coto},{"_id":0,"activa_estacionamientos":1})['activa_estacionamientos'])
+    correo_cobros = (db.cotos.find_one({"coto_nombre":coto},{"_id":0,"correo_cobros":1})['correo_cobros'])
     print(terrazas)
     array_conf = terrazas
     if configuracion and grupo == 'admin':
@@ -78,7 +79,7 @@ def configuracion(**kws):
                                dias_de_gracia=dias_de_gracia, activa_cobros=activa_cobros,
                                configuracion=array_conf, activa_terraza=activa_terraza,
                                activa_estacionamientos=activa_estacionamientos,
-                               dia_de_corte=dia_de_corte, mensualidad=mensualidad,
+                               dia_de_corte=dia_de_corte, mensualidad=mensualidad, correo_cobros=correo_cobros,
                                cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:
         flash('No hay usuarios configuraciones', 'danger')
@@ -134,6 +135,7 @@ def actconfest():
     if request.method == "POST":
         try:
             num_estacionamiento = request.form['num_estacionamiento']
+            num_estacionamiento = int(num_estacionamiento)
             db.cotos.update_one({"coto_nombre": coto}, {"$set":{"num_estacionamiento": num_estacionamiento}})
             flash(f'Cambio efectuado correctamente', 'success')
             return redirect(url_for('main.configuracion'))
@@ -151,6 +153,7 @@ def actconfduraccionqr():
     if request.method == "POST":
         try:
             max_tpo_qr_unico = request.form['max_tpo_qr_unico']
+            max_tpo_qr_unico = int(max_tpo_qr_unico)
             db.cotos.update_one({"coto_nombre": coto}, {"$set": {"max_tpo_qr_unico": max_tpo_qr_unico}})
             flash(f'Cambio efectuado correctamente', 'success')
             return redirect(url_for('main.configuracion'))
@@ -169,7 +172,9 @@ def actconfmens():
         try:
             mensualidad = request.form['mensualidad']
             dias_de_gracia = request.form['dias_de_gracia']
-            db.cotos.update_one({"coto_nombre": coto}, {"$set": {"mensualidad": mensualidad,"dias_de_gracia":dias_de_gracia}})
+            correo_cobros = request.form['correo_cobros']
+            dias_de_gracia = int(dias_de_gracia)
+            db.cotos.update_one({"coto_nombre": coto}, {"$set": {"mensualidad": mensualidad,"dias_de_gracia":dias_de_gracia, "correo_cobros":correo_cobros}})
             flash(f'Cambio efectuado correctamente', 'success')
             return redirect(url_for('main.configuracion'))
         except Exception as e:
