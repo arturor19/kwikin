@@ -98,8 +98,10 @@ def crearcargo():
             for row in alldir:
                 direccion = (row['direccion'])
                 array_alldir.append({"direccion": direccion})
+            print(23, array_alldir)
             for entry in array_alldir:
-                check = casas.find_one({'direccion': entry['direccion'],"coto":coto, extra:concepto},{"_id":1})
+                direccion = entry['direccion']
+                check = casas.find_one({'direccion': direccion ,"coto":coto, extra:concepto},{"_id":1})
                 email_res = casas.find_one({'direccion': entry['direccion'],"coto":coto}, {"_id": 0, "residentes": 1})['residentes'][
                     0]
                 if check:
@@ -107,14 +109,14 @@ def crearcargo():
                     return redirect(url_for('cobros.gestioncobros'))
                 else:
                     casas.find_one_and_update(
-                            {"direccion": entry['direccion'], "coto": coto}, {"$addToSet":{"cobro":{"concepto":concepto, "cargo":cargo, "estado":"Por Pagar", "Fecha_limite":fecha, "comprobante":"", "id":id_pago}}})
+                            {"direccion": direccion, "coto": coto}, {"$addToSet":{"cobro":{"concepto":concepto, "cargo":cargo, "estado":"Por Pagar", "Fecha_limite":fecha, "comprobante":"", "id":id_pago}}})
                     comunicados.insert_one({"fecha": nowt, "titulo": concepto, "mensaje": mensaje,
                                             "idmultiple_mensaje": sec, "email_usuario_receptor": email_res,
                                             "id_usuario_emisor": correo, "leido": 0, "opcion_a": "", "opcion_c": "",
                                             "opcion_b": "", "opcion_d": "", "resultado": "", "tipo": "Comunicado",
                                             "coto": coto})
                     flash(f'Nuevo cargo agregado a {direccion}, un mensaje se ha enviado ', 'success')
-                    return redirect(url_for('cobros.gestioncobros'))
+            return redirect(url_for('cobros.gestioncobros'))
         else:
             check = casas.find_one({'direccion': direccion, "coto": coto, extra:concepto},
                                    {"_id": 1})

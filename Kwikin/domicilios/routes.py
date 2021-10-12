@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for, session, request, Blueprint
 from auth_decorator import is_logged_in, is_user, usuario_notificaciones
-import json
+from datetime import timedelta, datetime
+import json, pytz
 from config import db
 import bcrypt, secrets
 from bson import ObjectId
@@ -90,29 +91,46 @@ def upload():
             return redirect(url_for('domicilios.gestiondomicilios'))
 
 @domicilios.route('/gestiondomicilios', methods=['GET', 'POST', 'UPDATE'])
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def gestiondomicilios(**kws):
+    tz = pytz.timezone('America/Mexico_City')
     casas = db.casas
     resp = json.loads(session['profile'])
     coto = (resp['coto'])
     domicilios = casas.find({"$and":[{"coto":coto},{"$or":[{"status":"Activo"},{"status":"Inactivo"}]}]})
     array = []
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     for row in domicilios:
+        cargo_sum = 0
+        array_ind = []
         id_dom = (row['_id'])
         status = (row['status'])
         direccion = (row['direccion'])
-        cobro = (row['cobro'])
+        for x in (row['cobro']):
+            c = x['cargo']
+            if c > 0:
+                cargo_sum = cargo_sum + c
+                concepto = x['concepto']
+                Fecha_limite = x['Fecha_limite']
+                cargo =  x['cargo']
+                estado = x['estado']
+                array_ind.append({'concepto':concepto,
+                          'Fecha_limite': Fecha_limite,
+                                  'estado':estado,
+                            'cargo': cargo})
         array.append({'status': (status),
                       'id_dom': id_dom,
                       'direccion': direccion,
-                      'cobro': cobro})
+                      "array_ind": array_ind,
+                      'cargo_sum': cargo_sum,})
+    print(array)
     if len(array) > 0:
-        return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
+        return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, now=now, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:
         flash('No hay usuarios asociados al coto', 'danger')
-        return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
+        return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, now=now, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
 @domicilios.route('/actdomicilio', methods=['GET', 'POST'])
 @is_user
