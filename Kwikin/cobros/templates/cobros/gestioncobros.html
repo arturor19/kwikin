@@ -69,13 +69,7 @@ $.extend( true, $.fn.dataTable.defaults, {
 </script>
 <section>
     <div>
-        <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#collapseUsers" aria-expanded="false" aria-controls="collapseExample">Agregar cargos</button>
-        <div class="collapse" id="collapseUsers">
-            <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#Modaluser" type="button">Individual</button> #agrega cargo extra de manera individual
-                <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#Modalusuarios" type="button">Multiple</button>  #agrega cargo extra a todos
-            </div>
-        </div>
+        <button class="btn btn-primary btn-sm" type="button" data-toggle="modal" data-target="#Modaluser">Agregar cargos</button>
     </div>
 </section><br>
 <section>
@@ -165,21 +159,38 @@ $.extend( true, $.fn.dataTable.defaults, {
 
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title">Crear domicilio</h1>
+                <h1 class="modal-title">Cargo</h1>
             </div>
             <div class="modal-body">
-              <form id="IndForm" action="/creardomInd" class="" method="post">
+              <form id="IndForm" action="/crearcargo" class="" method="post">
                   <div class="form-group">
-                      <label for="direccion" class="col-sm-2 col-form-label">Dirección:</label>
+                      <label for="domdirigido" class="col-12 col-form-label">Dirigido a:</label>
+                                    <select class="col-sm-6" name="domdirigido" id="domdirigido">
+                                        <option value="Todos">Todos</option>
+                                        {% for usuario in domicilios %}
+                                        <option value="{{usuario.direccion}}">{{usuario.direccion}}</option>
+                                        {% endfor %}
+                                    </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="conceptoInd" class="col-sm-2 col-form-label">Concepto:</label>
                       <div class="col-sm-8">
-                          <input class="form-control-sm" type="text" id="direccion" name="direccion"/>
+                          <input class="form-control-sm" type="text" required maxlength = "25" id="conceptoInd" pattern="[^\\/:\x22*?<>|]+" name="conceptoInd"/>
+                      </div>
+                      <label for="cargoInd" class="col-sm-2 col-form-label">$:</label>
+                      <div class="col-sm-8">
+                          <input class="form-control-sm" required type="number" id="cargoInd" name="cargoInd"/>
+                      </div>
+                      <label for="fechalimite" class="col-sm-2 col-form-label">Fecha limite:</label>
+                      <div class="col-sm-8">
+                          <input class="form-control-sm" required type="date" id="fechalimite" name="fechalimite"/>
                       </div>
                   </div>
 
                   <div class="modal-footer">
                       <div style="text-align:center;" class="form-group">
                           <input type="submit" name="cerraruser" data-dismiss="modal" value="Cancelar"/>
-                          <input type="submit" id="send-signup" name="creardomindividual" value="Crear domicilio"/>
+                          <input type="submit" id="send-signup" name="creardomindividual" value="Crear cargo"/>
                       </div>
                   </div>
 
@@ -190,27 +201,7 @@ $.extend( true, $.fn.dataTable.defaults, {
     </div>
 </div>
 </section>
-<section>
-<div class="modal fade" id="Modalusuarios" tabindex="1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
-    <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title">Cargar Usuarios</h1>
-                 <a class="btn btn-warning btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Ayuda" href="{{ url_for('usuarios.ayudabulk') }}"><i class="fa fa-question" aria-hidden="true"></i></a>
-            </div>
-            <div class="modal-body">
-              <form method=post enctype=multipart/form-data action="/crearBulk">
-                  <input class="form-control-sm" type=file name=file><br><br>
-                  <input class="form-control-sm" type=submit data-toggle="tooltip" data-placement="top" alt="Recuerda que el archivo CSV debe contener Email, Dirección, Teléfono"  title="Recuerda que el archivo CSV debe contener Email,	Direccion, Telefono" value="Cargar">
-              </form>
-
-
-             </div>
-        </div>
-    </div>
-</div>
-</section>
 
 <script>
 $(document).ready(function(){

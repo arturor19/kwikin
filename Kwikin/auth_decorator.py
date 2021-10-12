@@ -8,9 +8,6 @@ import os
 
 
 
-
-
-
 def is_logged_in(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

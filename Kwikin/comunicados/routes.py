@@ -64,9 +64,7 @@ def comunicado(**kws):
         tipo = "Comunicado"
         if email_usuario_receptor == "Todos":
             array_allemails = []
-            print(coto)
             allemails = usuario.find({x:{"$exists": True}}, {"_id": 0, "correo": 1})
-            print(allemails, 1)
             for row in allemails:
                 email = (row['correo'])
                 print(email)

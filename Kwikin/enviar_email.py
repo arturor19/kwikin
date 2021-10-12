@@ -1,7 +1,10 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 from email.mime.image import MIMEImage
 import smtplib
+import os
 
 # Email parameters
 FromAddr = 'contacto@kwikin.com'
@@ -28,7 +31,7 @@ body = f"""<html>
     </html>
     """
 
-def enviar_correo(FromAddr, ToAddr, html_body):
+def enviar_correo(FromAddr, ToAddr, html_body, attach, subject):
     subject = "Atlas Data Catalog Access/UAM Request Needed."
     msg = MIMEMultipart()
     msg["From"] = FromAddr
@@ -36,6 +39,13 @@ def enviar_correo(FromAddr, ToAddr, html_body):
     msg["Subject"] = subject
     msgText = MIMEText(html_body, 'html')
     msg.attach(msgText)   # Added, and edited the previous line
+
+    file = attach  #attach archivo
+    attachment = MIMEBase('application', 'octet-stream')
+    attachment.set_payload(file)
+    encoders.encode_base64(attachment)
+    attachment.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(file))
+    msg.attach(attachment)
 
 
     text = msg.as_string()

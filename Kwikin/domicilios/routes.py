@@ -51,7 +51,7 @@ def creardomInd():
             return redirect(url_for('domicilios.gestiondomicilios'))
         else:
             casas.insert_one(
-                    {"direccion": direccion, "residentes": [], "coto": coto, "mensualidad": {}, "extra": {}, "status":"Inactivo"})
+                    {"direccion": direccion, "residentes": [], "coto": coto, "cobro": [], "status":"Inactivo"})
             flash(f'Nuevo domicilio agregado, recuerda que permanecerá Inactivo hasta agregar correos desde Gestión de Usuarios. Importante que la dirección coincida ', 'success')
             return redirect(url_for('domicilios.gestiondomicilios'))
     return redirect(url_for('domicilios.gestiondomicilios'))
@@ -77,7 +77,7 @@ def upload():
                     return redirect(url_for('domicilios.gestiondomicilios'))
                 else:
                     casas.insert_one(
-                        {"direccion": direccion, "residentes": [], "coto": coto, "mensualidad": {}, "extra": {},
+                        {"direccion": direccion, "residentes": [], "coto": coto, "cobro": [],
                          "status": "Inactivo"})
                     flash(
                         f'Nuevo domicilio agregado, recuerda que permanecerá Inactivo hasta agregar correos desde Gestión de Usuarios. Importante que la dirección coincida ',
@@ -103,13 +103,11 @@ def gestiondomicilios(**kws):
         id_dom = (row['_id'])
         status = (row['status'])
         direccion = (row['direccion'])
-        mensualidad = (row['mensualidad'])
-        extra = (row['extra'])
+        cobro = (row['cobro'])
         array.append({'status': (status),
                       'id_dom': id_dom,
                       'direccion': direccion,
-                      'mensualidad': mensualidad,
-                      'extra': extra})
+                      'cobro': cobro})
     if len(array) > 0:
         return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:

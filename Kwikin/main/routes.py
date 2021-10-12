@@ -86,45 +86,6 @@ def configuracion(**kws):
                                cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     return render_template('main/configuracion.html', cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
-@main.route('/cobros', methods=['GET', 'POST', 'UPDATE'])
-@is_user
-@is_logged_in
-@usuario_notificaciones
-def cobros(**kws):
-    tz = pytz.timezone('America/Mexico_City')
-    ct = datetime.now(tz=tz)
-    tzone = ct
-    email = session['profile']['email']
-    now = ct
-    now = datetime.strftime((now), "%Y-%m-%d")
-    cobros = db_execute("SELECT eventos.*, usuarios.* FROM eventos, usuarios WHERE eventos.correo = usuarios.email "
-                         "AND eventos.dia >= '%s';" % now)
-    array_cobros = []
-    for row in cobros:
-        estado = (row['estado'])
-        email = (row['correo'])
-        nombre = (row['nombre'])
-        terraza = (row['terraza'])
-        dia = (row['dia'])
-        domicilio = (row['domicilio'])
-        telefono = (row['telefono'])
-        id_eventos = (row['id_eventos'])
-
-        array_cobros.append({'estado': (estado),
-                              'id_eventos': id_eventos,
-                              'email': email,
-                              'nombre': nombre,
-                              'terraza': terraza,
-                              'domicilio': domicilio,
-                              'telefono': telefono,
-                              'dia': dia})
-
-    if len(cobros) > 0:
-        return render_template('main/cobros.html', cobros=array_cobros, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
-    else:
-        msg = 'No hay eventos asociados'
-        return render_template('main/cobros.html', cobros=array_cobros, msg=msg, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
-
 @main.route('/actconfterraza', methods=['GET', 'POST'])
 @is_user
 @is_logged_in

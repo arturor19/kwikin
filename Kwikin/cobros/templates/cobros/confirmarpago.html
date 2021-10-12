@@ -1,0 +1,69 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Confirmar Pago</title>
+
+
+{% endblock %}
+{% block body %}
+<body>
+<container>
+
+
+    <form method="post" action="/validarpago">
+     {% for cobro in cobros %}
+        <div class="modal-header">
+            <h4 class="modal-title">Información</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Casa</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.direccion }}">
+            </div>
+            <div class="form-group">
+                <label>Concepto</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.concepto }}">
+            </div>
+            <div class="form-group">
+                <label>Residente</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.residentes }}">
+            </div>
+            <div class="form-group">
+                <label>Estado casa</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.status }}">
+            </div>
+            <div class="form-group">
+                <label>Estado pago</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.estado }}">
+            </div>
+            <div class="form-group">
+                <label>Fecha límite</label>
+                <input disabled type="Text" class="form-control" value="{{ cobro.Fecha_limite }}">
+            </div>
+            <div class="form-group">
+                <label>Cargo</label>
+                <input type="number" class="form-control" value="{{ cobro.cargo }}" name="tarifacobro">
+            </div>
+            <div class="form-group">
+                <input hidden type="Text" class="form-control" value="{{ cobro.id }}" name="idpago">
+                <input hidden type="Text" class="form-control" value="{{ cobro.direccion }}" name="direccion">
+                <input hidden type="Text" class="form-control" value="{{ cobro.residentes }}" name="residentes">
+                <input hidden type="Text" class="form-control" value="{{ cobro.concepto }}" name="concepto">
+                <input hidden type="Text" class="form-control" value="{{ cobro.cargo }}" name="tarifacobroold">
+            </div>
+
+
+
+        </div>
+        <div class="modal-footer">
+            <input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
+            <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+        </div>
+         {% endfor %}
+    </form>
+
+</container>
+
+</body>
+{% endblock %}

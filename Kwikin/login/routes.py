@@ -123,9 +123,7 @@ def authorize():
     return redirect(url_for('login.bienvenida'))
 
 @login.route('/bienvenida', methods=["GET", "POST"])
-@is_user
 @is_logged_in
-@usuario_notificaciones
 def bienvenida(**kws):
     usuario = db.usuarios
     resp = json.loads(session['profile'])
@@ -138,12 +136,11 @@ def bienvenida(**kws):
         session['profile'] = resp
         print(session['profile'])
         return redirect(url_for('login.bienvenida_'))
-    return render_template('login/bienvenida.html', grupos=array_grupos, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
+    return render_template('login/bienvenida.html', grupos=array_grupos)
 
 @login.route('/bienvenida_', methods=["GET", "POST"])
-@is_user
+
 @is_logged_in
-@usuario_notificaciones
 def bienvenida_(**kws):
     usuario = db.usuarios
     grupos = usuario.grupos
@@ -160,7 +157,7 @@ def bienvenida_(**kws):
         resp = json.dumps(resp, default=str)
         session['profile'] = resp
         return redirect(url_for('main.dashboard'))
-    return render_template('login/bienvenida_.html', grupos=grupos, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
+    return render_template('login/bienvenida_.html', grupos=grupos)
 
 @login.route('/logout')
 def logout():
