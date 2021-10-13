@@ -9,40 +9,42 @@
 <body>
 <container>
 
-
+<div class="modal hide fade" data-backdrop="static" data-keyboard="false" id="Modalconfirmarpago" role="dialog">
+  <div class="modal-dialog modal-m" role="document">
+    <div class="modal-content">
     <form method="post" action="/validarpago">
      {% for cobro in cobros %}
         <div class="modal-header">
             <h4 class="modal-title">Información</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <a type="button" href="{{ url_for('cobros.gestioncobros') }}">&times;</a>
         </div>
-        <div class="modal-body">
-            <div class="form-group">
+        <div class="modal-body align-items-center">
+            <div class="form-group col-md-10">
                 <label>Casa</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.direccion }}">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-10">
                 <label>Concepto</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.concepto }}">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-10">
                 <label>Residente</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.residentes }}">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-10">
                 <label>Estado casa</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.status }}">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-10">
                 <label>Estado pago</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.estado }}">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-10">
                 <label>Fecha límite</label>
                 <input disabled type="Text" class="form-control" value="{{ cobro.Fecha_limite }}">
             </div>
-            <div class="form-group">
-                <label>Cargo</label>
+            <div class="form-group col-md-10">
+                <label>Pago</label>
                 <input type="number" class="form-control" value="{{ cobro.cargo }}" name="tarifacobro">
             </div>
             <div class="form-group">
@@ -57,13 +59,20 @@
 
         </div>
         <div class="modal-footer">
-            <input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
+            <a type="button" class="btn btn-default" href="{{ url_for('cobros.gestioncobros') }}">Cerrar</a>
             <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
         </div>
          {% endfor %}
     </form>
+    </div>
+  </div>
+</div>
 
 </container>
-
+<script type="text/javascript">
+    $(window).on('load', function() {
+        $('#Modalconfirmarpago').modal('show');
+    });
+</script>
 </body>
 {% endblock %}

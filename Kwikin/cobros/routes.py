@@ -14,26 +14,41 @@ cobros = Blueprint('cobros', __name__, template_folder='templates', static_folde
 
 
 @cobros.route('/gestioncobros', methods=['GET', 'POST', 'UPDATE'])
-@is_user
+
 @is_logged_in
 @usuario_notificaciones
 def gestioncobros(**kws):
+    tz = pytz.timezone('America/Mexico_City')
+    now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     casas = db.casas
     resp = json.loads(session['profile'])
     coto = (resp['coto'])
     domicilios = casas.find({"$and": [{"coto": coto}, {"$or": [{"status": "Activo"}, {"status": "Inactivo"}]}]})
     array = []
     for row in domicilios:
-        id_dom = (row['_id'])
+        cargo_sum = 0
+        array_ind = []
         status = (row['status'])
         direccion = (row['direccion'])
-        cobro = (row['cobro'])
-        array.append({'status': (status),
-                      'id_dom': id_dom,
+        for x in (row['cobro']):
+            c = x['cargo']
+            if c > 0:
+                concepto = x['concepto']
+                Fecha_limite = x['Fecha_limite']
+                cargo = x['cargo']
+                estado = x['estado']
+                id = x['id']
+                array.append({'concepto': concepto,
+                                  'id':id,
+                                  'Fecha_limite': Fecha_limite,
+                                  'estado': estado,'status': (status),
                       'direccion': direccion,
-                      'cobro': cobro})
+                      'array_ind': array_ind,
+                                  'cargo': cargo})
+
+    print(array)
     if len(array) > 0:
-        return render_template('cobros/gestioncobros.html', coto_it=coto, domicilios=array, cont=kws['cont'],
+        return render_template('cobros/gestioncobros.html', now=now, coto_it=coto, domicilios=array, cont=kws['cont'],
                                foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
     else:
         flash('No hay usuarios asociados al coto', 'danger')
@@ -234,7 +249,7 @@ def cargarpago():
 
 @is_logged_in
 @usuario_notificaciones
-def confirmapago(id, **kws):
+def confirmarpago(id, **kws):
     casas = db.casas
     usuario = db.usuarios
     resp = json.loads(session['profile'])

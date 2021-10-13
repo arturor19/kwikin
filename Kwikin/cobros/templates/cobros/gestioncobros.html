@@ -77,77 +77,26 @@ $.extend( true, $.fn.dataTable.defaults, {
       <!-- Table head -->
       <thead>
         <tr>
-          <th>Activo</th>
-          <th>Dirección</th>
-          <th>Saldo Mensualidad</th>
-          <th>Saldo Extraordinario</th>
+            <th>Concepto</th>
+            <th>Cargo</th>
+            <th>Fecha límite</th>
+            <th>Estado</th>
+            <th>Casa</th>
         </tr>
       </thead>
       <!-- Table head -->
 
       <!-- Table body -->
       <tbody>
-            {% for usuario in domicilios %}
+            {% for cobro in domicilios %}
              <tr>
-                 <td scope="row">
-                     <input type="checkbox" id={{usuario.id_dom}} name="mycheckbox"  value={{usuario.status}} data-toggle="toggle"  data-on="<i class='fa fa-check'></i>" data-off="<i class='fa fa-times'></i>" data-onstyle="primary" data-offstyle="secondary" data-width="40" data-height="20" {% if usuario.status == "Activo" %} checked {% endif %}>
-                <td><a href="#" data-toggle="modal" data-target='#editdomicilio{{ usuario.id_dom }}'>{{usuario.direccion}}</a></td>
-                <td><a>{{usuario.mensualidad}}</a></td>
-                <td><a>{{usuario.extra}}</a></td>
+                 <td {% if cobro.Fecha_limite < now %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}><a href="{{ url_for('cobros.confirmarpago',id = cobro.id) }}">{{cobro.concepto}}</a></td>
+                 <td {% if cobro.Fecha_limite < now %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}<a>{{cobro.cargo}}</a></td>
+                 <td {% if cobro.Fecha_limite < now %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}td><a>{{cobro.Fecha_limite}}</a></td>
+                 <td {% if cobro.Fecha_limite < now %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}td><a>{{cobro.estado}}</a></td>
+                 <td {% if cobro.Fecha_limite < now %} style="color: #5a5c69; background: #d3d3d3;" {% endif %}td><a>{{cobro.direccion}}</a></td>
              </tr>
-                 <div class="modal fade" id="editdomicilio{{ usuario.id_dom }}" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form method="post" action="/actdomicilio">
-                                <div class="modal-header">
-                                    <h4 class="modal-title">Actualizar</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                </div>
-                                <div class="modal-body">
-                                     <div class="form-group">
-                                        <label>Dirección</label>
-                                        <input  type="text" class="form-control" value="{{ usuario.direccion }}" name="direccioncasa">
-                                     </div>
-                                     <div class="form-group">
-                                        <input hidden type="Text"  value="{{ usuario.id_dom }}" name="idusuariohidden">
-                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="button" class="btn btn-default" name="cerrarusuariogestion"  data-dismiss="modal" value="Cerrar">
-                                    <button type="submit" name="actdomicilio" id="actdomicilio" class="btn btn-primary" style="width:100px"> Actualizar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                 </div>
-                  <script>
-
-                 $(document).ready(function($) {
-                    $("#actdomicilio").on("click", "a", function(event) {
-                    event.preventDefault();
-                    jQuery.noConflict();
-                    $('#editdomicilio').modal('show');
-
-                  });
-                });
-
-                   </script>
-                {% endfor %}
-
-                        {% for message in get_flashed_messages(category_filter=["danger"]) %}
-                            <div class="alert alert-danger" role="alert">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                {{ message }}
-
-                            </div>
-                        {% endfor %}
-                        {% for message in get_flashed_messages(category_filter=["success"]) %}
-                            <div class="alert alert-success" role="alert">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                {{ message }}
-
-                            </div>
-                        {% endfor %}
+            {% endfor %}
       </tbody>
 
     </table>
