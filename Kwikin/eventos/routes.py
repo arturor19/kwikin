@@ -77,11 +77,13 @@ def test_calendario():
 @is_logged_in
 @usuario_notificaciones
 def peticionevento(**kws):
-    tz = pytz.timezone('America/Mexico_City')
+    resp = json.loads(session['profile'])
+    coto = (resp['coto'])
+    cotos = db.cotos
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     casas = db.casas
     eventos = db.eventos
-    res = json.loads(session['profile'])
-    coto = (res['coto'])
     correo = (res['correo'])
     now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     casareq = casas.find_one({"coto": coto, "residentes": correo},{"_id":1})["_id"]
@@ -118,12 +120,13 @@ def peticionevento(**kws):
 @is_logged_in
 @usuario_notificaciones
 def gestioneventos(**kws):
-    tz = pytz.timezone('America/Mexico_City')
+    resp = json.loads(session['profile'])
+    coto = (resp['coto'])
+    cotos = db.cotos
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     casas = db.casas
     eventos = db.eventos
-    res = json.loads(session['profile'])
-    coto = (res['coto'])
-    correo = (res['correo'])
     now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     eventos = eventos.find({"coto":coto,"dia":{"$gte":now}})
     print(eventos)
@@ -166,13 +169,15 @@ def gestioneventos(**kws):
 
 @is_logged_in
 def acteventos():
-    tz = pytz.timezone('America/Mexico_City')
+    resp = json.loads(session['profile'])
+    coto = (resp['coto'])
+    cotos = db.cotos
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     casas = db.casas
     eventos = db.eventos
     comunicados = db.comunicados
-    res = json.loads(session['profile'])
-    coto = (res['coto'])
-    correo = (res['correo'])
+    correo = (resp['correo'])
     nowt = datetime.now(tz=tz).strftime("%Y-%m-%dT%H:%M")
     now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     sec = secrets.token_urlsafe(10)
@@ -240,12 +245,13 @@ def acteventos():
 @is_logged_in
 @usuario_notificaciones
 def gestioneventoshistorico(**kws):
-    tz = pytz.timezone('America/Mexico_City')
+    resp = json.loads(session['profile'])
+    coto = (resp['coto'])
+    cotos = db.cotos
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     casas = db.casas
     eventos = db.eventos
-    res = json.loads(session['profile'])
-    coto = (res['coto'])
-    correo = (res['correo'])
     now = datetime.now(tz=tz).strftime("%Y-%m-%d")
     eventos = eventos.find({"coto": coto, "dia": {"$lt": now}})
     print(eventos)

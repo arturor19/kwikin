@@ -37,6 +37,7 @@ def scannerqrs(**kws):
 @is_logged_in
 @usuario_notificaciones
 def peticionqr(**kws):
+    cotos = db.cotos
     resp = json.loads(session['profile'])
     coto = (resp['coto'])
     id_usuario = (resp['_id'])
@@ -47,7 +48,8 @@ def peticionqr(**kws):
         max_tpo_qr = 0
         flash(f'Favor de configurar los parámetros de maximo tiempo QR en configuracion', 'danger')
     print(max_tpo_qr)
-    tz = pytz.timezone('America/Mexico_City')
+    check_tz = cotos.find_one({"coto_nombre":coto},{"_id":0,"zona_horaria":1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     ct = datetime.now(tz=tz)
     now = ct
     array_qr = []
@@ -177,10 +179,13 @@ def actestadoaccesoqr():
 @is_logged_in
 @usuario_notificaciones
 def gestionqrhistorico(**kws):
+    cotos = db.cotos
     resp = json.loads(session['profile'])
     id_usuario = (resp['_id'])
     qr_colec = db.qr
-    tz = pytz.timezone('America/Mexico_City')
+    coto = (resp['coto'])
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     ct = datetime.now(tz=tz)
     now = ct
     array_qrh = []
@@ -216,9 +221,12 @@ def gestionqrhistorico(**kws):
 @is_logged_in
 def actqr():
     qr_colec = db.qr
+    cotos = db.cotos
     resp = json.loads(session['profile'])
     id_usuario = (resp['_id'])
-    tz = pytz.timezone('America/Mexico_City')
+    coto = (resp['coto'])
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     ct = datetime.now(tz=tz)
     now = ct
     array_qrh = []
@@ -282,7 +290,11 @@ def actqr():
 @usuario_notificaciones
 def validarqr(**kws):
     qr_colec = db.qr
-    tz = pytz.timezone('America/Mexico_City')
+    resp = json.loads(session['profile'])
+    cotos = db.cotos
+    coto = (resp['coto'])
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     ct = datetime.now(tz=tz)
     now = ct
     if request.method == 'GET':
@@ -323,7 +335,11 @@ def validarqr(**kws):
 @usuario_notificaciones
 def validarqrs(**kws):
     qr_colec = db.qr
-    tz = pytz.timezone('America/Mexico_City')
+    cotos = db.cotos
+    resp = json.loads(session['profile'])
+    coto = (resp['coto'])
+    check_tz = cotos.find_one({"coto_nombre": coto}, {"_id": 0, "zona_horaria": 1})['zona_horaria']
+    tz = pytz.timezone(check_tz)
     ct = datetime.now(tz=tz)
     now = ct
     if request.method == 'GET':

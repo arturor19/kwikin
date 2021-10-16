@@ -1,0 +1,191 @@
+{% extends "main/layout.html" %}
+
+{% block head %}
+<title>Crear coto</title>
+
+
+{% endblock %}
+{% block body %}
+<body>
+<container>
+<script type="text/javascript" class="init">
+
+$(document).ready(function() {
+	$('#dtOrderEventos7').DataTable({
+        "order": [[ 2, "asc" ]]
+    });
+} );
+
+</script>
+<script type="text/javascript" class="init">
+$.extend( true, $.fn.dataTable.defaults, {
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoPostFix": "",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "loadingRecords": "Cargando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "searchPlaceholder": "Término de búsqueda",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "aria": {
+            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        //only works for built-in buttons, not for custom buttons
+        "buttons": {
+            "create": "Nuevo",
+            "edit": "Cambiar",
+            "remove": "Borrar",
+            "copy": "Copiar",
+            "csv": "fichero CSV",
+            "excel": "tabla Excel",
+            "pdf": "documento PDF",
+            "print": "Imprimir",
+            "colvis": "Visibilidad columnas",
+            "collection": "Colección",
+            "upload": "Seleccione fichero....",
+
+        },
+        "select": {
+            "rows": {
+                _: '%d filas seleccionadas',
+                0: 'clic fila para seleccionar',
+                1: 'una fila seleccionada'
+            }
+        }
+    }
+} );
+</script>
+<section>
+    <div>
+        <button class="btn btn-primary btn-sm" type="button" data-toggle="modal" data-target="#Modalconfirmarpago">Agregar Coto</button>
+    </div>
+</section><br>
+<section>
+    <table id="dtOrderEventos7" class="table table-striped table-bordered table-sm table-responsive" cellspacing="0" width="100%">
+      <!-- Table head -->
+      <thead>
+        <tr>
+            <th>Coto</th>
+            <th>Direccion</th>
+            <th>Fecha</th>
+            <th>Número de Casas</th>
+        </tr>
+      </thead>
+      <!-- Table head -->
+
+      <!-- Table body -->
+      <tbody>
+            {% for coto in arraycotos %}
+             <tr>
+                 <td><a>{{coto.coto_nombre}}</a></td>
+                 <td><a>{{coto.direccion}}</a></td>
+                 <td><a>{{coto.fecha_coto}}</a></td>
+                 <td><a>{{coto.numero_casas}}</a></td>
+
+             </tr>
+            {% endfor %}
+      </tbody>
+
+    </table>
+    </form>
+</section>
+<section>
+<div class="modal hide fade" data-backdrop="static" data-keyboard="false" id="Modalconfirmarpago" role="dialog">
+  <div class="modal-dialog modal-m" role="document">
+    <div class="modal-content">
+    <form method="post" action="/crearcoto">
+        <div class="modal-header">
+            <h4 class="modal-title">Información</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        </div>
+        <div class="modal-body align-items-center">
+            <div class="form-group col-md-10">
+                <label>Nombre del coto:</label>
+                <input type="Text" class="form-control" name="coto_nombre">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Calle y número</label>
+                <input type="Text" class="form-control" name="coto_direccion">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Código Postal</label>
+                <input type="Text" class="form-control" name="cp_coto">
+            </div>
+            <div class="form-group col-md-10">
+                <label for="zona_horaria" class="col-12 col-form-label">Zona Horaria:</label>
+                    <select class="col-sm-6" name="zona_horaria" id="zona_horaria">
+                        <option value="America/Cancun">Cancun</option>
+                        <option value="America/Mexico_City">Cd de México</option>
+                        <option value="America/Chihuahua">Chihuahua</option>
+                        <option value="America/Ensenada">Ensenada</option>
+                        <option value="America/Mexico_City">Guadalajara</option>
+                        <option value="America/Hermosillo">Hermosillo</option>
+                        <option value="America/La_Paz">La_Paz</option>
+                        <option value="America/Matamoros">Matamoros</option>
+                        <option value="America/Mazatlan">Mazatlan</option>
+                        <option value="America/Merida">Merida</option>
+                        <option value="America/Monterrey">Monterrey</option>
+                        <option value="America/Tijuana">Tijuana</option>
+                    </select>
+            </div>
+            <div class="form-group col-md-10">
+                <label>Nombre Administrador</label>
+                <input type="Text" class="form-control" name="nombre">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Apellido</label>
+                <input type="Text" class="form-control" name="apellido">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Correo</label>
+                <input type="Email" class="form-control" name="correo">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Teléfono</label>
+                <input type="Text" class="form-control" name="telefono">
+            </div>
+            <div class="form-group col-md-10">
+                <label>Dirección</label>
+                <input type="Text" class="form-control" name="direccion">
+                <small class="form-text text-muted">Llenar sólo sí Administrador vive en el coto</small>
+            </div>
+
+
+
+
+        </div>
+        <div class="modal-footer">
+            <input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
+            <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+        </div>
+
+    </form>
+    </div>
+  </div>
+</div>
+</section>
+</container>
+<script>
+       $('#closemodal').click(function() {
+    $('#Modalconfirmarpago').modal('hide');
+    sendEvent('#Modalconfirmarpago', 1);
+    $('#Modalconfirmarpago').on('hidden.bs.modal', function(e) {
+        $(this).removeData();
+    }) ;
+});
+</script>
+</body>
+{% endblock %}

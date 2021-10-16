@@ -4,9 +4,6 @@ from config import db
 from datetime import timedelta, datetime
 import json, pytz, secrets
 from enviar_email import enviar_correo
-from werkzeug.utils import secure_filename
-import os
-from PIL import Image
 from bson import ObjectId, Binary, BSON
 
 cobros = Blueprint('cobros', __name__, template_folder='templates', static_folder='Kwikin/static')
@@ -14,7 +11,7 @@ cobros = Blueprint('cobros', __name__, template_folder='templates', static_folde
 
 
 @cobros.route('/gestioncobros', methods=['GET', 'POST', 'UPDATE'])
-
+@is_user
 @is_logged_in
 @usuario_notificaciones
 def gestioncobros(**kws):
@@ -154,7 +151,7 @@ def crearcargo():
     return redirect(url_for('cobros.gestioncobros'))
 
 @cobros.route('/pagos', methods=['GET', 'POST', 'UPDATE'])
-
+@is_user
 @is_logged_in
 @usuario_notificaciones
 def pagos(**kws):
@@ -246,7 +243,7 @@ def cargarpago():
     return redirect(url_for('cobros.pagos'))
 
 @cobros.route('/confirmarpago/<id>', methods=['GET', 'POST', 'UPDATE'])
-
+@is_user
 @is_logged_in
 @usuario_notificaciones
 def confirmarpago(id, **kws):
@@ -283,7 +280,7 @@ def confirmarpago(id, **kws):
                                foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
 
 @cobros.route('/validarpago', methods=['GET', 'POST', 'UPDATE'])
-
+@is_user
 @is_logged_in
 @usuario_notificaciones
 def validarpago(**kws):

@@ -94,7 +94,7 @@ def crearInd():
                 casas.find_one_and_update({"coto": coto, "direccion": direccion}, {"$addToSet": {"residentes": correo}})
                 casas.find_one_and_update({"coto": coto, "direccion": direccion}, {"$set": {"status": "Activo"}})
             else:
-                casas.insert_one({"direccion": direccion, "residentes":[correo], "coto":coto, "mensualidad":{}, "extra":{}, "status":"Activo"})
+                casas.insert_one({"direccion": direccion, "residentes":[correo], "coto":coto, "cobro":[], "status":"Activo"})
             body = f"""<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
                                     <body><p>Estimado usuario,</p><p>Por favor usa <b>{passwordt}<b> como password temporal</p>
                                     <p>Una vez en la plataforma, necesitarás actualizarlo</p><p>Gracias.</p>
@@ -112,7 +112,7 @@ def crearInd():
                 casas.find_one_and_update({"coto": coto, "direccion": direccion}, {"$addToSet": {"residentes": correo}})
             else:
                 casas.insert_one(
-                    {"direccion": direccion, "residentes": [correo], "coto": coto, "mensualidad": {}, "extra": {}, "status":"Activo"})
+                    {"direccion": direccion, "residentes": [correo], "coto": coto, "cobro": [], "status":"Activo"})
             flash(f'Nuevo coto agregado correctamente debido a que {correo} ya esta registrado en nuestra base', 'success')
             return redirect(url_for('usuarios.gestionusuarios'))
     return redirect(url_for('usuarios.gestionusuarios'))
@@ -151,8 +151,8 @@ def upload():
                                                       {"$addToSet": {"residentes": correo}})
                         else:
                             casas.insert_one(
-                                {"direccion": direccion, "residentes": [correo], "coto": coto, "mensualidad": {},
-                                 "extra": {}, "status":"Activo"})
+                                {"direccion": direccion, "residentes": [correo], "coto": coto,
+                                 "cobro": [], "status":"Activo"})
                         body = f"""<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
                                                             <body><p>Estimado usuario,</p><p>Por favor usa <b>{passwordt}<b> como password temporal</p>
                                                             <p>Una vez en la plataforma, necesitarás actualizarlo</p><p>Gracias.</p>
@@ -173,8 +173,8 @@ def upload():
                                                   {"$addToSet": {"residentes": correo}})
                     else:
                         casas.insert_one(
-                            {"direccion": direccion, "residentes": [correo], "coto": coto, "mensualidad": {},
-                             "extra": {}, "status":"Activo"})
+                            {"direccion": direccion, "residentes": [correo], "coto": coto,
+                             "cobro": [], "status":"Activo"})
                     flash(f'Nuevo coto agregado correctamente debido a que {correo} ya esta registrado en nuestra base',
                           'success')
                 else:

@@ -32,7 +32,6 @@ body = f"""<html>
     """
 
 def enviar_correo(FromAddr, ToAddr, html_body, attach, subject):
-    subject = "Atlas Data Catalog Access/UAM Request Needed."
     msg = MIMEMultipart()
     msg["From"] = FromAddr
     msg["To"] = ToAddr
@@ -46,6 +45,7 @@ def enviar_correo(FromAddr, ToAddr, html_body, attach, subject):
     encoders.encode_base64(attachment)
     attachment.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(file))
     msg.attach(attachment)
+    print(ToAddr)
 
 
     text = msg.as_string()

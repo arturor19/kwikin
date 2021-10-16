@@ -125,7 +125,7 @@ $.extend( true, $.fn.dataTable.defaults, {
                                 </div>
                                 <div class="modal-footer">
                                     <input type="button" class="btn btn-default" name="cerrareventogestion"  data-dismiss="modal" value="Cerrar">
-                                    <button type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
+                                    <button {% if "Pendiente" in cobro.estado| string() %} disabled {% endif %} type="submit" name="acteventos" id="acteventos" class="btn btn-primary" style="width:100px"><i class="fa fa-check"></i> Enviar</button>
                                 </div>
 
                             </form>

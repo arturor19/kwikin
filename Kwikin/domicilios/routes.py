@@ -108,23 +108,27 @@ def gestiondomicilios(**kws):
         id_dom = (row['_id'])
         status = (row['status'])
         direccion = (row['direccion'])
-        for x in (row['cobro']):
-            c = x['cargo']
-            if c > 0:
-                cargo_sum = cargo_sum + c
-                concepto = x['concepto']
-                Fecha_limite = x['Fecha_limite']
-                cargo =  x['cargo']
-                estado = x['estado']
-                array_ind.append({'concepto':concepto,
-                          'Fecha_limite': Fecha_limite,
-                                  'estado':estado,
-                            'cargo': cargo})
+        print(row['cobro'])
+        if (row['cobro']) != '':
+            for x in (row['cobro']):
+                c = x['cargo']
+                if c > 0:
+                    cargo_sum = cargo_sum + c
+                    concepto = x['concepto']
+                    Fecha_limite = x['Fecha_limite']
+                    cargo =  x['cargo']
+                    estado = x['estado']
+                    array_ind.append({'concepto':concepto,
+                              'Fecha_limite': Fecha_limite,
+                                      'estado':estado,
+                                'cargo': cargo})
+        else:
+            array_ind = ""
         array.append({'status': (status),
-                      'id_dom': id_dom,
-                      'direccion': direccion,
-                      "array_ind": array_ind,
-                      'cargo_sum': cargo_sum,})
+                          'id_dom': id_dom,
+                          'direccion': direccion,
+                          "array_ind": array_ind,
+                          'cargo_sum': cargo_sum,})
     print(array)
     if len(array) > 0:
         return render_template('domicilios/gestiondomicilios.html', coto_it=coto, domicilios=array, now=now, cont=kws['cont'], foto=kws['foto'], nombre=kws['nombre'], com=kws['com'])
