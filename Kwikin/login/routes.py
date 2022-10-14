@@ -17,15 +17,15 @@ def loging():
 
 @login.route('/login', methods=['POST', 'GET'])
 def logineng():
+    '''comentarios'''
     try:
-        usuario = db.usuarios
-        correo = request.form['logincorreo']
-        usuario_login = usuario.find_one({'correo':correo})
-        inte = usuario.find_one({'correo': correo}, {'_id': 0,'intentos':1})
+        usuario = db.usuarios  #nombre variable de base de datos
+        correo = request.form['logincorreo'] #obtiene el correo de la forma de pagina login
+        usuario_login = usuario.find_one({'correo':correo})  #Con el correo, busca_todo el json en base de datos
+        inte = usuario.find_one({'correo': correo}, {'_id': 0,'intentos':1}) #contador que incrementa los intentos
         intento = json.dumps(inte, default=str)
         info_bd = json.loads(intento)
         intentos = (info_bd['intentos'])
-        print(intentos)
         if usuario_login and usuario_login['password_temporal'] == True: #si el password es temporal lo manda a configuracion
            if request.form['loginpassword'] == usuario_login['passwordt']:
                usuario_login_session = usuario.find_one({'correo': correo},
@@ -86,11 +86,13 @@ def resetpasstemp(correo):
     passwordt = secrets.token_urlsafe(10)
     usuario.update_one({"correo": correo}, {'$set': {"passwordt": passwordt, "password": "", "password_temporal": True,
                                  "intentos": 0}})
+    attach = "test"
+    subject = "Nuevo Password temporal"
     body = f"""<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
                                                 <body><p>Estimado usuario,</p><p>Por favor usa <b>{passwordt}<b> como password temporal</p>
                                                 <p>Una vez en la plataforma, necesitarás actualizarlo</p><p>Gracias.</p>
                                                 </body></html>"""
-    enviar_correo('root@kwikin.mx', correo, body)
+    #enviar_correo('root@kwikin.mx', correo, body, attach, subject) Envio de correo comentado por lo pronto
     flash('Password temporal creado, revisa tu correo', 'danger')
     return render_template('login/login.html')
 
